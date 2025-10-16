@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h2>APlanilha2</h2>
+        <h2 class="text-2xl font-bold">APlanilha2</h2>
     </div>
 </template>
 
