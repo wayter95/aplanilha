@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-bodybg text-defaulttextcolor">
     <div class="grid grid-cols-12 authentication mx-0 min-h-screen">
-      <!-- Seção Principal do Login -->
+
       <div class="xxl:col-span-7 xl:col-span-7 lg:col-span-12 col-span-12 bg-bodybg">
         <div class="grid grid-cols-12 items-center h-full min-h-screen">
           <div class="xxl:col-span-3 xl:col-span-3 lg:col-span-3 md:col-span-3 sm:col-span-2"></div>
@@ -9,14 +9,12 @@
             <div class="p-[3rem]">
               <div class="mb-4">
                 <a aria-label="anchor" href="/">
-                  <img :src="desktopLogo" alt="" class="authentication-brand desktop-logo">
-                  <img :src="desktopDark" alt="" class="authentication-brand desktop-dark">
+                  <h2 class="text-2xl font-bold">Aplanilha</h2>
                 </a>
               </div>
               <p class="h5 font-semibold mb-2 text-defaulttextcolor">Sign In</p>
               <p class="mb-4 text-textmuted font-normal">Welcome back!</p>
               
-              <!-- Formulário de Login -->
               <form @submit.prevent="handleSubmit">
                 <div class="grid grid-cols-12">
                   <div class="xl:col-span-12 col-span-12 mb-4">
@@ -85,8 +83,7 @@
         </div>
       </div>
       
-      <!-- Seção Lateral com Carousel -->
-      <div class="xxl:col-span-5 xl:col-span-5 lg:col-span-5 col-span-12 xl:block hidden px-0">
+      <div class="xxl:col-span-5 xl:col-span-5 lg:col-span-5 col-span-12 xl:block hidden px-0 bg-cover bg-center bg-no-repeat" :style="{ backgroundImage: `url(${backgroundImage})` }">
         <div class="authentication-cover bg-gradient-to-br from-primary/20 to-secondary/20">
           <div class="aunthentication-cover-content rounded bg-black/50">
             <div class="swiper keyboard-control" ref="swiperContainer">
@@ -150,33 +147,25 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import { computed, nextTick, onMounted, ref } from 'vue';
 
-// Import images
+import backgroundImage from '../../assets/images/authentication/1.jpg';
 import authImage1 from '../../assets/images/authentication/2.png';
 import authImage2 from '../../assets/images/authentication/3.png';
-import desktopDark from '../../assets/images/brand-logos/desktop-dark.png';
-import desktopLogo from '../../assets/images/brand-logos/desktop-logo.png';
 
-// Form data
 const form = ref({
     username: '',
     password: '',
     remember: false
 });
 
-// Loading state
 const isLoading = ref(false);
 
-// Password visibility
 const showPassword = ref(false);
 
-// Swiper container ref
 const swiperContainer = ref(null);
 
-// Computed properties
 const passwordType = computed(() => showPassword.value ? 'text' : 'password');
 const passwordIcon = computed(() => showPassword.value ? 'ri-eye-line' : 'ri-eye-off-line');
 
-// Methods
 const togglePassword = () => {
     showPassword.value = !showPassword.value;
 };
@@ -187,7 +176,7 @@ const handleSubmit = async () => {
     try {
         router.post('/login', form.value, {
             onSuccess: () => {
-                router.visit('/dashboard');
+                router.visit('/');
             },
             onError: (errors) => {
                 console.error('Login failed:', errors);
@@ -202,7 +191,6 @@ const handleSubmit = async () => {
     }
 };
 
-// Initialize Swiper when component is mounted
 onMounted(async () => {
     await nextTick();
     

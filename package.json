@@ -27,6 +27,7 @@
         "@inertiajs/vue3": "^2.2.8",
         "@popperjs/core": "^2.11.6",
         "@simonwep/pickr": "^1.8.2",
+        "@types/swiper": "^5.4.3",
         "@vitejs/plugin-vue": "^6.0.1",
         "animate.css": "^4.1.1",
         "apexcharts": "3.46.0",
