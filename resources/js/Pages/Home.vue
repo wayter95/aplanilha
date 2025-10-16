@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h2>APlanilha</h2>
+        <h2>APlanilha2</h2>
     </div>
 </template>
 
