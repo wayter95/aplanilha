@@ -1,76 +1,235 @@
 <template>
-  <div class="container">
-    <div class="flex justify-center authentication authentication-basic items-center h-full text-defaultsize text-defaulttextcolor">
-        <div class="grid grid-cols-12">
-            <div class="xxl:col-span-4 xl:col-span-4 lg:col-span-4 md:col-span-3 sm:col-span-2"></div>
-            <div class="xxl:col-span-4 xl:col-span-4 lg:col-span-4 md:col-span-6 sm:col-span-8 col-span-12">
-                <div class="my-[2.5rem] flex justify-center">
-                    <a href="/index">
-                        <img src="../assets/images/brand-logos/desktop-logo.png" alt="logo" class="desktop-logo">
-                        <img src="../assets/images/brand-logos/desktop-dark.png" alt="logo" class="desktop-dark">
-                    </a>
-                </div>
-                <div class="box">
-                    <div class="box-body !p-[3rem]">
-                        <p class="h5 font-semibold mb-2 text-center">Sign In</p>
-                        <div class="grid grid-cols-12">
-                            <div class="xl:col-span-12 col-span-12 mb-3">
-                                <label for="signin-username" class="form-label text-default">User Name</label>
-                                <input type="text" class="form-control form-control-lg w-full !rounded-md" id="signin-username" placeholder="user name">
-                            </div>
-                            <div class="xl:col-span-12 col-span-12 mb-3">
-                                <label for="signin-password" class="form-label text-default block">Password<a href="/resetpassword-basic" class="ltr:float-right rtl:float-left text-danger">Forget password ?</a></label>
-                                <div class="input-group">
-                                    <input type="password" class="form-control !border-s border-defaultborder dark:border-defaultborder/10 form-control-lg !rounded-s-md" id="signin-password" placeholder="password">
-                                    <button aria-label="button" class="ti-btn ti-btn-light !rounded-s-none !mb-0" type="button" onclick="togglePassword()" id="button-addon2"><i class="ri-eye-off-line align-middle"></i></button>
-                                </div>
-                                <div class="mt-2">
-                                    <div class="form-check !ps-0">
-                                        <input class="form-check-input" type="checkbox" value="" id="defaultCheck1">
-                                        <label class="form-check-label text-[#8c9097] dark:text-white/50 font-normal" for="defaultCheck1">
-                                            Remember password ?
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="xl:col-span-12 col-span-12 grid mt-2">
-                                <a href="/index" class="ti-btn ti-btn-primary !bg-primary  btn-wave !text-white !font-medium">Sign In</a>
-                            </div>
-                        </div>
-                        <div class="text-center">
-                            <p class="text-[0.75rem] text-[#8c9097] dark:text-white/50 mt-4">Dont have an account? <a href="/signup-basic" class="text-primary">Sign Up</a></p>
-                        </div>
-                        <div class="text-center my-4 authentication-barrier">
-                            <span>OR</span>
-                        </div>
-                        <div class="btn-list text-center">
-                            <button aria-label="button" type="button" class="ti-btn ti-btn-icon ti-btn-light me-[0.365rem]">
-                                <i class="ri-facebook-line font-bold text-dark opacity-[0.7]"></i>
-                            </button>
-                            <button aria-label="button" type="button" class="ti-btn ti-btn-icon ti-btn-light me-[0.365rem]">
-                                <i class="ri-google-line font-bold text-dark opacity-[0.7]"></i>
-                            </button>
-                            <button aria-label="button" type="button" class="ti-btn ti-btn-icon ti-btn-light">
-                                <i class="ri-twitter-x-line font-bold text-dark opacity-[0.7]"></i>
-                            </button>
-                        </div>
+  <div class="min-h-screen bg-bodybg text-defaulttextcolor">
+    <div class="grid grid-cols-12 authentication mx-0 min-h-screen">
+      <!-- Seção Principal do Login -->
+      <div class="xxl:col-span-7 xl:col-span-7 lg:col-span-12 col-span-12 bg-bodybg">
+        <div class="grid grid-cols-12 items-center h-full min-h-screen">
+          <div class="xxl:col-span-3 xl:col-span-3 lg:col-span-3 md:col-span-3 sm:col-span-2"></div>
+          <div class="xxl:col-span-6 xl:col-span-6 lg:col-span-6 md:col-span-6 sm:col-span-8 col-span-12">
+            <div class="p-[3rem]">
+              <div class="mb-4">
+                <a aria-label="anchor" href="/">
+                  <img :src="desktopLogo" alt="" class="authentication-brand desktop-logo">
+                  <img :src="desktopDark" alt="" class="authentication-brand desktop-dark">
+                </a>
+              </div>
+              <p class="h5 font-semibold mb-2 text-defaulttextcolor">Sign In</p>
+              <p class="mb-4 text-textmuted font-normal">Welcome back!</p>
+              
+              <!-- Formulário de Login -->
+              <form @submit.prevent="handleSubmit">
+                <div class="grid grid-cols-12">
+                  <div class="xl:col-span-12 col-span-12 mb-4">
+                    <label for="signin-username" class="form-label text-defaulttextcolor">User Name</label>
+                    <input 
+                      type="text" 
+                      class="form-control form-control-lg w-full !rounded-md bg-defaultbackground border-inputborder text-defaulttextcolor" 
+                      id="signin-username" 
+                      placeholder="user name"
+                      v-model="form.username"
+                      required
+                    >
+                  </div>
+                  <div class="xl:col-span-12 col-span-12 mb-4">
+                    <label for="signin-password" class="form-label text-defaulttextcolor block">
+                      Password
+                      <a href="/resetpassword" class="ltr:float-right rtl:float-left text-danger">Forget password ?</a>
+                    </label>
+                    <div class="input-group">
+                      <input 
+                        :type="passwordType" 
+                        class="form-control form-control-lg !border-s border-inputborder !rounded-e-none bg-defaultbackground text-defaulttextcolor" 
+                        id="signin-password" 
+                        placeholder="password"
+                        v-model="form.password"
+                        required
+                      >
+                      <button 
+                        aria-label="button" 
+                        type="button" 
+                        class="ti-btn ti-btn-light !rounded-s-none !mb-0" 
+                        @click="togglePassword"
+                      >
+                        <i :class="passwordIcon" class="align-middle"></i>
+                      </button>
                     </div>
+                    <div class="mt-2">
+                      <div class="form-check !ps-0">
+                        <input 
+                          class="form-check-input" 
+                          type="checkbox" 
+                          v-model="form.remember"
+                          id="defaultCheck1"
+                        >
+                        <label class="form-check-label text-textmuted font-normal" for="defaultCheck1">
+                          Remember password ?
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="xl:col-span-12 col-span-12 grid">
+                    <button 
+                      type="submit" 
+                      class="ti-btn ti-btn-lg bg-primary text-white btn-wave !font-medium w-full"
+                      :disabled="isLoading"
+                    >
+                      <span v-if="isLoading">Signing In...</span>
+                      <span v-else>Sign In</span>
+                    </button>
+                  </div>
                 </div>
+              </form>
             </div>
-            <div class="xxl:col-span-4 xl:col-span-4 lg:col-span-4 md:col-span-3 sm:col-span-2"></div>
+          </div>
+          <div class="xxl:col-span-3 xl:col-span-3 lg:col-span-3 md:col-span-3 sm:col-span-2"></div>
         </div>
+      </div>
+      
+      <!-- Seção Lateral com Carousel -->
+      <div class="xxl:col-span-5 xl:col-span-5 lg:col-span-5 col-span-12 xl:block hidden px-0">
+        <div class="authentication-cover bg-gradient-to-br from-primary/20 to-secondary/20">
+          <div class="aunthentication-cover-content rounded bg-black/50">
+            <div class="swiper keyboard-control" ref="swiperContainer">
+              <div class="swiper-wrapper">
+                <div class="swiper-slide">
+                  <div class="text-white text-center p-[3rem] flex items-center justify-center">
+                    <div>
+                      <div class="mb-[3rem]">
+                        <img :src="authImage1" class="authentication-image" alt="">
+                      </div>
+                      <h6 class="font-semibold text-[1rem]">Sign In</h6>
+                      <p class="font-normal text-[0.875rem] opacity-[0.7]">
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsa eligendi expedita aliquam quaerat nulla voluptas facilis. Porro rem voluptates possimus, ad, autem quae culpa architecto, quam labore blanditiis at ratione.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="swiper-slide">
+                  <div class="text-white text-center p-[3rem] flex items-center justify-center">
+                    <div>
+                      <div class="mb-[3rem]">
+                        <img :src="authImage2" class="authentication-image" alt="">
+                      </div>
+                      <h6 class="font-semibold text-[1rem]">Sign In</h6>
+                      <p class="font-normal text-[0.875rem] opacity-[0.7]">
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsa eligendi expedita aliquam quaerat nulla voluptas facilis. Porro rem voluptates possimus, ad, autem quae culpa architecto, quam labore blanditiis at ratione.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="swiper-slide">
+                  <div class="text-white text-center p-[3rem] flex items-center justify-center">
+                    <div>
+                      <div class="mb-[3rem]">
+                        <img :src="authImage1" class="authentication-image" alt="">
+                      </div>
+                      <h6 class="font-semibold text-[1rem]">Sign In</h6>
+                      <p class="font-normal text-[0.875rem] opacity-[0.7]">
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsa eligendi expedita aliquam quaerat nulla voluptas facilis. Porro rem voluptates possimus, ad, autem quae culpa architecto, quam labore blanditiis at ratione.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="swiper-button-next"></div>
+              <div class="swiper-button-prev"></div>
+              <div class="swiper-pagination"></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { router } from '@inertiajs/vue3';
+import { Autoplay, Keyboard, Navigation, Pagination, Swiper } from 'swiper';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import { computed, nextTick, onMounted, ref } from 'vue';
 
-const password = ref('password');
+// Import images
+import authImage1 from '../../assets/images/authentication/2.png';
+import authImage2 from '../../assets/images/authentication/3.png';
+import desktopDark from '../../assets/images/brand-logos/desktop-dark.png';
+import desktopLogo from '../../assets/images/brand-logos/desktop-logo.png';
 
+// Form data
+const form = ref({
+    username: '',
+    password: '',
+    remember: false
+});
+
+// Loading state
+const isLoading = ref(false);
+
+// Password visibility
+const showPassword = ref(false);
+
+// Swiper container ref
+const swiperContainer = ref(null);
+
+// Computed properties
+const passwordType = computed(() => showPassword.value ? 'text' : 'password');
+const passwordIcon = computed(() => showPassword.value ? 'ri-eye-line' : 'ri-eye-off-line');
+
+// Methods
 const togglePassword = () => {
-    password.value = password.value === 'password' ? 'text' : 'password';
-}
+    showPassword.value = !showPassword.value;
+};
+
+const handleSubmit = async () => {
+    isLoading.value = true;
+
+    try {
+        router.post('/login', form.value, {
+            onSuccess: () => {
+                router.visit('/dashboard');
+            },
+            onError: (errors) => {
+                console.error('Login failed:', errors);
+            },
+            onFinish: () => {
+                isLoading.value = false;
+            }
+        });
+    } catch (error) {
+        console.error('Login error:', error);
+        isLoading.value = false;
+    }
+};
+
+// Initialize Swiper when component is mounted
+onMounted(async () => {
+    await nextTick();
+    
+    if (swiperContainer.value) {
+        new Swiper(swiperContainer.value, {
+            modules: [Navigation, Pagination, Autoplay, Keyboard],
+            slidesPerView: 1,
+            spaceBetween: 30,
+            keyboard: {
+                enabled: true,
+            },
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+            loop: true,
+            autoplay: {
+                delay: 1500,
+                disableOnInteraction: false
+            }
+        });
+    }
+});
 </script>
 
 <style scoped></style>

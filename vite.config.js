@@ -8,6 +8,8 @@ export default defineConfig({
         laravel({
             input: [
                 "resources/sass/app.scss",
+                "resources/css/app.css",
+                "resources/assets/css/style.css",
                 "resources/js/app.js",
 
                 // Resources assets js file paths
