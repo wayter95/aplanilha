@@ -184,7 +184,7 @@
             <button 
               @click="toggleUserMenu"
               type="button"
-              class="header-link-icon inline-flex flex-shrink-0 justify-center items-center gap-2 !rounded-full font-medium dark:hover:bg-black/20 dark:text-white/50 dark:hover:text-white dark:focus:ring-white/10 dark:focus:ring-offset-white/10 hover:bg-gray-100 p-2"
+              class="header-link-icon inline-flex flex-shrink-0 justify-center items-center gap-3 !rounded-full font-medium dark:hover:bg-black/20 dark:text-white/50 dark:hover:text-white dark:focus:ring-white/10 dark:focus:ring-offset-white/10 hover:bg-gray-100 p-2"
             >
               <div class="user-avatar">
                 {{ user?.name?.charAt(0)?.toUpperCase() || 'U' }}
@@ -192,7 +192,7 @@
             </button>
             
             <div class="md:block hidden dropdown-profile">
-              <p class="font-semibold mb-0 leading-none text-[#536485] dark:text-white text-[0.813rem]">{{ user?.name || 'Usuário' }}</p>
+              <p class="font-semibold mb-0 leading-none text-[#536485] dark:text-white text-[0.813rem]">{{ getDisplayName(user?.name) }}</p>
               <span class="opacity-[0.7] font-normal text-[#536485] dark:text-white/70 block text-[0.6875rem]">{{ user?.email || 'email@exemplo.com' }}</span>
             </div>
             
@@ -315,6 +315,19 @@ const logout = () => {
   router.post('/logout')
 }
 
+// Função para mostrar apenas primeiro e segundo nome
+const getDisplayName = (fullName) => {
+  if (!fullName) return 'Usuário'
+  
+  const nameParts = fullName.trim().split(' ')
+  if (nameParts.length <= 2) {
+    return fullName
+  }
+  
+  // Retorna apenas primeiro e segundo nome
+  return `${nameParts[0]} ${nameParts[1]}`
+}
+
 // Fechar dropdowns ao clicar fora
 const handleClickOutside = (event) => {
   if (!event.target.closest('.header-profile-dropdown') && !event.target.closest('.header-link-icon')) {
@@ -379,6 +392,16 @@ onMounted(() => {
   line-height: 1;
   overflow: hidden;
   flex-shrink: 0;
+}
+
+/* Profile Dropdown Styles */
+.dropdown-profile {
+  margin-left: 0.75rem; /* Espaçamento entre avatar e texto */
+}
+
+.user-dropdown {
+  display: flex;
+  align-items: center;
 }
 
 .dropdown-divider {
