@@ -18,20 +18,20 @@
               <form @submit.prevent="handleSubmit">
                 <div class="grid grid-cols-12">
                   <div class="xl:col-span-12 col-span-12 mb-4">
-                    <label for="signin-username" class="form-label text-defaulttextcolor">User Name</label>
+                    <label for="signin-email" class="form-label text-defaulttextcolor">Email</label>
                     <input 
-                      type="text" 
+                      type="email" 
                       class="form-control form-control-lg w-full !rounded-md bg-defaultbackground border-inputborder text-defaulttextcolor" 
-                      id="signin-username" 
-                      placeholder="user name"
-                      v-model="form.username"
+                      id="signin-email" 
+                      placeholder="email@example.com"
+                      v-model="form.email"
                       required
                     >
                   </div>
                   <div class="xl:col-span-12 col-span-12 mb-4">
                     <label for="signin-password" class="form-label text-defaulttextcolor block">
                       Password
-                      <a href="/resetpassword" class="ltr:float-right rtl:float-left text-danger">Forget password ?</a>
+                      <a href="/forgot-password" class="ltr:float-right rtl:float-left text-danger">Forget password ?</a>
                     </label>
                     <div class="input-group">
                       <input 
@@ -140,19 +140,21 @@
 </template>
 
 <script setup>
-import { router } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
 import { Autoplay, Keyboard, Navigation, Pagination, Swiper } from 'swiper';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import { computed, nextTick, onMounted, ref } from 'vue';
 
-import backgroundImage from '../../assets/images/authentication/1.jpg';
-import authImage1 from '../../assets/images/authentication/2.png';
-import authImage2 from '../../assets/images/authentication/3.png';
+import backgroundImage from '../../../assets/images/authentication/1.jpg';
+import authImage1 from '../../../assets/images/authentication/2.png';
+import authImage2 from '../../../assets/images/authentication/3.png';
+
+const page = usePage();
 
 const form = ref({
-    username: '',
+    email: '',
     password: '',
     remember: false
 });
