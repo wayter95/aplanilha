@@ -34,17 +34,20 @@ class UserController extends Controller
             ];
 
             $users = $this->userService->getAllUsers($perPage, $filters);
+            $availableRoles = $this->userService->getAvailableRoles();
 
             return Inertia::render('Users', [
                 'users' => $users,
                 'filters' => $filters,
                 'user' => Auth::user(),
+                'availableRoles' => $availableRoles,
             ]);
         } catch (Exception $e) {
             return Inertia::render('Users', [
                 'users' => [],
                 'filters' => [],
                 'user' => Auth::user(),
+                'availableRoles' => [],
                 'error' => 'Erro ao carregar usuários: ' . $e->getMessage(),
             ]);
         }

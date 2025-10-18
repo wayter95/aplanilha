@@ -276,7 +276,23 @@ class UserService
      */
     public function getAvailableRoles(): Collection
     {
-        return UserRole::all();
+        try {
+            // Try to get tenant context if available
+            $tenantContext = app('tenant.context');
+            $clientId = $tenantContext->getClientId();
+        } catch (\Exception $e) {
+            // If tenant context is not available, use default tenant
+            $defaultTenant = \App\Models\ClientSubscribe::first();
+            $clientId = $defaultTenant ? $defaultTenant->id : null;
+        }
+
+        $query = UserRole::where('is_active', true);
+        
+        if ($clientId) {
+            $query->where('client_id', $clientId);
+        }
+
+        return $query->get();
     }
 
     /**

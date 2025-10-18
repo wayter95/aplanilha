@@ -36,6 +36,7 @@
     <!-- Modals -->
     <CreateUserModal 
       :show="showCreateModal" 
+      :available-roles="availableRoles"
       @close="showCreateModal = false"
       @user-created="handleUserCreated"
     />
@@ -43,6 +44,7 @@
     <UpdateUserModal 
       :show="showUpdateModal" 
       :user="selectedUser"
+      :available-roles="availableRoles"
       @close="showUpdateModal = false"
       @user-updated="handleUserUpdated"
     />
@@ -74,6 +76,10 @@ const props = defineProps({
   user: {
     type: Object,
     required: true
+  },
+  availableRoles: {
+    type: Array,
+    default: () => []
   }
 })
 

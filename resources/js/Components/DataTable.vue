@@ -445,7 +445,18 @@ const visiblePages = computed(() => {
 
 // Methods
 const getNestedValue = (obj, key) => {
-  return key.split('.').reduce((acc, part) => acc && acc[part], obj)
+  return key.split('.').reduce((acc, part) => {
+    if (!acc) return acc
+    
+    // Handle array indices like "roles[0]"
+    if (part.includes('[') && part.includes(']')) {
+      const arrayName = part.substring(0, part.indexOf('['))
+      const index = parseInt(part.substring(part.indexOf('[') + 1, part.indexOf(']')))
+      return acc[arrayName] && acc[arrayName][index]
+    }
+    
+    return acc[part]
+  }, obj)
 }
 
 const getStatusValue = (obj, key) => {

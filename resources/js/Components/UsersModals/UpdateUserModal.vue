@@ -63,10 +63,9 @@
               </label>
               <select v-model="form.role" required class="ti-form-select">
                 <option value="">Selecione uma função</option>
-                <option value="admin">Administrador</option>
-                <option value="user">Usuário</option>
-                <option value="moderator">Moderador</option>
-                <option value="guest">Convidado</option>
+                <option v-for="role in availableRoles" :key="role.id" :value="role.name">
+                  {{ role.display_name }}
+                </option>
               </select>
             </div>
 
@@ -118,6 +117,10 @@ const props = defineProps({
   user: {
     type: Object,
     default: null
+  },
+  availableRoles: {
+    type: Array,
+    default: () => []
   }
 })
 
@@ -131,10 +134,15 @@ const form = ref({
   status: ''
 })
 
+// Get role ID by name from available roles
+const getRoleIdByName = (roleName) => {
+  const role = props.availableRoles.find(r => r.name === roleName)
+  return role ? role.id : null
+}
+
 // Watch for user changes to populate form
 watch(() => props.user, (newUser) => {
   if (newUser) {
-    console.log('User data:', newUser) // Debug log
     form.value = {
       name: newUser.name || '',
       email: newUser.email || '',
@@ -152,9 +160,13 @@ const updateUser = async () => {
   }
 
   try {
+    // Get role ID from role name
+    const roleId = getRoleIdByName(form.value.role)
+    
     // Prepare data with status instead of is_active
     const dataToSend = {
       ...form.value,
+      role_id: roleId,
       // Convert status to is_active for backend
       is_active: form.value.status === 'Ativo'
     }
