@@ -2,184 +2,279 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Services\UserService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules\Password;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
+use Inertia\Response;
+use Exception;
 
 class UserController extends Controller
 {
-    public function index()
-    {
-        // Mock data for development
-        $mockUsers = collect([
-            (object)[
-                'id' => '1',
-                'name' => 'João Silva',
-                'email' => 'joao.silva@example.com',
-                'status' => 'Ativo',
-                'is_master' => false,
-                'created_at' => now()->subDays(5)->toISOString(),
-                'updated_at' => now()->subDays(1)->toISOString(),
-            ],
-            (object)[
-                'id' => '2',
-                'name' => 'Maria Santos',
-                'email' => 'maria.santos@example.com',
-                'status' => 'Ativo',
-                'is_master' => true,
-                'created_at' => now()->subDays(10)->toISOString(),
-                'updated_at' => now()->subHours(2)->toISOString(),
-            ],
-            (object)[
-                'id' => '3',
-                'name' => 'Pedro Costa',
-                'email' => 'pedro.costa@example.com',
-                'status' => 'Ativo',
-                'is_master' => false,
-                'created_at' => now()->subDays(3)->toISOString(),
-                'updated_at' => now()->subHours(5)->toISOString(),
-            ],
-            (object)[
-                'id' => '4',
-                'name' => 'Ana Oliveira',
-                'email' => 'ana.oliveira@example.com',
-                'status' => 'Inativo',
-                'is_master' => false,
-                'created_at' => now()->subDays(15)->toISOString(),
-                'updated_at' => now()->subDays(2)->toISOString(),
-            ],
-            (object)[
-                'id' => '5',
-                'name' => 'Carlos Lima',
-                'email' => 'carlos.lima@example.com',
-                'status' => 'Ativo',
-                'is_master' => true,
-                'created_at' => now()->subDays(7)->toISOString(),
-                'updated_at' => now()->subMinutes(30)->toISOString(),
-            ]
-        ]);
+    protected UserService $userService;
 
-        // Simulate pagination
-        $users = (object)[
-            'data' => $mockUsers->take(10),
-            'total' => $mockUsers->count(),
-            'from' => 1,
-            'to' => $mockUsers->count(),
-            'current_page' => 1,
-            'last_page' => 1,
-            'per_page' => 10,
-            'links' => [
-                (object)['url' => null, 'label' => '&laquo; Anterior', 'active' => false],
-                (object)['url' => '#', 'label' => '1', 'active' => true],
-                (object)['url' => null, 'label' => 'Próximo &raquo;', 'active' => false],
-            ]
-        ];
-        
-        return Inertia::render('Users', [
-            'users' => $users,
-            'title' => 'Usuários',
-            'description' => 'Gerenciar usuários do sistema'
-        ]);
+    public function __construct(UserService $userService)
+    {
+        $this->userService = $userService;
     }
 
-    public function create()
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request): Response|RedirectResponse
     {
-        return Inertia::render('Users/Create', [
-            'title' => 'Novo Usuário',
-            'description' => 'Criar um novo usuário'
-        ]);
-    }
+        try {
+            $perPage = $request->get('per_page', 10);
+            $filters = [
+                'search' => $request->get('search'),
+                'status' => $request->get('status'),
+                'role' => $request->get('role'),
+            ];
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => ['required', 'confirmed', Password::defaults()],
-            'is_master' => 'boolean'
-        ]);
+            $users = $this->userService->getAllUsers($perPage, $filters);
 
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'is_master' => $validated['is_master'] ?? false,
-        ]);
-
-        return redirect()->route('users.index')
-            ->with('success', 'Usuário criado com sucesso!');
-    }
-
-    public function show(User $user)
-    {
-        // Mock data for development
-        $mockUser = (object)[
-            'id' => $user->id ?? '1',
-            'name' => $user->name ?? 'João Silva',
-            'email' => $user->email ?? 'joao.silva@example.com',
-            'is_master' => $user->is_master ?? false,
-            'created_at' => $user->created_at ?? now()->subDays(5)->toISOString(),
-            'updated_at' => $user->updated_at ?? now()->subDays(1)->toISOString(),
-        ];
-        
-        return Inertia::render('Users/Show', [
-            'user' => $mockUser,
-            'title' => 'Detalhes do Usuário',
-            'description' => 'Visualizar informações do usuário'
-        ]);
-    }
-
-    public function edit(User $user)
-    {
-        // Mock data for development
-        $mockUser = (object)[
-            'id' => $user->id ?? '1',
-            'name' => $user->name ?? 'João Silva',
-            'email' => $user->email ?? 'joao.silva@example.com',
-            'is_master' => $user->is_master ?? false,
-            'created_at' => $user->created_at ?? now()->subDays(5)->toISOString(),
-            'updated_at' => $user->updated_at ?? now()->subDays(1)->toISOString(),
-        ];
-        
-        return Inertia::render('Users/Edit', [
-            'user' => $mockUser,
-            'title' => 'Editar Usuário',
-            'description' => 'Editar informações do usuário'
-        ]);
-    }
-
-    public function update(Request $request, User $user)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'password' => ['nullable', 'confirmed', Password::defaults()],
-            'is_master' => 'boolean'
-        ]);
-
-        $updateData = [
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'is_master' => $validated['is_master'] ?? false,
-        ];
-
-        if (!empty($validated['password'])) {
-            $updateData['password'] = Hash::make($validated['password']);
+            return Inertia::render('Users', [
+                'users' => $users,
+                'filters' => $filters,
+            ]);
+        } catch (Exception $e) {
+            return Inertia::render('Users', [
+                'users' => [],
+                'filters' => [],
+                'error' => 'Erro ao carregar usuários: ' . $e->getMessage(),
+            ]);
         }
-
-        $user->update($updateData);
-
-        return redirect()->route('users.index')
-            ->with('success', 'Usuário atualizado com sucesso!');
     }
 
-    public function destroy(User $user)
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request): JsonResponse
     {
-        $user->delete();
+        try {
+            $validatedData = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|max:255',
+                'password' => 'required|string|min:8',
+                'role_id' => 'nullable|exists:user_roles,id',
+                'is_active' => 'boolean',
+            ]);
 
-        return redirect()->route('users.index')
-            ->with('success', 'Usuário excluído com sucesso!');
+            $user = $this->userService->createUser($validatedData);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Usuário criado com sucesso!',
+                'user' => $user,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id): Response|RedirectResponse
+    {
+        try {
+            $user = $this->userService->getUserById($id);
+
+            if (!$user) {
+                abort(404, 'Usuário não encontrado');
+            }
+
+            return Inertia::render('Users/Show', [
+                'user' => $user,
+            ]);
+        } catch (Exception $e) {
+            return redirect()->back()->with('error', 'Erro ao carregar usuário: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id): Response
+    {
+        try {
+            $user = $this->userService->getUserById($id);
+
+            if (!$user) {
+                abort(404, 'Usuário não encontrado');
+            }
+
+            $roles = $this->userService->getAvailableRoles();
+
+            return Inertia::render('Users/Edit', [
+                'user' => $user,
+                'roles' => $roles,
+            ]);
+        } catch (Exception $e) {
+            return Inertia::render('Users/Edit', [
+                'user' => null,
+                'roles' => [],
+                'error' => 'Erro ao carregar usuário: ' . $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id): JsonResponse
+    {
+        try {
+            $validatedData = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|max:255',
+                'password' => 'nullable|string|min:8',
+                'role_id' => 'nullable|exists:user_roles,id',
+                'is_active' => 'boolean',
+            ]);
+
+            $user = $this->userService->updateUser($id, $validatedData);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Usuário atualizado com sucesso!',
+                'user' => $user,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id): JsonResponse
+    {
+        try {
+            $this->userService->deleteUser($id);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Usuário excluído com sucesso!',
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Toggle user status (active/inactive).
+     */
+    public function toggleStatus(string $id): JsonResponse
+    {
+        try {
+            $user = $this->userService->toggleUserStatus($id);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Status do usuário alterado com sucesso!',
+                'user' => $user,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Get user statistics.
+     */
+    public function statistics(): JsonResponse
+    {
+        try {
+            $stats = $this->userService->getUserStatistics();
+
+            return response()->json([
+                'success' => true,
+                'data' => $stats,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Get available roles.
+     */
+    public function roles(): JsonResponse
+    {
+        try {
+            $roles = $this->userService->getAvailableRoles();
+
+            return response()->json([
+                'success' => true,
+                'data' => $roles,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Export users to CSV.
+     */
+    public function exportCsv(Request $request): JsonResponse
+    {
+        try {
+            $filters = [
+                'search' => $request->get('search'),
+                'status' => $request->get('status'),
+                'role' => $request->get('role'),
+            ];
+
+            $users = $this->userService->getAllUsersList($filters);
+
+            // Generate CSV content
+            $csvContent = "ID,Nome,Email,Status,Função,Data de Criação\n";
+            
+            foreach ($users as $user) {
+                $roleName = $user->roles->first() ? $user->roles->first()->name : 'N/A';
+                $status = $user->is_active ? 'Ativo' : 'Inativo';
+                
+                $csvContent .= sprintf(
+                    "%s,%s,%s,%s,%s,%s\n",
+                    $user->id,
+                    $user->name,
+                    $user->email,
+                    $status,
+                    $roleName,
+                    $user->created_at->format('d/m/Y H:i:s')
+                );
+            }
+
+            return response()->json([
+                'success' => true,
+                'csv_content' => $csvContent,
+                'filename' => 'usuarios_' . date('Y-m-d_H-i-s') . '.csv',
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

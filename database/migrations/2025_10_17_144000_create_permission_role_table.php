@@ -13,7 +13,9 @@ return new class extends Migration
     public function up(): void
     {
         // Enable UUID extension if not already enabled
-        DB::statement('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
+        }
         
         Schema::create('permission_role', function (Blueprint $table) {
             $table->uuid('role_id');

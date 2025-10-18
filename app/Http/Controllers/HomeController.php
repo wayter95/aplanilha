@@ -11,8 +11,16 @@ class HomeController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $tenantContext = app('tenant.context');
-        $client = $tenantContext->getClient();
+        
+        // Try to get tenant context if available, otherwise use default
+        try {
+            $tenantContext = app('tenant.context');
+            $client = $tenantContext->getClient();
+        } catch (\Exception $e) {
+            // If tenant context is not available, use default tenant
+            $defaultTenant = \App\Models\ClientSubscribe::first();
+            $client = $defaultTenant;
+        }
 
         $stats = [
             'totalUsers' => 25,

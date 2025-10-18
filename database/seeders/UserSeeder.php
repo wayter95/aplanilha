@@ -2,79 +2,76 @@
 
 namespace Database\Seeders;
 
-use App\Models\ClientSubscribe;
-use App\Models\User;
-use App\Models\UserRole;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
+use App\Models\User;
+use App\Models\ClientSubscribe;
+use App\Models\UserRole;
 
 class UserSeeder extends Seeder
 {
+    /**
+     * Run the database seeder.
+     */
     public function run(): void
     {
-        $masterUser = User::updateOrCreate(
-            ['email' => 'master@aplanilha.com'],
-            [
-                'id' => Str::uuid(),
-                'client_id' => null,
-                'name' => 'Master User',
-                'email' => 'master@aplanilha.com',
-                'password' => Hash::make('password'),
-                'is_master' => true,
-                'email_verified_at' => now(),
-            ]
-        );
-
-        $clients = ClientSubscribe::all();
+        // Get the first client
+        $client = ClientSubscribe::first();
         
-        foreach ($clients as $client) {
-            $adminRole = UserRole::where('client_id', $client->id)
-                ->where('name', 'Admin')
-                ->first();
+        if (!$client) {
+            return;
+        }
+
+        // Get roles
+        $adminRole = UserRole::where('name', 'admin')->first();
+        $userRole = UserRole::where('name', 'user')->first();
+
+        // Create users
+        $users = [
+            [
+                'client_id' => $client->id,
+                'name' => 'João Silva',
+                'email' => 'joao.silva@empresademo.com',
+                'password' => Hash::make('password123'),
+                'is_master' => false,
+                'role_id' => $adminRole->id,
+            ],
+            [
+                'client_id' => $client->id,
+                'name' => 'Maria Santos',
+                'email' => 'maria.santos@empresademo.com',
+                'password' => Hash::make('password123'),
+                'is_master' => false,
+                'role_id' => $userRole->id,
+            ],
+            [
+                'client_id' => $client->id,
+                'name' => 'Pedro Costa',
+                'email' => 'pedro.costa@empresademo.com',
+                'password' => Hash::make('password123'),
+                'is_master' => false,
+                'role_id' => $userRole->id,
+            ],
+            [
+                'client_id' => $client->id,
+                'name' => 'Ana Oliveira',
+                'email' => 'ana.oliveira@empresademo.com',
+                'password' => Hash::make('password123'),
+                'is_master' => false,
+                'role_id' => $userRole->id,
+            ],
+        ];
+
+        foreach ($users as $userData) {
+            $roleId = $userData['role_id'];
+            unset($userData['role_id']);
             
-            $userRole = UserRole::where('client_id', $client->id)
-                ->where('name', 'User')
-                ->first();
-
-            $adminUser = User::updateOrCreate(
-                [
-                    'email' => "admin@{$client->subdomain}.com",
-                    'client_id' => $client->id
-                ],
-                [
-                    'id' => Str::uuid(),
-                    'client_id' => $client->id,
-                    'name' => "Admin {$client->name}",
-                    'email' => "admin@{$client->subdomain}.com",
-                    'password' => Hash::make('password'),
-                    'is_master' => false,
-                    'email_verified_at' => now(),
-                ]
-            );
-
-            $demoUser = User::updateOrCreate(
-                [
-                    'email' => "demo@{$client->subdomain}.com",
-                    'client_id' => $client->id
-                ],
-                [
-                    'id' => Str::uuid(),
-                    'client_id' => $client->id,
-                    'name' => "Demo User {$client->name}",
-                    'email' => "demo@{$client->subdomain}.com",
-                    'password' => Hash::make('password'),
-                    'is_master' => false,
-                    'email_verified_at' => now(),
-                ]
-            );
-
-            if ($adminRole) {
-                $adminUser->roles()->syncWithoutDetaching([$adminRole->id]);
-            }
+            $user = User::create($userData);
             
-            if ($userRole) {
-                $demoUser->roles()->syncWithoutDetaching([$userRole->id]);
+            // Assign role
+            if ($roleId) {
+                $role = UserRole::find($roleId);
+                $user->assignRole($role);
             }
         }
     }

@@ -78,10 +78,10 @@
 </template>
 
 <script setup>
-import CreateUserModal from '@/Components/CreateUserModal.vue'
 import DataTable from '@/Components/DataTable.vue'
-import DeleteUserModal from '@/Components/DeleteUserModal.vue'
-import UpdateUserModal from '@/Components/UpdateUserModal.vue'
+import CreateUserModal from '@/Components/UsersModals/CreateUserModal.vue'
+import DeleteUserModal from '@/Components/UsersModals/DeleteUserModal.vue'
+import UpdateUserModal from '@/Components/UsersModals/UpdateUserModal.vue'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import { ref } from 'vue'
 
@@ -193,21 +193,21 @@ const handleSelectionChange = (selectedItems) => {
 
 const handleUserCreated = () => {
   showCreateModal.value = false
-  // Reload page or update data
+  // Reload page to show updated data
   window.location.reload()
 }
 
 const handleUserUpdated = () => {
   showUpdateModal.value = false
   selectedUser.value = null
-  // Reload page or update data
+  // Reload page to show updated data
   window.location.reload()
 }
 
 const handleUserDeleted = () => {
   showDeleteModal.value = false
   selectedUser.value = null
-  // Reload page or update data
+  // Reload page to show updated data
   window.location.reload()
 }
 </script>

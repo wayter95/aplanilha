@@ -2,56 +2,42 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Scopes\TenantScope;
 
 class ActivityLog extends Model
 {
     use HasFactory, HasUuids;
 
-    /**
-     * The table associated with the model.
-     */
-    protected $table = 'activity_logs';
-
-    /**
-     * The attributes that are mass assignable.
-     */
     protected $fillable = [
         'client_id',
         'user_id',
         'action',
+        'description',
         'model_type',
         'model_id',
         'old_values',
         'new_values',
         'ip_address',
         'user_agent',
+        'created_at',
     ];
 
-    /**
-     * The attributes that should be cast.
-     */
-    protected $casts = [
-        'old_values' => 'array',
-        'new_values' => 'array',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'old_values' => 'array',
+            'new_values' => 'array',
+            'created_at' => 'datetime',
+        ];
+    }
 
     protected static function booted(): void
     {
         static::addGlobalScope(new TenantScope);
-    }
-
-    /**
-     * Get the client that owns the activity log.
-     */
-    public function client(): BelongsTo
-    {
-        return $this->belongsTo(ClientSubscribe::class, 'client_id');
     }
 
     /**
@@ -63,19 +49,11 @@ class ActivityLog extends Model
     }
 
     /**
-     * Get the model that was affected.
+     * Get the client that owns the activity log.
      */
-    public function model(): MorphTo
+    public function client(): BelongsTo
     {
-        return $this->morphTo('model', 'model_type', 'model_id');
-    }
-
-    /**
-     * Scope a query to only include logs for a specific client.
-     */
-    public function scopeForClient($query, $clientId)
-    {
-        return $this->where('client_id', $clientId);
+        return $this->belongsTo(ClientSubscribe::class, 'client_id');
     }
 
     /**
@@ -109,28 +87,72 @@ class ActivityLog extends Model
     }
 
     /**
-     * Scope a query to only include recent logs.
+     * Scope a query to only include logs within a date range.
      */
-    public function scopeRecent($query, $days = 30)
+    public function scopeDateRange($query, $startDate, $endDate)
     {
-        return $query->where('created_at', '>=', now()->subDays($days));
+        return $query->whereBetween('created_at', [$startDate, $endDate]);
+    }
+
+    /**
+     * Get the model that was affected.
+     */
+    public function model()
+    {
+        if ($this->model_type && $this->model_id) {
+            return $this->model_type::find($this->model_id);
+        }
+        
+        return null;
     }
 
     /**
      * Create a new activity log entry.
      */
-    public static function log(string $action, $model = null, array $oldValues = [], array $newValues = [], $userId = null, $clientId = null): self
-    {
+    public static function createLog(
+        string $action,
+        string $description,
+        ?string $userId = null,
+        ?string $modelType = null,
+        ?string $modelId = null,
+        ?array $oldValues = null,
+        ?array $newValues = null
+    ): self {
         return static::create([
-            'client_id' => $clientId ?? app('tenant.context')->getClientId(),
-            'user_id' => $userId ?? (auth()->guard()->check() ? auth()->guard()->user()->id : null),
+            'client_id' => auth()->user()?->client_id,
+            'user_id' => $userId ?? auth()->id(),
             'action' => $action,
-            'model_type' => $model ? get_class($model) : null,
-            'model_id' => $model?->id,
+            'description' => $description,
+            'model_type' => $modelType,
+            'model_id' => $modelId,
             'old_values' => $oldValues,
             'new_values' => $newValues,
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
         ]);
+    }
+
+    /**
+     * Get formatted old values for display.
+     */
+    public function getFormattedOldValuesAttribute(): ?string
+    {
+        if (!$this->old_values) {
+            return null;
+        }
+
+        return json_encode($this->old_values, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * Get formatted new values for display.
+     */
+    public function getFormattedNewValuesAttribute(): ?string
+    {
+        if (!$this->new_values) {
+            return null;
+        }
+
+        return json_encode($this->new_values, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     }
 }

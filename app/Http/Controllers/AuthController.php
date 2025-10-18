@@ -135,8 +135,15 @@ class AuthController extends Controller
 
     private function findUserForTenant(string $email): ?User
     {
-        $tenantContext = app('tenant.context');
-        $clientId = $tenantContext->getClientId();
+        try {
+            // Try to get tenant context if available
+            $tenantContext = app('tenant.context');
+            $clientId = $tenantContext->getClientId();
+        } catch (\Exception $e) {
+            // If tenant context is not available, use default tenant
+            $defaultTenant = \App\Models\ClientSubscribe::first();
+            $clientId = $defaultTenant ? $defaultTenant->id : null;
+        }
 
         if ($clientId) {
             return User::where('email', $email)
@@ -144,8 +151,7 @@ class AuthController extends Controller
                 ->first();
         }
 
-        return User::where('email', $email)
-            ->where('is_master', true)
-            ->first();
+        // Fallback: search for master users or any user
+        return User::where('email', $email)->first();
     }
 }

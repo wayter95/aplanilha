@@ -12,8 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Enable UUID extension if not already enabled
-        DB::statement('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
+        // Enable UUID extension only for PostgreSQL
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
+        }
         
         Schema::create('users', function (Blueprint $table) {
             $table->uuid('id')->primary();

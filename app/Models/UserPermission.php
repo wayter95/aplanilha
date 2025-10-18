@@ -2,30 +2,31 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Scopes\TenantScope;
 
 class UserPermission extends Model
 {
     use HasFactory, HasUuids;
 
-    /**
-     * The table associated with the model.
-     */
-    protected $table = 'user_permissions';
-
-    /**
-     * The attributes that are mass assignable.
-     */
     protected $fillable = [
         'client_id',
         'module',
         'action',
+        'display_name',
+        'description',
+        'is_active',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+        ];
+    }
 
     protected static function booted(): void
     {
@@ -33,20 +34,28 @@ class UserPermission extends Model
     }
 
     /**
-     * Get the client that owns the permission.
-     */
-    public function client(): BelongsTo
-    {
-        return $this->belongsTo(ClientSubscribe::class, 'client_id');
-    }
-
-    /**
-     * Get the roles that have this permission.
+     * Get the roles that belong to the permission.
      */
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(UserRole::class, 'permission_role', 'permission_id', 'role_id')
                     ->withTimestamps();
+    }
+
+    /**
+     * Get the client that owns the permission.
+     */
+    public function client()
+    {
+        return $this->belongsTo(ClientSubscribe::class, 'client_id');
+    }
+
+    /**
+     * Scope a query to only include active permissions.
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
     }
 
     /**
@@ -74,15 +83,7 @@ class UserPermission extends Model
     }
 
     /**
-     * Get the permission name in a readable format.
-     */
-    public function getNameAttribute(): string
-    {
-        return ucfirst($this->action) . ' ' . ucfirst($this->module);
-    }
-
-    /**
-     * Get the permission identifier.
+     * Get the permission identifier (module.action).
      */
     public function getIdentifierAttribute(): string
     {

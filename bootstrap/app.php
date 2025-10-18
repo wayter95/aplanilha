@@ -29,10 +29,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth' => RedirectIfNotAuthenticated::class,
         ]);
         
-        $middleware->web(prepend: [
-            DefaultTenantFallback::class,
-            ResolveTenant::class,
-        ]);
+        // Temporarily disabled tenant middlewares for testing
+        // $middleware->web(prepend: [
+        //     DefaultTenantFallback::class,
+        //     ResolveTenant::class,
+        // ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

@@ -2,42 +2,34 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Scopes\TenantScope;
 
 class UserRole extends Model
 {
     use HasFactory, HasUuids;
 
-    /**
-     * The table associated with the model.
-     */
-    protected $table = 'user_roles';
-
-    /**
-     * The attributes that are mass assignable.
-     */
     protected $fillable = [
         'client_id',
         'name',
+        'display_name',
         'description',
+        'is_active',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+        ];
+    }
 
     protected static function booted(): void
     {
         static::addGlobalScope(new TenantScope);
-    }
-
-    /**
-     * Get the client that owns the role.
-     */
-    public function client(): BelongsTo
-    {
-        return $this->belongsTo(ClientSubscribe::class, 'client_id');
     }
 
     /**
@@ -56,6 +48,22 @@ class UserRole extends Model
     {
         return $this->belongsToMany(UserPermission::class, 'permission_role', 'role_id', 'permission_id')
                     ->withTimestamps();
+    }
+
+    /**
+     * Get the client that owns the role.
+     */
+    public function client()
+    {
+        return $this->belongsTo(ClientSubscribe::class, 'client_id');
+    }
+
+    /**
+     * Scope a query to only include active roles.
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
     }
 
     /**
@@ -78,17 +86,17 @@ class UserRole extends Model
     }
 
     /**
-     * Give permission to the role.
+     * Assign a permission to the role.
      */
-    public function givePermission(UserPermission $permission): void
+    public function assignPermission(UserPermission $permission): void
     {
         $this->permissions()->syncWithoutDetaching([$permission->id]);
     }
 
     /**
-     * Revoke permission from the role.
+     * Remove a permission from the role.
      */
-    public function revokePermission(UserPermission $permission): void
+    public function removePermission(UserPermission $permission): void
     {
         $this->permissions()->detach($permission->id);
     }

@@ -91,12 +91,33 @@ const getInitials = (name) => {
   return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
 }
 
-const deleteUser = () => {
-  // Here you would typically make an API call
-  console.log('Deleting user:', props.user)
-  
-  // Emit the event
-  emit('user-deleted', props.user)
+const deleteUser = async () => {
+  if (!props.user || !props.user.id) {
+    console.error('No user ID provided')
+    return
+  }
+
+  try {
+    const response = await fetch(`/api/users/${props.user.id}`, {
+      method: 'DELETE',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      }
+    })
+
+    const result = await response.json()
+
+    if (result.success) {
+      emit('user-deleted', props.user)
+      close()
+    } else {
+      console.error('Error deleting user:', result.message)
+      alert('Erro ao excluir usuário: ' + result.message)
+    }
+  } catch (error) {
+    console.error('Error deleting user:', error)
+    alert('Erro ao excluir usuário')
+  }
 }
 
 const close = () => {

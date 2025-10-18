@@ -127,20 +127,29 @@ const form = ref({
   status: ''
 })
 
-const createUser = () => {
-  // Here you would typically make an API call
-  console.log('Creating user:', form.value)
-  
-  // Emit the event
-  emit('user-created', form.value)
-  
-  // Reset form
-  form.value = {
-    name: '',
-    email: '',
-    password: '',
-    role: '',
-    status: ''
+const createUser = async () => {
+  try {
+    const response = await fetch('/api/users', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      },
+      body: JSON.stringify(form.value)
+    })
+
+    const result = await response.json()
+
+    if (result.success) {
+      emit('user-created', result.user)
+      close()
+    } else {
+      console.error('Error creating user:', result.message)
+      alert('Erro ao criar usuário: ' + result.message)
+    }
+  } catch (error) {
+    console.error('Error creating user:', error)
+    alert('Erro ao criar usuário')
   }
 }
 

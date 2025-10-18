@@ -13,13 +13,17 @@ return new class extends Migration
     public function up(): void
     {
         // Enable UUID extension if not already enabled
-        DB::statement('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
+        }
         
         Schema::create('user_roles', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('client_id'); // FK para client_subscribes.id
             $table->string('name'); // ex: 'Master', 'Admin', 'User'
+            $table->string('display_name')->nullable(); // Nome para exibição
             $table->string('description')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
             
             // Foreign key constraint

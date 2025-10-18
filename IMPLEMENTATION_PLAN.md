@@ -96,10 +96,8 @@ Implementar sistema completo de autenticação multi-tenant com:
 #### 3. Páginas Principais
 
 -   [ ] Criar `Home.vue` (dashboard vazio)
--   [ ] Criar `Users/Index.vue` (listagem)
--   [ ] Criar `Users/Create.vue` (formulário)
--   [ ] Criar `Users/Edit.vue` (formulário)
--   [ ] Criar `Profile.vue` (perfil do usuário)
+-   [ ] Criar `Users.vue` (listagem)
+-   [ ] Crirar modais de CRUD do User
 
 #### 4. Componentes Reutilizáveis
 

@@ -143,12 +143,35 @@ watch(() => props.user, (newUser) => {
   }
 }, { immediate: true })
 
-const updateUser = () => {
-  // Here you would typically make an API call
-  console.log('Updating user:', form.value)
-  
-  // Emit the event
-  emit('user-updated', form.value)
+const updateUser = async () => {
+  if (!props.user || !props.user.id) {
+    console.error('No user ID provided')
+    return
+  }
+
+  try {
+    const response = await fetch(`/api/users/${props.user.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      },
+      body: JSON.stringify(form.value)
+    })
+
+    const result = await response.json()
+
+    if (result.success) {
+      emit('user-updated', result.user)
+      close()
+    } else {
+      console.error('Error updating user:', result.message)
+      alert('Erro ao atualizar usuário: ' + result.message)
+    }
+  } catch (error) {
+    console.error('Error updating user:', error)
+    alert('Erro ao atualizar usuário')
+  }
 }
 
 const close = () => {

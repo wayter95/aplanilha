@@ -177,11 +177,13 @@ const handleSubmit = async () => {
 
     try {
         router.post('/login', form.value, {
-            onSuccess: () => {
+            onSuccess: (page) => {
+                console.log('Login successful:', page);
                 router.visit('/');
             },
             onError: (errors) => {
                 console.error('Login failed:', errors);
+                alert('Erro no login: ' + JSON.stringify(errors));
             },
             onFinish: () => {
                 isLoading.value = false;
@@ -189,6 +191,7 @@ const handleSubmit = async () => {
         });
     } catch (error) {
         console.error('Login error:', error);
+        alert('Erro no login: ' + error.message);
         isLoading.value = false;
     }
 };

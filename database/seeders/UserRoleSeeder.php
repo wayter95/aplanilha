@@ -2,42 +2,51 @@
 
 namespace Database\Seeders;
 
-use App\Models\ClientSubscribe;
-use App\Models\UserRole;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
+use App\Models\UserRole;
+use App\Models\ClientSubscribe;
 
 class UserRoleSeeder extends Seeder
 {
+    /**
+     * Run the database seeder.
+     */
     public function run(): void
     {
-        $clients = ClientSubscribe::all();
+        // Get the first client
+        $client = ClientSubscribe::first();
         
-        foreach ($clients as $client) {
-            $roles = [
-                [
-                    'id' => Str::uuid(),
-                    'client_id' => $client->id,
-                    'name' => 'Admin',
-                    'description' => 'Administrador completo do tenant',
-                ],
-                [
-                    'id' => Str::uuid(),
-                    'client_id' => $client->id,
-                    'name' => 'User',
-                    'description' => 'Usuário padrão com permissões limitadas',
-                ],
-            ];
+        if (!$client) {
+            return;
+        }
 
-            foreach ($roles as $roleData) {
-                UserRole::updateOrCreate(
-                    [
-                        'client_id' => $roleData['client_id'],
-                        'name' => $roleData['name']
-                    ],
-                    $roleData
-                );
-            }
+        // Create default roles
+        $roles = [
+            [
+                'client_id' => $client->id,
+                'name' => 'admin',
+                'display_name' => 'Administrador',
+                'description' => 'Acesso total ao sistema',
+                'is_active' => true,
+            ],
+            [
+                'client_id' => $client->id,
+                'name' => 'user',
+                'display_name' => 'Usuário',
+                'description' => 'Acesso basic ao sistema',
+                'is_active' => true,
+            ],
+            [
+                'client_id' => $client->id,
+                'name' => 'moderator',
+                'display_name' => 'Moderador',
+                'description' => 'Acesso intermediário ao sistema',
+                'is_active' => true,
+            ],
+        ];
+
+        foreach ($roles as $role) {
+            UserRole::create($role);
         }
     }
 }
