@@ -32,7 +32,7 @@
             </div>
           </div>
           
-          <div v-if="user" class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+          <div v-if="user" class="bg-light dark:bg-gray-700 rounded-lg p-4">
             <div class="flex items-center">
               <div class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold mr-3">
                 {{ getInitials(user.name) }}
