@@ -2,16 +2,15 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('home');
     
-    Route::get('/users', fn() => Inertia::render('Users/Index', [
-        'title' => 'Users',
-        'description' => 'List of users',
-    ]))->name('users.index');
+    // Users CRUD routes
+    Route::get('users', [UserController::class, 'index'])->name('users');
     
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
