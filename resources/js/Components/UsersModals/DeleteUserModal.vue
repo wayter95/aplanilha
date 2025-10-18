@@ -72,6 +72,9 @@
 </template>
 
 <script setup>
+import { usePage } from '@inertiajs/vue3'
+
+const page = usePage()
 
 const props = defineProps({
   show: {
@@ -101,7 +104,7 @@ const deleteUser = async () => {
     const response = await fetch(`/api/users/${props.user.id}`, {
       method: 'DELETE',
       headers: {
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        'X-CSRF-TOKEN': page.props.csrf_token
       }
     })
 
