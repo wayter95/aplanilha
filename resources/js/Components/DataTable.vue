@@ -309,6 +309,18 @@ const props = defineProps({
     type: Boolean,
     default: true
   },
+  serverSideFiltering: {
+    type: Boolean,
+    default: false
+  },
+  initialFilters: {
+    type: Object,
+    default: () => ({})
+  },
+  initialSearch: {
+    type: String,
+    default: ''
+  },
   showSearch: {
     type: Boolean,
     default: true
@@ -331,21 +343,23 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['action', 'selection-change'])
+const emit = defineEmits(['action', 'selection-change', 'filter-change', 'search-change'])
 
 // Reactive state
-const searchQuery = ref('')
+const searchQuery = ref(props.initialSearch || '')
 const sortField = ref('')
 const sortDirection = ref('asc')
 const currentPage = ref(1)
 const itemsPerPage = ref(10)
-const filterValues = ref({})
+const filterValues = ref({ ...props.initialFilters })
 const selectAll = ref(false)
 const selectedItems = ref([])
 
-// Initialize filter values
+// Initialize filter values (only if not already set)
 props.filters.forEach(filter => {
-  filterValues.value[filter.key] = ''
+  if (!filterValues.value.hasOwnProperty(filter.key)) {
+    filterValues.value[filter.key] = ''
+  }
 })
 
 // Computed properties
@@ -353,6 +367,20 @@ const hasActions = computed(() => props.actions.length > 0)
 
 const filteredData = computed(() => {
   let result = [...props.data]
+
+  // If server-side filtering is enabled, don't filter locally
+  if (props.serverSideFiltering) {
+    // Only apply sorting locally
+    if (sortField.value) {
+      result.sort((a, b) => {
+        const aVal = getNestedValue(a, sortField.value)
+        const bVal = getNestedValue(b, sortField.value)
+        const modifier = sortDirection.value === 'asc' ? 1 : -1
+        return aVal > bVal ? modifier : aVal < bVal ? -modifier : 0
+      })
+    }
+    return result
+  }
 
   // Apply search
   if (searchQuery.value) {
@@ -479,10 +507,12 @@ const formatDate = (date) => {
 
 const handleSearch = () => {
   currentPage.value = 1
+  emit('search-change', searchQuery.value)
 }
 
 const handleFilter = () => {
   currentPage.value = 1
+  emit('filter-change', filterValues.value)
 }
 
 const handleSort = (field) => {

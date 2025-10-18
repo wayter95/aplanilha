@@ -9,7 +9,10 @@
           :data="users.data"
           :columns="columns"
           :actions="actions"
-          :filters="filters"
+          :filters="filterOptions"
+          :server-side-filtering="true"
+          :initial-filters="{}"
+          :initial-search="''"
           :show-select-all="true"
           :show-search="true"
           :show-export="true"
@@ -17,6 +20,8 @@
           search-placeholder="Buscar usuários..."
           @action="handleAction"
           @selection-change="handleSelectionChange"
+          @filter-change="handleFilterChange"
+          @search-change="handleSearchChange"
         >
           <!-- Custom Header Actions -->
           <template #header-actions>
@@ -65,7 +70,7 @@ import DeleteUserModal from '@/Components/UsersModals/DeleteUserModal.vue'
 import UpdateUserModal from '@/Components/UsersModals/UpdateUserModal.vue'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import { router } from '@inertiajs/vue3'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 // Props from Inertia
 const props = defineProps({
@@ -80,6 +85,10 @@ const props = defineProps({
   availableRoles: {
     type: Array,
     default: () => []
+  },
+  filters: {
+    type: Object,
+    default: () => ({})
   }
 })
 
@@ -139,28 +148,25 @@ const actions = [
   }
 ]
 
-const filters = [
+// Dynamic filters based on backend data
+const filterOptions = computed(() => [
   {
     key: 'status',
     label: 'Status',
     options: [
       { value: 'Ativo', label: 'Ativo' },
-      { value: 'Inativo', label: 'Inativo' },
-      { value: 'Pendente', label: 'Pendente' },
-      { value: 'Bloqueado', label: 'Bloqueado' }
+      { value: 'Inativo', label: 'Inativo' }
     ]
   },
   {
     key: 'role',
     label: 'Função',
-    options: [
-      { value: 'admin', label: 'Administrador' },
-      { value: 'user', label: 'Usuário' },
-      { value: 'moderator', label: 'Moderador' },
-      { value: 'guest', label: 'Convidado' }
-    ]
+    options: props.availableRoles.map(role => ({
+      value: role.name,
+      label: role.display_name
+    }))
   }
-]
+])
 
 // Event handlers
 const handleAction = ({ action, row }) => {
@@ -179,6 +185,50 @@ const handleAction = ({ action, row }) => {
 const handleSelectionChange = (selectedItems) => {
   console.log('Selected items:', selectedItems)
   // Handle bulk actions here
+}
+
+// Store current filters and search
+const currentFilters = ref({})
+const currentSearch = ref('')
+
+const handleFilterChange = (filters) => {
+  console.log('Filter changed:', filters)
+  // Update specific filter instead of replacing all
+  Object.keys(filters).forEach(key => {
+    if (filters[key]) {
+      currentFilters.value[key] = filters[key]
+    } else {
+      delete currentFilters.value[key]
+    }
+  })
+  reloadWithFilters()
+}
+
+const handleSearchChange = (searchQuery) => {
+  console.log('Search changed:', searchQuery)
+  currentSearch.value = searchQuery
+  reloadWithFilters()
+}
+
+const reloadWithFilters = () => {
+  const queryParams = {
+    ...currentFilters.value,
+    search: currentSearch.value
+  }
+  
+  // Remove empty values
+  Object.keys(queryParams).forEach(key => {
+    if (!queryParams[key] || queryParams[key] === '') {
+      delete queryParams[key]
+    }
+  })
+  
+  router.visit('/users', {
+    method: 'get',
+    data: queryParams,
+    preserveState: false,
+    preserveScroll: false
+  })
 }
 
 const handleUserCreated = () => {
