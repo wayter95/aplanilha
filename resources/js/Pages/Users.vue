@@ -78,15 +78,15 @@
               <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <!-- Search -->
                 <div class="md:col-span-2">
-                  <div class="relative">
+                  <div class="search-input-container">
                     <input
                       v-model="searchQuery"
                       type="text"
                       placeholder="Buscar usuários..."
-                      class="ti-form-input pl-10"
+                      class="ti-form-input pr-4"
                       @input="handleSearch"
                     />
-                    <i class="ri-search-line absolute left-3 top-1/2 transform -translate-y-1/2 text-textmuted dark:text-textmuted"></i>
+                    <i class="ri-search-line search-icon text-textmuted dark:text-textmuted text-sm"></i>
                   </div>
                 </div>
                 
@@ -1051,5 +1051,52 @@ watch(selectedUsers, (newValue) => {
 /* Cursor pointer */
 .cursor-pointer {
   cursor: pointer;
+}
+
+/* Search input dark mode fixes */
+.dark .ti-form-input {
+  background-color: rgb(35 38 40) !important;
+  border-color: rgb(49 51 53) !important;
+  color: rgb(255 255 255) !important;
+}
+
+.dark .ti-form-input::placeholder {
+  color: rgb(140 144 151) !important;
+}
+
+.dark .ti-form-input:focus {
+  background-color: rgb(35 38 40) !important;
+  border-color: rgb(132 90 223) !important;
+  box-shadow: 0 0 0 2px rgba(132, 90, 223, 0.2) !important;
+}
+
+.dark .ti-form-select {
+  background-color: rgb(35 38 40) !important;
+  border-color: rgb(49 51 53) !important;
+  color: rgb(255 255 255) !important;
+}
+
+.dark .ti-form-select:focus {
+  background-color: rgb(35 38 40) !important;
+  border-color: rgb(132 90 223) !important;
+  box-shadow: 0 0 0 2px rgba(132, 90, 223, 0.2) !important;
+}
+
+/* Search icon positioning fix */
+.search-input-container {
+  position: relative;
+}
+
+.search-input-container .search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.search-input-container input {
+  padding-left: 40px !important;
 }
 </style>
