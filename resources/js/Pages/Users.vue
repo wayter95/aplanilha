@@ -11,8 +11,8 @@
           :actions="actions"
           :filters="filterOptions"
           :server-side-filtering="true"
-          :initial-filters="{}"
-          :initial-search="''"
+          :initial-filters="props.filters"
+          :initial-search="props.filters.search || ''"
           :show-select-all="true"
           :show-search="true"
           :show-export="true"
@@ -187,20 +187,16 @@ const handleSelectionChange = (selectedItems) => {
   // Handle bulk actions here
 }
 
-// Store current filters and search
-const currentFilters = ref({})
-const currentSearch = ref('')
+// Store current filters and search (initialize with backend values)
+const currentFilters = ref({ ...props.filters })
+const currentSearch = ref(props.filters.search || '')
 
 const handleFilterChange = (filters) => {
   console.log('Filter changed:', filters)
-  // Update specific filter instead of replacing all
-  Object.keys(filters).forEach(key => {
-    if (filters[key]) {
-      currentFilters.value[key] = filters[key]
-    } else {
-      delete currentFilters.value[key]
-    }
-  })
+  console.log('Current filters before update:', currentFilters.value)
+  // Update current filters with new values
+  currentFilters.value = { ...filters }
+  console.log('Current filters after update:', currentFilters.value)
   reloadWithFilters()
 }
 
@@ -216,12 +212,16 @@ const reloadWithFilters = () => {
     search: currentSearch.value
   }
   
+  console.log('Query params before cleanup:', queryParams)
+  
   // Remove empty values
   Object.keys(queryParams).forEach(key => {
     if (!queryParams[key] || queryParams[key] === '') {
       delete queryParams[key]
     }
   })
+  
+  console.log('Final query params:', queryParams)
   
   router.visit('/users', {
     method: 'get',

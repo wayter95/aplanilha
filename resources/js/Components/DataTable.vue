@@ -50,7 +50,7 @@
               @change="handleFilter"
               class="ti-form-select"
             >
-              <option value="">{{ filter.label || 'Todos' }}</option>
+              <option value="">{{ getFilterPlaceholder(filter) }}</option>
               <option v-for="option in filter.options" :key="option.value" :value="option.value">
                 {{ option.label }}
               </option>
@@ -606,6 +606,19 @@ const getRoleLabel = (role) => {
   
   // Otherwise, map the role name to display name
   return roleMap[role] || role
+}
+
+const getFilterPlaceholder = (filter) => {
+  const placeholders = {
+    'status': 'Selecione o status',
+    'role': 'Selecione a função',
+    'search': 'Digite para buscar...',
+    'type': 'Selecione o tipo',
+    'category': 'Selecione a categoria'
+  }
+  
+  // Return specific placeholder or generic one
+  return placeholders[filter.key] || `Selecione ${filter.label.toLowerCase()}`
 }
 
 const exportCSV = () => {
