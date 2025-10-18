@@ -1,58 +1,56 @@
 <template>
-  <div class="box">
+  <div class="box custom-box">
     <!-- Header -->
     <div class="box-header">
-      <div class="flex items-center justify-between">
-        <h5 class="box-title">{{ title }}</h5>
-        <div class="flex items-center gap-2">
-          <!-- Search -->
-          <div class="relative">
-            <input
-              v-model="searchQuery"
-              type="text"
-              placeholder="Buscar..."
-              class="ti-form-input"
-              @input="handleSearch"
-            />
-            <i class="bx bx-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-          </div>
+      <div class="flex items-center justify-between flex-wrap gap-4">
+        <div class="box-title">
+          {{ title }}
+          <span v-if="showCount" class="badge bg-light text-defaulttextcolor rounded-full ms-1 text-[0.75rem] align-middle">
+            {{ filteredData.length }}
+          </span>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <!-- Custom Header Actions Slot -->
+          <slot name="header-actions"></slot>
           
           <!-- Export Buttons -->
-          <div class="flex items-center gap-1">
-            <button 
-              @click="exportCSV"
-              class="ti-btn btn-wave ti-btn-outline-primary ti-btn-sm"
-              title="Exportar CSV"
-            >
-              <i class="bx bx-download"></i>
-            </button>
-            <button 
-              @click="exportExcel"
-              class="ti-btn btn-wave ti-btn-outline-success ti-btn-sm"
-              title="Exportar Excel"
-            >
-              <i class="bx bx-file"></i>
-            </button>
-          </div>
+          <button 
+            v-if="showExport"
+            @click="exportCSV"
+            class="ti-btn btn-wave ti-btn-success !py-1 !px-2 !text-[0.75rem] !m-0"
+          >
+            Exportar CSV
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- Body -->
-    <div class="box-body">
-      <!-- Filters -->
-      <div v-if="showFilters" class="mb-4">
+    <!-- Search and Filters -->
+    <div v-if="showFilters || showSearch" class="box-body !p-0 border-b border-defaultborder">
+      <div class="p-4">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <!-- Search -->
+          <div v-if="showSearch" class="md:col-span-2">
+            <div class="search-input-container">
+              <input
+                v-model="searchQuery"
+                type="text"
+                :placeholder="searchPlaceholder"
+                class="ti-form-input pr-4"
+                @input="handleSearch"
+              />
+              <i class="ri-search-line search-icon text-textmuted dark:text-textmuted text-sm"></i>
+            </div>
+          </div>
+          
+          <!-- Filters -->
           <div v-for="filter in filters" :key="filter.key">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {{ filter.label }}
-            </label>
             <select
               v-model="filterValues[filter.key]"
               @change="handleFilter"
               class="ti-form-select"
             >
-              <option value="">Todos</option>
+              <option value="">{{ filter.label || 'Todos' }}</option>
               <option v-for="option in filter.options" :key="option.value" :value="option.value">
                 {{ option.label }}
               </option>
@@ -60,42 +58,41 @@
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Table -->
-      <div class="overflow-auto table-bordered">
+    <!-- Table -->
+    <div class="box-body !p-0">
+      <div class="overflow-auto">
         <div class="ti-custom-table ti-striped-table ti-custom-table-hover">
           <table class="table whitespace-nowrap min-w-full">
             <thead>
               <tr class="border-b border-defaultborder">
+                <!-- Select All Checkbox -->
+                <th v-if="showSelectAll" scope="col" class="text-start">
+                  <input
+                    type="checkbox"
+                    :checked="selectAll"
+                    @change="handleSelectAll"
+                    class="form-check-input"
+                  >
+                </th>
+                
+                <!-- Column Headers -->
                 <th 
                   v-for="column in columns" 
                   :key="column.key"
                   scope="col" 
-                  class="text-start cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
-                  @click="handleSort(column.key)"
+                  class="text-start cursor-pointer"
+                  @click="column.sortable !== false ? handleSort(column.key) : null"
+                  :class="{ 'cursor-pointer': column.sortable !== false }"
                 >
                   <div class="flex items-center gap-2">
                     <span>{{ column.label }}</span>
-                    <div class="flex flex-col">
-                      <i 
-                        :class="[
-                          'bx bx-chevron-up text-xs',
-                          sortField === column.key && sortDirection === 'asc' 
-                            ? 'text-primary' 
-                            : 'text-gray-300 dark:text-gray-600'
-                        ]"
-                      ></i>
-                      <i 
-                        :class="[
-                          'bx bx-chevron-down text-xs -mt-1',
-                          sortField === column.key && sortDirection === 'desc' 
-                            ? 'text-primary' 
-                            : 'text-gray-300 dark:text-gray-600'
-                        ]"
-                      ></i>
-                    </div>
+                    <i v-if="column.sortable !== false" class="ri-arrow-up-down-line text-textmuted dark:text-textmuted"></i>
                   </div>
                 </th>
+                
+                <!-- Actions Column -->
                 <th v-if="hasActions" scope="col" class="text-start">Ações</th>
               </tr>
             </thead>
@@ -103,33 +100,74 @@
               <tr 
                 v-for="(row, rowIndex) in paginatedData" 
                 :key="row.id || rowIndex" 
-                class="border-b border-defaultborder hover:bg-gray-50 dark:hover:bg-gray-700"
+                class="crm-contact"
               >
-                <td v-for="column in columns" :key="column.key">
+                <!-- Select Row Checkbox -->
+                <td v-if="showSelectAll" class="text-start">
+                  <input
+                    type="checkbox"
+                    :checked="selectedItems.includes(row.id)"
+                    @change="toggleRowSelection(row.id)"
+                    class="form-check-input"
+                  >
+                </td>
+                
+                <!-- Data Cells -->
+                <td v-for="column in columns" :key="column.key" class="text-start">
                   <slot :name="`cell-${column.key}`" :value="getNestedValue(row, column.key)" :row="row" :column="column" :rowIndex="rowIndex">
-                    <!-- Default cell content -->
-                    <div v-if="column.type === 'avatar'">
-                      <div class="flex items-center">
-                        <div class="avatar avatar-sm me-2 avatar-rounded">
-                          <div 
-                            class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold"
-                          >
-                            {{ getInitials(getNestedValue(row, column.nameKey)) }}
+                    <!-- User Avatar Type -->
+                    <div v-if="column.type === 'user'">
+                      <div class="flex items-center gap-3">
+                        <div class="avatar avatar-sm avatar-rounded">
+                          <div class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                            {{ getInitials(getNestedValue(row, column.nameKey || 'name')) }}
                           </div>
                         </div>
-                        <div v-if="column.showInfo">
+                        <div>
                           <div class="leading-none">
-                            <span>{{ getNestedValue(row, column.nameKey) }}</span>
+                            <span class="font-semibold">{{ getNestedValue(row, column.nameKey || 'name') }}</span>
                           </div>
                           <div class="leading-none">
-                            <span class="text-[0.6875rem] text-[#8c9097] dark:text-white/50">
-                              {{ getNestedValue(row, column.emailKey) }}
+                            <span class="text-[0.6875rem] text-textmuted dark:text-textmuted">
+                              {{ getNestedValue(row, column.emailKey || 'email') }}
                             </span>
                           </div>
                         </div>
                       </div>
                     </div>
 
+                    <!-- Status Badge Type -->
+                    <div v-else-if="column.type === 'status'">
+                      <span 
+                        :class="[
+                          'badge',
+                          getStatusBadgeClass(getNestedValue(row, column.key))
+                        ]"
+                      >
+                        {{ getNestedValue(row, column.key) }}
+                      </span>
+                    </div>
+
+                    <!-- Role Badge Type -->
+                    <div v-else-if="column.type === 'role'">
+                      <span 
+                        :class="[
+                          'badge',
+                          getRoleBadgeClass(getNestedValue(row, column.key))
+                        ]"
+                      >
+                        {{ getRoleLabel(getNestedValue(row, column.key)) }}
+                      </span>
+                    </div>
+
+                    <!-- Date Type -->
+                    <div v-else-if="column.type === 'date'">
+                      <span class="text-textmuted dark:text-textmuted">
+                        {{ formatDate(getNestedValue(row, column.key)) }}
+                      </span>
+                    </div>
+
+                    <!-- Badge Type (Generic) -->
                     <div v-else-if="column.type === 'badge'">
                       <span 
                         :class="[
@@ -141,16 +179,13 @@
                       </span>
                     </div>
 
-                    <div v-else-if="column.type === 'date'">
-                      <span class="text-[#8c9097] dark:text-white/50">
-                        {{ formatDate(getNestedValue(row, column.key)) }}
-                      </span>
-                    </div>
-
+                    <!-- Default Text -->
                     <span v-else>{{ getNestedValue(row, column.key) }}</span>
                   </slot>
                 </td>
-                <td v-if="hasActions">
+                
+                <!-- Actions Column -->
+                <td v-if="hasActions" class="text-start">
                   <div class="flex items-center gap-2">
                     <button 
                       v-for="action in actions" 
@@ -171,9 +206,9 @@
               
               <!-- Empty State -->
               <tr v-if="filteredData.length === 0">
-                <td :colspan="columns.length + (hasActions ? 1 : 0)" class="text-center py-8">
-                  <div class="text-gray-500 dark:text-gray-400">
-                    <i class="bx bx-search text-4xl mb-2"></i>
+                <td :colspan="columns.length + (hasActions ? 1 : 0) + (showSelectAll ? 1 : 0)" class="text-center py-8">
+                  <div class="text-textmuted dark:text-textmuted">
+                    <i class="ri-search-line text-4xl mb-2"></i>
                     <p>Nenhum resultado encontrado</p>
                   </div>
                 </td>
@@ -184,62 +219,62 @@
       </div>
 
       <!-- Pagination -->
-      <div class="flex items-center justify-between mt-4">
-        <div class="flex items-center gap-4">
-          <div class="flex items-center gap-2">
-            <span class="text-sm text-gray-600 dark:text-gray-400">Mostrar</span>
-            <select
-              v-model="itemsPerPage"
-              @change="handleItemsPerPageChange"
-              class="ti-form-select ti-form-select-sm"
-            >
-              <option value="5">5</option>
-              <option value="10">10</option>
-              <option value="25">25</option>
-              <option value="50">50</option>
-              <option value="100">100</option>
-            </select>
+      <div class="box-body !p-0">
+        <div class="flex items-center justify-between p-4">
+          <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+              <select
+                v-model="itemsPerPage"
+                @change="handleItemsPerPageChange"
+                class="ti-form-select !py-1 !px-2 !text-[0.75rem] !m-0"
+              >
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+              </select>
+            </div>
+            
+            <div class="text-sm text-textmuted dark:text-textmuted">
+              Mostrando {{ startIndex }} até {{ endIndex }} de {{ filteredData.length }} resultados
+            </div>
           </div>
-          
-          <div class="text-sm text-gray-600 dark:text-gray-400">
-            Mostrando {{ startIndex }} até {{ endIndex }} de {{ filteredData.length }} resultados
-          </div>
-        </div>
 
-        <div class="flex items-center gap-2">
-          <button
-            @click="goToPage(currentPage - 1)"
-            :disabled="currentPage === 1"
-            class="ti-btn btn-wave ti-btn-outline-default ti-btn-sm"
-            :class="{ 'opacity-50 cursor-not-allowed': currentPage === 1 }"
-          >
-            <i class="bx bx-chevron-left"></i>
-          </button>
-          
-          <div class="flex items-center gap-1">
+          <div class="flex items-center gap-2">
             <button
-              v-for="page in visiblePages"
-              :key="page"
-              @click="goToPage(page)"
-              :class="[
-                'ti-btn btn-wave ti-btn-sm',
-                page === currentPage 
-                  ? 'ti-btn-primary' 
-                  : 'ti-btn-outline-default'
-              ]"
+              @click="goToPage(currentPage - 1)"
+              :disabled="currentPage === 1"
+              class="ti-btn btn-wave ti-btn-outline-default !py-1 !px-2 !text-[0.75rem] !m-0"
+              :class="{ 'opacity-50 cursor-not-allowed': currentPage === 1 }"
             >
-              {{ page }}
+              <i class="ri-arrow-left-s-line"></i>
+            </button>
+            
+            <div class="flex items-center gap-1">
+              <button
+                v-for="page in visiblePages"
+                :key="page"
+                @click="goToPage(page)"
+                :class="[
+                  'ti-btn btn-wave !py-1 !px-2 !text-[0.75rem] !m-0',
+                  page === currentPage 
+                    ? 'ti-btn-primary' 
+                    : 'ti-btn-outline-default'
+                ]"
+              >
+                {{ page }}
+              </button>
+            </div>
+            
+            <button
+              @click="goToPage(currentPage + 1)"
+              :disabled="currentPage === totalPages"
+              class="ti-btn btn-wave ti-btn-outline-default !py-1 !px-2 !text-[0.75rem] !m-0"
+              :class="{ 'opacity-50 cursor-not-allowed': currentPage === totalPages }"
+            >
+              <i class="ri-arrow-right-s-line"></i>
             </button>
           </div>
-          
-          <button
-            @click="goToPage(currentPage + 1)"
-            :disabled="currentPage === totalPages"
-            class="ti-btn btn-wave ti-btn-outline-default ti-btn-sm"
-            :class="{ 'opacity-50 cursor-not-allowed': currentPage === totalPages }"
-          >
-            <i class="bx bx-chevron-right"></i>
-          </button>
         </div>
       </div>
     </div>
@@ -273,10 +308,30 @@ const props = defineProps({
   showFilters: {
     type: Boolean,
     default: true
+  },
+  showSearch: {
+    type: Boolean,
+    default: true
+  },
+  showExport: {
+    type: Boolean,
+    default: true
+  },
+  showSelectAll: {
+    type: Boolean,
+    default: false
+  },
+  showCount: {
+    type: Boolean,
+    default: true
+  },
+  searchPlaceholder: {
+    type: String,
+    default: 'Buscar...'
   }
 })
 
-const emit = defineEmits(['action'])
+const emit = defineEmits(['action', 'selection-change'])
 
 // Reactive state
 const searchQuery = ref('')
@@ -285,6 +340,8 @@ const sortDirection = ref('asc')
 const currentPage = ref(1)
 const itemsPerPage = ref(10)
 const filterValues = ref({})
+const selectAll = ref(false)
+const selectedItems = ref([])
 
 // Initialize filter values
 props.filters.forEach(filter => {
@@ -433,6 +490,59 @@ const handleAction = (actionName, row, rowIndex) => {
   emit('action', { action: actionName, row, rowIndex })
 }
 
+const handleSelectAll = () => {
+  if (selectAll.value) {
+    selectedItems.value = paginatedData.value.map(row => row.id)
+  } else {
+    selectedItems.value = []
+  }
+  emit('selection-change', selectedItems.value)
+}
+
+const toggleRowSelection = (rowId) => {
+  const index = selectedItems.value.indexOf(rowId)
+  if (index > -1) {
+    selectedItems.value.splice(index, 1)
+  } else {
+    selectedItems.value.push(rowId)
+  }
+  
+  // Update select all state
+  selectAll.value = selectedItems.value.length === paginatedData.value.length
+  emit('selection-change', selectedItems.value)
+}
+
+// User-specific helper functions
+const getStatusBadgeClass = (status) => {
+  const statusMap = {
+    'Ativo': 'bg-success/10 text-success',
+    'Inativo': 'bg-danger/10 text-danger',
+    'Pendente': 'bg-warning/10 text-warning',
+    'Bloqueado': 'bg-danger/10 text-danger'
+  }
+  return statusMap[status] || 'bg-light text-defaulttextcolor'
+}
+
+const getRoleBadgeClass = (role) => {
+  const roleMap = {
+    'admin': 'bg-primary/10 text-primary',
+    'user': 'bg-success/10 text-success',
+    'moderator': 'bg-warning/10 text-warning',
+    'guest': 'bg-light text-defaulttextcolor'
+  }
+  return roleMap[role] || 'bg-light text-defaulttextcolor'
+}
+
+const getRoleLabel = (role) => {
+  const roleMap = {
+    'admin': 'Administrador',
+    'user': 'Usuário',
+    'moderator': 'Moderador',
+    'guest': 'Convidado'
+  }
+  return roleMap[role] || role
+}
+
 const exportCSV = () => {
   const headers = props.columns.map(col => col.label).join(',')
   const rows = filteredData.value.map(row => 
@@ -469,163 +579,221 @@ watch(() => props.data, () => {
 <style scoped>
 /* Ynex theme styles */
 .box {
-  @apply bg-white dark:bg-bodybg border border-defaultborder rounded-lg shadow-sm;
+  background-color: rgb(var(--default-background));
+  border-color: rgb(var(--bootstrap-card-border));
+}
+
+.custom-box {
+  background-color: rgb(var(--default-background));
+  border-color: rgb(var(--bootstrap-card-border));
 }
 
 .box-header {
-  @apply px-6 py-4 border-b border-defaultborder;
+  background-color: rgb(var(--default-background));
+  border-color: rgb(var(--bootstrap-card-border));
 }
 
 .box-title {
-  @apply text-lg font-semibold text-defaulttextcolor dark:text-defaulttextcolor/70;
-}
-
-.box-body {
-  @apply p-6;
+  color: rgb(var(--default-text-color));
 }
 
 .table {
-  @apply w-full text-sm text-left;
+  background-color: rgb(var(--default-background));
 }
 
 .table thead tr {
-  @apply bg-gray-50 dark:bg-gray-800;
+  background-color: rgb(var(--light));
 }
 
 .table th {
-  @apply px-6 py-3 font-medium text-gray-900 dark:text-white;
+  color: rgb(var(--default-text-color));
 }
 
 .table td {
-  @apply px-6 py-4 text-gray-700 dark:text-gray-300;
+  color: rgb(var(--default-text-color));
 }
 
-.table tbody tr:hover {
-  @apply bg-gray-50 dark:bg-gray-700/50;
+.table tbody tr:nth-child(even) {
+  background-color: rgb(var(--light));
 }
 
-.ti-custom-table {
-  @apply border border-defaultborder rounded-lg overflow-hidden;
+.crm-contact {
+  border-color: rgb(var(--bootstrap-card-border));
 }
 
-.ti-striped-table tbody tr:nth-child(even) {
-  @apply bg-gray-50/50 dark:bg-gray-800/50;
+.crm-contact:hover {
+  background-color: rgb(var(--list-hover-focus-bg));
 }
 
-.ti-custom-table-hover tbody tr:hover {
-  @apply bg-primary/5 dark:bg-primary/10;
-}
-
-.table-bordered {
-  @apply border border-defaultborder rounded-lg;
-}
-
-/* Form styles */
 .ti-form-input {
-  @apply w-full px-3 py-2 border border-defaultborder rounded-md bg-white dark:bg-bodybg text-defaulttextcolor dark:text-defaulttextcolor/70 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary;
+  background-color: rgb(var(--form-control-bg));
+  border-color: rgb(var(--input-border));
+  color: rgb(var(--default-text-color));
+}
+
+.ti-form-input:focus {
+  background-color: rgb(var(--form-control-bg));
+  border-color: rgb(var(--primary));
+  box-shadow: 0 0 0 2px rgba(132, 90, 223, 0.2);
 }
 
 .ti-form-select {
-  @apply w-full px-3 py-2 border border-defaultborder rounded-md bg-white dark:bg-bodybg text-defaulttextcolor dark:text-defaulttextcolor/70 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary;
+  background-color: rgb(var(--form-control-bg));
+  border-color: rgb(var(--input-border));
+  color: rgb(var(--default-text-color));
 }
 
-.ti-form-select-sm {
-  @apply px-2 py-1 text-sm;
+.ti-form-select:focus {
+  background-color: rgb(var(--form-control-bg));
+  border-color: rgb(var(--primary));
+  box-shadow: 0 0 0 2px rgba(132, 90, 223, 0.2);
 }
 
-/* Button styles */
-.ti-btn {
-  @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+.ti-btn-light {
+  background-color: rgb(var(--light));
+  border-color: rgb(var(--default-border));
+  color: rgb(var(--default-text-color));
 }
 
-.ti-btn-sm {
-  @apply px-3 py-1.5 text-xs;
+.ti-dropdown-item {
+  color: rgb(var(--default-text-color));
 }
 
-.ti-btn-primary {
-  @apply bg-primary text-white hover:bg-primary/90 focus:ring-primary;
+.bg-light {
+  background-color: rgb(var(--light));
 }
 
-.ti-btn-outline-primary {
-  @apply border border-primary text-primary hover:bg-primary hover:text-white focus:ring-primary;
+.form-check-input {
+  background-color: rgb(var(--form-control-bg));
+  border-color: rgb(var(--input-border));
 }
 
-.ti-btn-outline-success {
-  @apply border border-success text-success hover:bg-success hover:text-white focus:ring-success;
+.form-check-input:focus {
+  background-color: rgb(var(--form-control-bg));
+  border-color: rgb(var(--primary));
+  box-shadow: 0 0 0 2px rgba(132, 90, 223, 0.2);
 }
 
-.ti-btn-outline-default {
-  @apply border border-defaultborder text-defaulttextcolor dark:text-defaulttextcolor/70 hover:bg-gray-50 dark:hover:bg-gray-700 focus:ring-gray-500;
+/* Search input dark mode fixes */
+.dark .ti-form-input {
+  background-color: rgb(35 38 40) !important;
+  border-color: rgb(49 51 53) !important;
+  color: rgb(255 255 255) !important;
 }
 
-.btn-wave {
-  @apply relative overflow-hidden;
+.dark .ti-form-input::placeholder {
+  color: rgb(140 144 151) !important;
 }
 
-/* Badge styles */
-.badge {
-  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+.dark .ti-form-input:focus {
+  background-color: rgb(35 38 40) !important;
+  border-color: rgb(132 90 223) !important;
+  box-shadow: 0 0 0 2px rgba(132, 90, 223, 0.2) !important;
 }
 
-.bg-primary\/10 {
-  @apply bg-primary/10 text-primary;
+.dark .ti-form-select {
+  background-color: rgb(35 38 40) !important;
+  border-color: rgb(49 51 53) !important;
+  color: rgb(255 255 255) !important;
 }
 
-.bg-success\/10 {
-  @apply bg-success/10 text-success;
+.dark .ti-form-select:focus {
+  background-color: rgb(35 38 40) !important;
+  border-color: rgb(132 90 223) !important;
+  box-shadow: 0 0 0 2px rgba(132, 90, 223, 0.2) !important;
 }
 
-.bg-danger\/10 {
-  @apply bg-danger/10 text-danger;
+/* Search icon positioning fix */
+.search-input-container {
+  position: relative;
 }
 
-.bg-warning\/10 {
-  @apply bg-warning/10 text-warning;
+.search-input-container .search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 2;
 }
 
-/* Avatar styles */
-.avatar {
-  @apply relative inline-flex items-center justify-center;
+.search-input-container input {
+  padding-left: 40px !important;
 }
 
-.avatar-sm {
-  @apply w-8 h-8;
+/* Dark mode styles */
+.dark .box {
+  background-color: rgb(35 38 40) !important;
+  border-color: rgb(49 51 53) !important;
 }
 
-.avatar-rounded {
-  @apply rounded-full;
+.dark .custom-box {
+  background-color: rgb(35 38 40) !important;
+  border-color: rgb(49 51 53) !important;
 }
 
-/* Colors */
-.text-primary {
-  @apply text-primary;
+.dark .box-header {
+  background-color: rgb(35 38 40) !important;
+  border-color: rgb(49 51 53) !important;
 }
 
-.text-success {
-  @apply text-success;
+.dark .box-title {
+  color: rgb(255 255 255) !important;
 }
 
-.text-danger {
-  @apply text-danger;
+.dark .table {
+  background-color: rgb(35 38 40) !important;
 }
 
-.text-warning {
-  @apply text-warning;
+.dark .table thead tr {
+  background-color: rgb(43 46 49) !important;
 }
 
-.bg-primary {
-  @apply bg-primary;
+.dark .table th {
+  color: rgb(255 255 255) !important;
 }
 
-.bg-success {
-  @apply bg-success;
+.dark .table td {
+  color: rgb(255 255 255) !important;
 }
 
-.bg-danger {
-  @apply bg-danger;
+.dark .crm-contact {
+  border-color: rgb(49 51 53) !important;
 }
 
-.bg-warning {
-  @apply bg-warning;
+.dark .crm-contact:hover {
+  background-color: rgb(43 46 49) !important;
+}
+
+.dark .ti-dropdown-menu {
+  border-color: rgb(49 51 53) !important;
+}
+
+.dark .ti-btn-outline-default {
+  border-color: rgb(49 51 53) !important;
+}
+
+.dark .ti-btn-light {
+  background-color: rgb(43 46 49) !important;
+  border-color: rgb(49 51 53) !important;
+}
+
+.dark .ti-dropdown-item {
+  color: rgb(255 255 255) !important;
+}
+
+.dark .bg-light {
+  background-color: rgb(43 46 49) !important;
+}
+
+.dark .form-check-input {
+  background-color: rgb(35 38 40) !important;
+  border-color: rgb(49 51 53) !important;
+}
+
+.dark .form-check-input:focus {
+  background-color: rgb(35 38 40) !important;
+  border-color: rgb(132 90 223) !important;
+  box-shadow: 0 0 0 2px rgba(132, 90, 223, 0.2) !important;
 }
 </style>
