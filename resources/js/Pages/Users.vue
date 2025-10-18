@@ -47,28 +47,6 @@
               >
                 Exportar CSV
               </button>
-              <div class="hs-dropdown ti-dropdown">
-                <button 
-                  type="button"
-                  class="ti-btn btn-wave ti-btn-light !py-1 !px-2 !text-[0.75rem] !m-0"
-                  aria-expanded="false"
-                  @click="toggleSortDropdown"
-                >
-                  Ordenar Por
-                  <i class="ri-arrow-down-s-line align-middle ms-1 inline-block"></i>
-                </button>
-                <ul 
-                  :class="[
-                    'hs-dropdown-menu ti-dropdown-menu',
-                    showSortDropdown ? 'block' : 'hidden'
-                  ]"
-                  role="menu"
-                >
-                  <li><a class="ti-dropdown-item cursor-pointer" @click="sortBy('newest')">Mais Recente</a></li>
-                  <li><a class="ti-dropdown-item cursor-pointer" @click="sortBy('oldest')">Mais Antigo</a></li>
-                  <li><a class="ti-dropdown-item cursor-pointer" @click="sortBy('name')">A - Z</a></li>
-                </ul>
-              </div>
             </div>
           </div>
           
@@ -302,7 +280,6 @@
                     <option value="25">25</option>
                     <option value="50">50</option>
                   </select>
-                  <span class="text-sm text-textmuted dark:text-textmuted">itens por página</span>
                 </div>
                 
                 <div class="text-sm text-textmuted dark:text-textmuted">
@@ -396,7 +373,6 @@ const currentPage = ref(1)
 const itemsPerPage = ref(10)
 const selectAll = ref(false)
 const selectedUsers = ref([])
-const showSortDropdown = ref(false)
 
 // Modal states
 const showCreateModal = ref(false)
@@ -548,7 +524,6 @@ const sortBy = (field) => {
     sortDirection.value = 'asc'
   }
   currentPage.value = 1
-  showSortDropdown.value = false
 }
 
 const handleItemsPerPageChange = () => {
@@ -561,9 +536,6 @@ const goToPage = (page) => {
   }
 }
 
-const toggleSortDropdown = () => {
-  showSortDropdown.value = !showSortDropdown.value
-}
 
 const handleSelectAll = () => {
   if (selectAll.value) {
@@ -1099,4 +1071,5 @@ watch(selectedUsers, (newValue) => {
 .search-input-container input {
   padding-left: 40px !important;
 }
+
 </style>

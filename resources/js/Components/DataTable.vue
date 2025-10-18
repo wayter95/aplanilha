@@ -199,7 +199,6 @@
               <option value="50">50</option>
               <option value="100">100</option>
             </select>
-            <span class="text-sm text-gray-600 dark:text-gray-400">itens por página</span>
           </div>
           
           <div class="text-sm text-gray-600 dark:text-gray-400">
