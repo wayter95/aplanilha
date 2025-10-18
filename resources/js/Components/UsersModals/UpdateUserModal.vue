@@ -78,8 +78,6 @@
                 <option value="">Selecione um status</option>
                 <option value="Ativo">Ativo</option>
                 <option value="Inativo">Inativo</option>
-                <option value="Pendente">Pendente</option>
-                <option value="Bloqueado">Bloqueado</option>
               </select>
             </div>
           </div>
@@ -107,7 +105,10 @@
 </template>
 
 <script setup>
+import { usePage } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
+
+const page = usePage()
 
 const props = defineProps({
   show: {
@@ -133,12 +134,13 @@ const form = ref({
 // Watch for user changes to populate form
 watch(() => props.user, (newUser) => {
   if (newUser) {
+    console.log('User data:', newUser) // Debug log
     form.value = {
       name: newUser.name || '',
       email: newUser.email || '',
       password: '',
-      role: newUser.role || '',
-      status: newUser.status || ''
+      role: newUser.role || newUser.roles?.[0]?.name || '',
+      status: newUser.status || (newUser.is_active ? 'Ativo' : 'Inativo') || ''
     }
   }
 }, { immediate: true })
@@ -150,13 +152,20 @@ const updateUser = async () => {
   }
 
   try {
+    // Prepare data with status instead of is_active
+    const dataToSend = {
+      ...form.value,
+      // Convert status to is_active for backend
+      is_active: form.value.status === 'Ativo'
+    }
+
     const response = await fetch(`/api/users/${props.user.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        'X-CSRF-TOKEN': page.props.csrf_token
       },
-      body: JSON.stringify(form.value)
+      body: JSON.stringify(dataToSend)
     })
 
     const result = await response.json()

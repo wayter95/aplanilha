@@ -29,6 +29,7 @@ class User extends Authenticatable
         'password',
         'avatar_path',
         'is_master',
+        'is_active',
     ];
 
     /**

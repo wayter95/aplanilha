@@ -62,6 +62,7 @@ import CreateUserModal from '@/Components/UsersModals/CreateUserModal.vue'
 import DeleteUserModal from '@/Components/UsersModals/DeleteUserModal.vue'
 import UpdateUserModal from '@/Components/UsersModals/UpdateUserModal.vue'
 import AppLayout from '@/Layouts/AppLayout.vue'
+import { router } from '@inertiajs/vue3'
 import { ref } from 'vue'
 
 // Props from Inertia
@@ -93,13 +94,13 @@ const columns = [
     sortable: true
   },
   {
-    key: 'status',
+    key: 'is_active',
     label: 'Status',
     type: 'status',
     sortable: true
   },
   {
-    key: 'role',
+    key: 'roles[0].display_name',
     label: 'Função',
     type: 'role',
     sortable: true
@@ -177,20 +178,32 @@ const handleSelectionChange = (selectedItems) => {
 const handleUserCreated = () => {
   showCreateModal.value = false
   // Reload page to show updated data
-  window.location.reload()
+  router.visit('/users', {
+    method: 'get',
+    preserveState: false,
+    preserveScroll: false
+  })
 }
 
 const handleUserUpdated = () => {
   showUpdateModal.value = false
   selectedUser.value = null
   // Reload page to show updated data
-  window.location.reload()
+  router.visit('/users', {
+    method: 'get',
+    preserveState: false,
+    preserveScroll: false
+  })
 }
 
 const handleUserDeleted = () => {
   showDeleteModal.value = false
   selectedUser.value = null
   // Reload page to show updated data
-  window.location.reload()
+  router.visit('/users', {
+    method: 'get',
+    preserveState: false,
+    preserveScroll: false
+  })
 }
 </script>

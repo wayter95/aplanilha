@@ -38,13 +38,6 @@
               </a>
             </li>
 
-            <li class="slide">
-              <a href="/reports" class="side-menu__item" :class="{ 'active': $page.url.startsWith('/reports') }">
-                <i class="bx bx-bar-chart-alt-2 side-menu__icon"></i>
-                <span class="side-menu__label">Relatórios</span>
-              </a>
-            </li>
-
             <li class="slide__category"><span class="category-name">Configurações</span></li>
 
             <li class="slide">

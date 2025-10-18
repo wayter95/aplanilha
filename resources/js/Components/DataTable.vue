@@ -141,10 +141,10 @@
                       <span 
                         :class="[
                           'badge',
-                          getStatusBadgeClass(getNestedValue(row, column.key))
+                          getStatusBadgeClass(getStatusValue(row, column.key))
                         ]"
                       >
-                        {{ getNestedValue(row, column.key) }}
+                        {{ getStatusValue(row, column.key) }}
                       </span>
                     </div>
 
@@ -448,6 +448,14 @@ const getNestedValue = (obj, key) => {
   return key.split('.').reduce((acc, part) => acc && acc[part], obj)
 }
 
+const getStatusValue = (obj, key) => {
+  const value = getNestedValue(obj, key)
+  if (key === 'is_active') {
+    return value ? 'Ativo' : 'Inativo'
+  }
+  return value
+}
+
 const getInitials = (name) => {
   if (!name) return ''
   return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
@@ -524,22 +532,38 @@ const getStatusBadgeClass = (status) => {
 }
 
 const getRoleBadgeClass = (role) => {
+  if (!role) return 'bg-light text-defaulttextcolor'
+  
   const roleMap = {
     'admin': 'bg-primary/10 text-primary',
     'user': 'bg-success/10 text-success',
     'moderator': 'bg-warning/10 text-warning',
-    'guest': 'bg-light text-defaulttextcolor'
+    'guest': 'bg-light text-defaulttextcolor',
+    // Display names
+    'Administrador': 'bg-primary/10 text-primary',
+    'Usuário': 'bg-success/10 text-success',
+    'Moderador': 'bg-warning/10 text-warning',
+    'Convidado': 'bg-light text-defaulttextcolor'
   }
   return roleMap[role] || 'bg-light text-defaulttextcolor'
 }
 
 const getRoleLabel = (role) => {
+  if (!role) return 'N/A'
+  
   const roleMap = {
     'admin': 'Administrador',
     'user': 'Usuário',
     'moderator': 'Moderador',
     'guest': 'Convidado'
   }
+  
+  // If role is already a display name (like "Administrador"), return as is
+  if (Object.values(roleMap).includes(role)) {
+    return role
+  }
+  
+  // Otherwise, map the role name to display name
   return roleMap[role] || role
 }
 
