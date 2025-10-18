@@ -1,32 +1,11 @@
 <template>
-  <AppLayout title="Usuários" description="Gerenciar usuários do sistema">
-    <!-- Page Header -->
-    <div class="block justify-between page-header md:flex">
-      <div>
-        <h3 class="!text-defaulttextcolor dark:!text-white text-[1.125rem] font-semibold">
-          Usuários
-        </h3>
-      </div>
-      <ol class="flex items-center whitespace-nowrap min-w-0">
-        <li class="text-[0.813rem] ps-[0.5rem]">
-          <a class="flex items-center text-primary hover:text-primary dark:text-primary truncate" href="javascript:void(0);">
-            Sistema
-            <i class="ti ti-chevrons-right flex-shrink-0 text-textmuted dark:text-textmuted px-[0.5rem] overflow-visible rtl:rotate-180"></i>
-          </a>
-        </li>
-        <li class="text-[0.813rem] text-defaulttextcolor font-semibold hover:text-primary dark:text-white" aria-current="page">
-          Usuários
-        </li>
-      </ol>
-    </div>
-    <!-- Page Header Close -->
-
+  <AppLayout :title="'Usuários'" :description="'Gerenciar usuários do sistema'" :user="user">
     <!-- Start::row-1 -->
     <div class="grid grid-cols-12 gap-6">
       <div class="xl:col-span-12 col-span-12">
         <!-- DataTable Component -->
         <DataTable
-          title="Usuários"
+          title="Lista de Usuários"
           :data="users.data"
           :columns="columns"
           :actions="actions"
@@ -88,6 +67,10 @@ import { ref } from 'vue'
 // Props from Inertia
 const props = defineProps({
   users: {
+    type: Object,
+    required: true
+  },
+  user: {
     type: Object,
     required: true
   }

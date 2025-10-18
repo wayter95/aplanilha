@@ -6,6 +6,7 @@ use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 use Exception;
@@ -37,11 +38,13 @@ class UserController extends Controller
             return Inertia::render('Users', [
                 'users' => $users,
                 'filters' => $filters,
+                'user' => Auth::user(),
             ]);
         } catch (Exception $e) {
             return Inertia::render('Users', [
                 'users' => [],
                 'filters' => [],
+                'user' => Auth::user(),
                 'error' => 'Erro ao carregar usuários: ' . $e->getMessage(),
             ]);
         }
