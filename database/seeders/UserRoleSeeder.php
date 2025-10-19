@@ -8,19 +8,14 @@ use App\Models\ClientSubscribe;
 
 class UserRoleSeeder extends Seeder
 {
-    /**
-     * Run the database seeder.
-     */
     public function run(): void
     {
-        // Get the first client
         $client = ClientSubscribe::first();
         
         if (!$client) {
             return;
         }
 
-        // Create default roles
         $roles = [
             [
                 'client_id' => $client->id,

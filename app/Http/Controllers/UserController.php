@@ -20,9 +20,6 @@ class UserController extends Controller
         $this->userService = $userService;
     }
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request): Response|RedirectResponse
     {
         try {
@@ -53,9 +50,6 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request): JsonResponse
     {
         try {
@@ -82,9 +76,6 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id): Response|RedirectResponse
     {
         try {
@@ -102,9 +93,6 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id): Response
     {
         try {
@@ -129,9 +117,6 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id): JsonResponse
     {
         try {
@@ -158,9 +143,6 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id): JsonResponse
     {
         try {
@@ -178,9 +160,6 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * Toggle user status (active/inactive).
-     */
     public function toggleStatus(string $id): JsonResponse
     {
         try {
@@ -199,9 +178,6 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * Get user statistics.
-     */
     public function statistics(): JsonResponse
     {
         try {
@@ -219,9 +195,6 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * Get available roles.
-     */
     public function roles(): JsonResponse
     {
         try {
@@ -239,9 +212,6 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * Export users to CSV.
-     */
     public function exportCsv(Request $request): JsonResponse
     {
         try {
@@ -253,7 +223,6 @@ class UserController extends Controller
 
             $users = $this->userService->getAllUsersList($filters);
 
-            // Generate CSV content
             $csvContent = "ID,Nome,Email,Status,Função,Data de Criação\n";
             
             foreach ($users as $user) {

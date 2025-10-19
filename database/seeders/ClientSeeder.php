@@ -7,12 +7,8 @@ use App\Models\ClientSubscribe;
 
 class ClientSeeder extends Seeder
 {
-    /**
-     * Run the database seeder.
-     */
     public function run(): void
     {
-        // Create a default client for testing
         ClientSubscribe::create([
             'name' => 'Empresa Demo',
             'subdomain' => 'demo',

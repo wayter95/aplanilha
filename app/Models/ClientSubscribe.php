@@ -39,50 +39,32 @@ class ClientSubscribe extends Model
         ];
     }
 
-    /**
-     * Get the users that belong to the client.
-     */
     public function users(): HasMany
     {
         return $this->hasMany(User::class, 'client_id');
     }
 
-    /**
-     * Get the roles that belong to the client.
-     */
     public function roles(): HasMany
     {
         return $this->hasMany(UserRole::class, 'client_id');
     }
 
-    /**
-     * Get the permissions that belong to the client.
-     */
     public function permissions(): HasMany
     {
         return $this->hasMany(UserPermission::class, 'client_id');
     }
 
-    /**
-     * Scope a query to only include active clients.
-     */
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
     }
 
-    /**
-     * Scope a query to only include clients with active subscriptions.
-     */
     public function scopeWithActiveSubscription($query)
     {
         return $query->where('is_active', true)
                     ->where('subscription_end_date', '>', now());
     }
 
-    /**
-     * Check if the client has an active subscription.
-     */
     public function hasActiveSubscription(): bool
     {
         return $this->is_active && 
@@ -90,21 +72,15 @@ class ClientSubscribe extends Model
                $this->subscription_end_date->isFuture();
     }
 
-    /**
-     * Check if the client can add more users.
-     */
     public function canAddUser(): bool
     {
         if (!$this->max_users) {
-            return true; // Unlimited users
+            return true;
         }
 
         return $this->users()->count() < $this->max_users;
     }
 
-    /**
-     * Check if the client has a specific feature.
-     */
     public function hasFeature(string $feature): bool
     {
         if (!$this->features) {
@@ -114,9 +90,6 @@ class ClientSubscribe extends Model
         return in_array($feature, $this->features);
     }
 
-    /**
-     * Get the client's subscription status.
-     */
     public function getSubscriptionStatusAttribute(): string
     {
         if (!$this->is_active) {
@@ -138,21 +111,15 @@ class ClientSubscribe extends Model
         return 'active';
     }
 
-    /**
-     * Get the client's current user count.
-     */
     public function getCurrentUserCountAttribute(): int
     {
         return $this->users()->count();
     }
 
-    /**
-     * Get the client's usage percentage for users.
-     */
     public function getUserUsagePercentageAttribute(): float
     {
         if (!$this->max_users) {
-            return 0; // Unlimited users
+            return 0;
         }
 
         return ($this->current_user_count / $this->max_users) * 100;

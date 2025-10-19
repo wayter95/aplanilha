@@ -33,58 +33,37 @@ class UserPermission extends Model
         static::addGlobalScope(new TenantScope);
     }
 
-    /**
-     * Get the roles that belong to the permission.
-     */
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(UserRole::class, 'permission_role', 'permission_id', 'role_id')
                     ->withTimestamps();
     }
 
-    /**
-     * Get the client that owns the permission.
-     */
     public function client()
     {
         return $this->belongsTo(ClientSubscribe::class, 'client_id');
     }
 
-    /**
-     * Scope a query to only include active permissions.
-     */
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
     }
 
-    /**
-     * Scope a query to only include permissions for a specific client.
-     */
     public function scopeForClient($query, $clientId)
     {
         return $query->where('client_id', $clientId);
     }
 
-    /**
-     * Scope a query to only include permissions for a specific module.
-     */
     public function scopeForModule($query, $module)
     {
         return $query->where('module', $module);
     }
 
-    /**
-     * Scope a query to only include permissions for a specific action.
-     */
     public function scopeForAction($query, $action)
     {
         return $query->where('action', $action);
     }
 
-    /**
-     * Get the permission identifier (module.action).
-     */
     public function getIdentifierAttribute(): string
     {
         return $this->module . '.' . $this->action;

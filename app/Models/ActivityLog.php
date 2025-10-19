@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use App\Scopes\TenantScope;
+use Illuminate\Support\Facades\Auth;
 
 class ActivityLog extends Model
 {
@@ -40,41 +41,26 @@ class ActivityLog extends Model
         static::addGlobalScope(new TenantScope);
     }
 
-    /**
-     * Get the user that performed the action.
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    /**
-     * Get the client that owns the activity log.
-     */
     public function client(): BelongsTo
     {
         return $this->belongsTo(ClientSubscribe::class, 'client_id');
     }
 
-    /**
-     * Scope a query to only include logs for a specific user.
-     */
     public function scopeForUser($query, $userId)
     {
         return $query->where('user_id', $userId);
     }
 
-    /**
-     * Scope a query to only include logs for a specific action.
-     */
     public function scopeForAction($query, $action)
     {
         return $query->where('action', $action);
     }
 
-    /**
-     * Scope a query to only include logs for a specific model.
-     */
     public function scopeForModel($query, $modelType, $modelId = null)
     {
         $query = $query->where('model_type', $modelType);
@@ -86,17 +72,11 @@ class ActivityLog extends Model
         return $query;
     }
 
-    /**
-     * Scope a query to only include logs within a date range.
-     */
     public function scopeDateRange($query, $startDate, $endDate)
     {
         return $query->whereBetween('created_at', [$startDate, $endDate]);
     }
 
-    /**
-     * Get the model that was affected.
-     */
     public function model()
     {
         if ($this->model_type && $this->model_id) {
@@ -106,9 +86,6 @@ class ActivityLog extends Model
         return null;
     }
 
-    /**
-     * Create a new activity log entry.
-     */
     public static function createLog(
         string $action,
         string $description,
@@ -118,9 +95,11 @@ class ActivityLog extends Model
         ?array $oldValues = null,
         ?array $newValues = null
     ): self {
+        $user = Auth::user() ?? null;
+        
         return static::create([
-            'client_id' => auth()->user()?->client_id,
-            'user_id' => $userId ?? auth()->id(),
+            'client_id' => $user?->client_id,
+            'user_id' => $userId ?? $user?->id,
             'action' => $action,
             'description' => $description,
             'model_type' => $modelType,
@@ -132,9 +111,6 @@ class ActivityLog extends Model
         ]);
     }
 
-    /**
-     * Get formatted old values for display.
-     */
     public function getFormattedOldValuesAttribute(): ?string
     {
         if (!$this->old_values) {
@@ -144,9 +120,6 @@ class ActivityLog extends Model
         return json_encode($this->old_values, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     }
 
-    /**
-     * Get formatted new values for display.
-     */
     public function getFormattedNewValuesAttribute(): ?string
     {
         if (!$this->new_values) {

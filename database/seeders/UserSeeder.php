@@ -10,23 +10,17 @@ use App\Models\UserRole;
 
 class UserSeeder extends Seeder
 {
-    /**
-     * Run the database seeder.
-     */
     public function run(): void
     {
-        // Get the first client
         $client = ClientSubscribe::first();
         
         if (!$client) {
             return;
         }
 
-        // Get roles
         $adminRole = UserRole::where('name', 'admin')->first();
         $userRole = UserRole::where('name', 'user')->first();
 
-        // Create users
         $users = [
             [
                 'client_id' => $client->id,
@@ -68,7 +62,6 @@ class UserSeeder extends Seeder
             
             $user = User::create($userData);
             
-            // Assign role
             if ($roleId) {
                 $role = UserRole::find($roleId);
                 $user->assignRole($role);

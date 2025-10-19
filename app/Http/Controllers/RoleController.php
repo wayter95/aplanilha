@@ -19,10 +19,6 @@ class RoleController extends Controller
     {
         $this->roleService = $roleService;
     }
-
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request): Response|RedirectResponse
     {
         try {
@@ -52,9 +48,6 @@ class RoleController extends Controller
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request): JsonResponse
     {
         try {
@@ -82,9 +75,6 @@ class RoleController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id): Response|RedirectResponse
     {
         try {
@@ -102,9 +92,6 @@ class RoleController extends Controller
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id): Response
     {
         try {
@@ -129,9 +116,6 @@ class RoleController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id): JsonResponse
     {
         try {
@@ -159,9 +143,6 @@ class RoleController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id): JsonResponse
     {
         try {
@@ -179,9 +160,6 @@ class RoleController extends Controller
         }
     }
 
-    /**
-     * Toggle role status (active/inactive).
-     */
     public function toggleStatus(string $id): JsonResponse
     {
         try {
@@ -200,9 +178,6 @@ class RoleController extends Controller
         }
     }
 
-    /**
-     * Get role statistics.
-     */
     public function statistics(): JsonResponse
     {
         try {
@@ -220,9 +195,6 @@ class RoleController extends Controller
         }
     }
 
-    /**
-     * Get available permissions.
-     */
     public function permissions(): JsonResponse
     {
         try {
@@ -240,9 +212,6 @@ class RoleController extends Controller
         }
     }
 
-    /**
-     * Export roles to CSV.
-     */
     public function exportCsv(Request $request): JsonResponse
     {
         try {
@@ -253,7 +222,6 @@ class RoleController extends Controller
 
             $roles = $this->roleService->getAllRolesList($filters);
 
-            // Generate CSV content
             $csvContent = "ID,Nome,Display Name,Descrição,Status,Data de Criação\n";
             
             foreach ($roles as $role) {
