@@ -1,13 +1,24 @@
 <template>
-  <Modal :show="show" @close="closeModal" max-width="md">
-    <div class="box-header">
-      <h6 class="box-title">Criar Nova Função</h6>
-      <button @click="closeModal" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-        <i class="ri-close-line text-lg"></i>
-      </button>
-    </div>
-    <div class="box-body">
-      <form @submit.prevent="createRole">
+  <div v-if="show" class="fixed inset-0 z-50 overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+      <!-- Backdrop -->
+      <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" @click="closeModal"></div>
+
+      <!-- Modal -->
+      <div class="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-800 shadow-xl rounded-lg">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+            Criar Nova Função
+          </h3>
+          <button @click="closeModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+            <i class="ri-close-line text-xl"></i>
+          </button>
+        </div>
+
+        <!-- Form -->
+        <form @submit.prevent="createRole">
+          <div class="space-y-4">
         <Input
           id="create-role-name"
           v-model="form.name"
@@ -68,21 +79,22 @@
           </div>
         </div>
         
-        <div class="flex justify-end gap-2">
-          <button type="button" @click="closeModal" class="ti-btn ti-btn-light">Cancelar</button>
-          <button type="submit" class="ti-btn ti-btn-primary" :disabled="form.processing">
-            <span v-if="form.processing" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            Criar
-          </button>
-        </div>
-      </form>
+            <div class="flex justify-end gap-2 mt-6">
+              <button type="button" @click="closeModal" class="ti-btn ti-btn-light">Cancelar</button>
+              <button type="submit" class="ti-btn ti-btn-primary" :disabled="form.processing">
+                <span v-if="form.processing" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                Criar
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
-  </Modal>
+  </div>
 </template>
 
 <script setup>
 import Input from '@/Components/Input.vue'
-import Modal from '@/Components/Modal.vue'
 import { usePage } from '@inertiajs/vue3'
 import { ref } from 'vue'
 
