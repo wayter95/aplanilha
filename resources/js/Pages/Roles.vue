@@ -1,9 +1,7 @@
 <template>
   <AppLayout :title="'Funções'" :description="'Gerenciar funções do sistema'" :user="user">
-    <!-- Start::row-1 -->
     <div class="grid grid-cols-12 gap-6">
       <div class="xl:col-span-12 col-span-12">
-        <!-- DataTable Component -->
         <DataTable
           title="Lista de Funções"
           :data="roles.data"
@@ -23,7 +21,6 @@
           @filter-change="handleFilterChange"
           @search-change="handleSearchChange"
         >
-          <!-- Custom Header Actions -->
           <template #header-actions>
             <button 
               @click="showCreateModal = true"
@@ -36,9 +33,6 @@
         </DataTable>
       </div>
     </div>
-    <!-- End::row-1 -->
-
-    <!-- Modals -->
     <CreateRoleModal 
       :show="showCreateModal" 
       :available-permissions="availablePermissions"
@@ -72,7 +66,6 @@ import AppLayout from '@/Layouts/AppLayout.vue'
 import { router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 
-// Props from Inertia
 const props = defineProps({
   roles: {
     type: Object,
@@ -92,13 +85,11 @@ const props = defineProps({
   }
 })
 
-// Modal states
 const showCreateModal = ref(false)
 const showUpdateModal = ref(false)
 const showDeleteModal = ref(false)
 const selectedRole = ref(null)
 
-// Table configuration
 const columns = [
   {
     key: 'name',
@@ -157,7 +148,6 @@ const actions = [
   }
 ]
 
-// Dynamic filters based on backend data
 const filterOptions = computed(() => [
   {
     key: 'status',
@@ -169,11 +159,9 @@ const filterOptions = computed(() => [
   }
 ])
 
-// Store current filters and search (initialize with backend values)
 const currentFilters = ref({ ...props.filters })
 const currentSearch = ref(props.filters.search || '')
 
-// Event handlers
 const handleAction = ({ action, row }) => {
   selectedRole.value = row
   
@@ -188,21 +176,15 @@ const handleAction = ({ action, row }) => {
 }
 
 const handleSelectionChange = (selectedItems) => {
-  console.log('Selected items:', selectedItems)
   // Handle bulk actions here
 }
 
 const handleFilterChange = (filters) => {
-  console.log('Filter changed:', filters)
-  console.log('Current filters before update:', currentFilters.value)
-  // Update current filters with new values
   currentFilters.value = { ...filters }
-  console.log('Current filters after update:', currentFilters.value)
   reloadWithFilters()
 }
 
 const handleSearchChange = (searchQuery) => {
-  console.log('Search changed:', searchQuery)
   currentSearch.value = searchQuery
   reloadWithFilters()
 }
@@ -213,16 +195,12 @@ const reloadWithFilters = () => {
     search: currentSearch.value
   }
   
-  console.log('Query params before cleanup:', queryParams)
-  
-  // Remove empty values
   Object.keys(queryParams).forEach(key => {
     if (!queryParams[key] || queryParams[key] === '') {
       delete queryParams[key]
     }
   })
   
-  console.log('Final query params:', queryParams)
   
   router.visit('/roles', {
     method: 'get',
@@ -234,7 +212,6 @@ const reloadWithFilters = () => {
 
 const handleRoleCreated = () => {
   showCreateModal.value = false
-  // Reload page to show updated data
   router.visit('/roles', {
     method: 'get',
     preserveState: false,
@@ -245,7 +222,6 @@ const handleRoleCreated = () => {
 const handleRoleUpdated = () => {
   showUpdateModal.value = false
   selectedRole.value = null
-  // Reload page to show updated data
   router.visit('/roles', {
     method: 'get',
     preserveState: false,
@@ -256,7 +232,6 @@ const handleRoleUpdated = () => {
 const handleRoleDeleted = () => {
   showDeleteModal.value = false
   selectedRole.value = null
-  // Reload page to show updated data
   router.visit('/roles', {
     method: 'get',
     preserveState: false,

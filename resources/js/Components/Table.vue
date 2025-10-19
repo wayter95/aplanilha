@@ -29,7 +29,6 @@
               :column="column"
               :rowIndex="rowIndex"
             >
-              <!-- Default cell content -->
               <div v-if="column.type === 'avatar'">
                 <div class="flex items-center">
                   <div class="avatar avatar-sm me-2 avatar-rounded">
@@ -119,7 +118,6 @@
       </tbody>
     </table>
 
-    <!-- Empty State -->
     <div v-if="!data || data.length === 0" class="text-center py-8">
       <div class="text-gray-500 dark:text-gray-400">
         <i class="bx bx-table text-4xl mb-2"></i>
@@ -130,7 +128,6 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
 
 const props = defineProps({
   columns: {
@@ -156,7 +153,6 @@ const props = defineProps({
 
 const emit = defineEmits(['action'])
 
-// Helper function to get nested object values
 const getNestedValue = (obj, path) => {
   if (!path) return ''
   return path.split('.').reduce((current, key) => {
@@ -164,7 +160,6 @@ const getNestedValue = (obj, path) => {
   }, obj)
 }
 
-// Helper function to get user initials
 const getInitials = (name) => {
   if (!name) return '?'
   return name
@@ -175,7 +170,6 @@ const getInitials = (name) => {
     .slice(0, 2)
 }
 
-// Helper function to get badge classes
 const getBadgeClass = (value, badgeOptions = {}) => {
   if (typeof badgeOptions === 'function') {
     return badgeOptions(value)
@@ -185,7 +179,6 @@ const getBadgeClass = (value, badgeOptions = {}) => {
     return badgeOptions[value]
   }
 
-  // Default badge classes
   const defaultClasses = {
     'Ativo': 'bg-success/10 text-success',
     'Inativo': 'bg-danger/10 text-danger',
@@ -196,7 +189,6 @@ const getBadgeClass = (value, badgeOptions = {}) => {
   return defaultClasses[value] || 'bg-primary/10 text-primary'
 }
 
-// Helper function to get row classes
 const getRowClass = (row, rowIndex) => {
   if (typeof props.rowClass === 'function') {
     return props.rowClass(row, rowIndex)
@@ -204,14 +196,12 @@ const getRowClass = (row, rowIndex) => {
   return props.rowClass || ''
 }
 
-// Handle action clicks
 const handleAction = (actionName, row, rowIndex) => {
   emit('action', { action: actionName, row, rowIndex })
 }
 </script>
 
 <style scoped>
-/* Table styles based on Ynex theme */
 .table {
   width: 100%;
   font-size: 0.875rem;
@@ -266,7 +256,6 @@ const handleAction = (actionName, row, rowIndex) => {
   color: white;
 }
 
-/* Avatar styles */
 .avatar {
   position: relative;
   display: inline-flex;
@@ -290,7 +279,6 @@ const handleAction = (actionName, row, rowIndex) => {
   border-radius: 50%;
 }
 
-/* Badge styles */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -364,7 +352,6 @@ const handleAction = (actionName, row, rowIndex) => {
   color: #bfdbfe;
 }
 
-/* Progress bar styles */
 .progress {
   width: 100%;
   background-color: #e5e7eb;
@@ -387,7 +374,6 @@ const handleAction = (actionName, row, rowIndex) => {
   transition: all 0.3s ease;
 }
 
-/* Avatar list styles */
 .avatar-list-stacked {
   display: flex;
   margin-left: -0.5rem;
@@ -401,7 +387,6 @@ const handleAction = (actionName, row, rowIndex) => {
   border-color: #1f2937;
 }
 
-/* Button styles */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -465,7 +450,6 @@ const handleAction = (actionName, row, rowIndex) => {
   background-color: #15803d;
 }
 
-/* Border styles */
 .border-defaultborder {
   border-color: #e5e7eb;
 }
@@ -474,7 +458,6 @@ const handleAction = (actionName, row, rowIndex) => {
   border-color: #374151;
 }
 
-/* Text colors */
 .text-\[\#8c9097\] {
   color: #8c9097;
 }

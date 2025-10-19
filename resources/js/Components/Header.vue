@@ -3,9 +3,7 @@
     <nav class="main-header !h-[3.75rem]" aria-label="Global">
       <div class="main-header-container ps-[0.725rem] pe-[1rem]">
         
-        <!-- Start::header-content-left -->
         <div class="header-content-left">
-          <!-- Start::header-element -->
           <div class="header-element">
             <div class="horizontal-logo">
               <a href="/" class="header-logo">
@@ -13,11 +11,8 @@
               </a>
             </div>
           </div>
-          <!-- End::header-element -->
           
-          <!-- Start::header-element -->
           <div class="header-element md:px-[0.325rem] !items-center">
-            <!-- Start::header-link -->
             <a 
               aria-label="Hide Sidebar"
               class="sidemenu-toggle animated-arrow hor-toggle horizontal-navtoggle inline-flex items-center" 
@@ -26,16 +21,11 @@
             >
               <span></span>
             </a>
-            <!-- End::header-link -->
           </div>
-          <!-- End::header-element -->
         </div>
-        <!-- End::header-content-left -->
 
-        <!-- Start::header-content-right -->
         <div class="header-content-right">
 
-          <!-- Light and Dark Theme -->
           <div class="header-element header-theme-mode hidden !items-center sm:block !py-[1rem] md:!px-[0.65rem] px-2">
             <button 
               v-if="isLight"
@@ -54,9 +44,7 @@
               <i class="bx bx-sun text-lg"></i>
             </button>
           </div>
-          <!-- End Light and Dark Theme -->
 
-          <!-- Header Notifications -->
           <div class="header-element py-[1rem] md:px-[0.65rem] px-2 notifications-dropdown header-notification !hidden md:!block">
             <button 
               @click="toggleNotifications"
@@ -164,9 +152,7 @@
               </div>
             </div>
           </div>
-          <!-- End Header Notifications -->
 
-          <!-- Fullscreen -->
           <div class="header-element header-fullscreen py-[1rem] md:px-[0.65rem] px-2">
             <button 
               @click="toggleFullscreen"
@@ -177,9 +163,7 @@
               <i v-else class="bx bx-exit-fullscreen text-lg"></i>
             </button>
           </div>
-          <!-- End Fullscreen -->
 
-          <!-- Header Profile -->
           <div class="header-element md:!px-[0.65rem] px-2 !items-center relative user-dropdown">
             <button 
               @click="toggleUserMenu"
@@ -219,10 +203,8 @@
               </ul>
             </div>
           </div>
-          <!-- End Header Profile -->
 
         </div>
-        <!-- End::header-content-right -->
       </div>
     </nav>
   </header>
@@ -241,14 +223,12 @@ const props = defineProps({
 
 const emit = defineEmits(['toggle-sidebar'])
 
-// Estado local simples
 const showNotifications = ref(false)
 const showUserMenu = ref(false)
 const isFullscreen = ref(false)
 const isDark = ref(false)
 const isLight = ref(false)
 
-// Funções simples
 const toggleNotifications = () => {
   showNotifications.value = !showNotifications.value
   if (showNotifications.value) {
@@ -287,7 +267,6 @@ const toggleTheme = () => {
     html.classList.remove('dark')
   }
   
-  // Salvar no localStorage
   if (typeof localStorage !== 'undefined') {
     localStorage.setItem('app-theme', isDark.value ? 'dark' : 'light')
   }
@@ -305,7 +284,6 @@ const toggleSidebarCollapse = () => {
     htmlElement.classList.add('sidebar-collapsed')
   }
   
-  // Salvar no localStorage
   if (typeof localStorage !== 'undefined') {
     localStorage.setItem('sidebar-collapsed', (!isCollapsed).toString())
   }
@@ -315,7 +293,6 @@ const logout = () => {
   router.post('/logout')
 }
 
-// Função para mostrar apenas primeiro e segundo nome
 const getDisplayName = (fullName) => {
   if (!fullName) return 'Usuário'
   
@@ -324,11 +301,9 @@ const getDisplayName = (fullName) => {
     return fullName
   }
   
-  // Retorna apenas primeiro e segundo nome
   return `${nameParts[0]} ${nameParts[1]}`
 }
 
-// Fechar dropdowns ao clicar fora
 const handleClickOutside = (event) => {
   if (!event.target.closest('.header-profile-dropdown') && !event.target.closest('.header-link-icon')) {
     showUserMenu.value = false
@@ -336,7 +311,6 @@ const handleClickOutside = (event) => {
   }
 }
 
-// Inicializar tema
 onMounted(() => {
   if (typeof localStorage !== 'undefined' && typeof document !== 'undefined') {
     const savedTheme = localStorage.getItem('app-theme')
@@ -349,10 +323,8 @@ onMounted(() => {
       isLight.value = true
     }
     
-    // Verificar fullscreen
-    isFullscreen.value = !!document.fullscreenElement
+      isFullscreen.value = !!document.fullscreenElement
     
-    // Inicializar sidebar state
     const savedSidebarState = localStorage.getItem('sidebar-collapsed')
     if (savedSidebarState === 'true') {
       document.documentElement.classList.add('sidebar-collapsed')
@@ -364,7 +336,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Header Link Icon Styles - Tema Ynex */
 .header-link-icon {
   transition: all 0.15s ease-in-out;
 }
@@ -377,7 +348,6 @@ onMounted(() => {
   transform: translateY(0);
 }
 
-/* Avatar Styles */
 .user-avatar {
   width: 2rem;
   height: 2rem;
@@ -394,9 +364,8 @@ onMounted(() => {
   flex-shrink: 0;
 }
 
-/* Profile Dropdown Styles */
 .dropdown-profile {
-  margin-left: 0.75rem; /* Espaçamento entre avatar e texto */
+  margin-left: 0.75rem;
 }
 
 .user-dropdown {

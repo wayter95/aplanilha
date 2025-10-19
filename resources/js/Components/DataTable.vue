@@ -1,6 +1,5 @@
 <template>
   <div class="box custom-box">
-    <!-- Header -->
     <div class="box-header">
       <div class="flex items-center justify-between flex-wrap gap-4">
         <div class="box-title">
@@ -10,10 +9,8 @@
           </span>
         </div>
         <div class="flex flex-wrap gap-2">
-          <!-- Custom Header Actions Slot -->
           <slot name="header-actions"></slot>
           
-          <!-- Export Buttons -->
           <button 
             v-if="showExport"
             @click="exportCSV"
@@ -25,11 +22,9 @@
       </div>
     </div>
 
-    <!-- Search and Filters -->
     <div v-if="showFilters || showSearch" class="box-body !p-0 border-b border-defaultborder">
       <div class="p-4">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <!-- Search -->
           <div v-if="showSearch" class="md:col-span-2">
             <div class="search-input-container">
               <input
@@ -43,7 +38,6 @@
             </div>
           </div>
           
-          <!-- Filters -->
           <div v-for="filter in filters" :key="filter.key">
             <select
               v-model="filterValues[filter.key]"
@@ -60,14 +54,12 @@
       </div>
     </div>
 
-    <!-- Table -->
     <div class="box-body !p-0">
       <div class="overflow-auto">
         <div class="ti-custom-table ti-striped-table ti-custom-table-hover">
           <table class="table whitespace-nowrap min-w-full">
             <thead>
               <tr class="border-b border-defaultborder">
-                <!-- Select All Checkbox -->
                 <th v-if="showSelectAll" scope="col" class="text-start">
                   <input
                     type="checkbox"
@@ -77,7 +69,6 @@
                   >
                 </th>
                 
-                <!-- Column Headers -->
                 <th 
                   v-for="column in columns" 
                   :key="column.key"
@@ -92,7 +83,6 @@
                   </div>
                 </th>
                 
-                <!-- Actions Column -->
                 <th v-if="hasActions" scope="col" class="text-start">Ações</th>
               </tr>
             </thead>
@@ -102,7 +92,6 @@
                 :key="row.id || rowIndex" 
                 class="crm-contact"
               >
-                <!-- Select Row Checkbox -->
                 <td v-if="showSelectAll" class="text-start">
                   <input
                     type="checkbox"
@@ -112,10 +101,8 @@
                   >
                 </td>
                 
-                <!-- Data Cells -->
                 <td v-for="column in columns" :key="column.key" class="text-start">
                   <slot :name="`cell-${column.key}`" :value="getNestedValue(row, column.key)" :row="row" :column="column" :rowIndex="rowIndex">
-                    <!-- User Avatar Type -->
                     <div v-if="column.type === 'user'">
                       <div class="flex items-center gap-3">
                         <div class="avatar avatar-sm avatar-rounded">
@@ -136,7 +123,6 @@
                       </div>
                     </div>
 
-                    <!-- Status Badge Type -->
                     <div v-else-if="column.type === 'status'">
                       <span 
                         :class="[
@@ -148,7 +134,6 @@
                       </span>
                     </div>
 
-                    <!-- Role Badge Type -->
                     <div v-else-if="column.type === 'role'">
                       <span 
                         :class="[
@@ -160,14 +145,12 @@
                       </span>
                     </div>
 
-                    <!-- Date Type -->
                     <div v-else-if="column.type === 'date'">
                       <span class="text-textmuted dark:text-textmuted">
                         {{ formatDate(getNestedValue(row, column.key)) }}
                       </span>
                     </div>
 
-                    <!-- Badge Type (Generic) -->
                     <div v-else-if="column.type === 'badge'">
                       <span 
                         :class="[
@@ -179,19 +162,16 @@
                       </span>
                     </div>
 
-                    <!-- Permissions Count Type -->
                     <div v-else-if="column.type === 'permissions_count'">
                       <span class="badge bg-info/10 text-info">
                         {{ getNestedValue(row, column.key)?.length || 0 }} permissões
                       </span>
                     </div>
 
-                    <!-- Default Text -->
                     <span v-else>{{ getNestedValue(row, column.key) }}</span>
                   </slot>
                 </td>
                 
-                <!-- Actions Column -->
                 <td v-if="hasActions" class="text-start">
                   <div class="flex items-center gap-2">
                     <button 
@@ -211,7 +191,6 @@
                 </td>
               </tr>
               
-              <!-- Empty State -->
               <tr v-if="filteredData.length === 0">
                 <td :colspan="columns.length + (hasActions ? 1 : 0) + (showSelectAll ? 1 : 0)" class="text-center py-8">
                   <div class="text-textmuted dark:text-textmuted">
@@ -225,7 +204,6 @@
         </div>
       </div>
 
-      <!-- Pagination -->
       <div class="box-body !p-0">
         <div class="flex items-center justify-between p-4">
           <div class="flex items-center gap-4">
@@ -362,22 +340,18 @@ const filterValues = ref({ ...props.initialFilters })
 const selectAll = ref(false)
 const selectedItems = ref([])
 
-// Initialize filter values (only if not already set)
 props.filters.forEach(filter => {
   if (!filterValues.value.hasOwnProperty(filter.key)) {
     filterValues.value[filter.key] = ''
   }
 })
 
-// Computed properties
 const hasActions = computed(() => props.actions.length > 0)
 
 const filteredData = computed(() => {
   let result = [...props.data]
 
-  // If server-side filtering is enabled, don't filter locally
   if (props.serverSideFiltering) {
-    // Only apply sorting locally
     if (sortField.value) {
       result.sort((a, b) => {
         const aVal = getNestedValue(a, sortField.value)
@@ -389,7 +363,6 @@ const filteredData = computed(() => {
     return result
   }
 
-  // Apply search
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
     result = result.filter(row => {
@@ -400,7 +373,6 @@ const filteredData = computed(() => {
     })
   }
 
-  // Apply filters
   props.filters.forEach(filter => {
     const filterValue = filterValues.value[filter.key]
     if (filterValue) {
@@ -411,7 +383,6 @@ const filteredData = computed(() => {
     }
   })
 
-  // Apply sorting
   if (sortField.value) {
     result.sort((a, b) => {
       const aValue = getNestedValue(a, sortField.value)
@@ -478,12 +449,10 @@ const visiblePages = computed(() => {
   return pages
 })
 
-// Methods
 const getNestedValue = (obj, key) => {
   return key.split('.').reduce((acc, part) => {
     if (!acc) return acc
     
-    // Handle array indices like "roles[0]"
     if (part.includes('[') && part.includes(']')) {
       const arrayName = part.substring(0, part.indexOf('['))
       const index = parseInt(part.substring(part.indexOf('[') + 1, part.indexOf(']')))
@@ -563,12 +532,10 @@ const toggleRowSelection = (rowId) => {
     selectedItems.value.push(rowId)
   }
   
-  // Update select all state
   selectAll.value = selectedItems.value.length === paginatedData.value.length
   emit('selection-change', selectedItems.value)
 }
 
-// User-specific helper functions
 const getStatusBadgeClass = (status) => {
   const statusMap = {
     'Ativo': 'bg-success/10 text-success',
@@ -587,7 +554,6 @@ const getRoleBadgeClass = (role) => {
     'user': 'bg-success/10 text-success',
     'moderator': 'bg-warning/10 text-warning',
     'guest': 'bg-light text-defaulttextcolor',
-    // Display names
     'Administrador': 'bg-primary/10 text-primary',
     'Usuário': 'bg-success/10 text-success',
     'Moderador': 'bg-warning/10 text-warning',
@@ -606,12 +572,10 @@ const getRoleLabel = (role) => {
     'guest': 'Convidado'
   }
   
-  // If role is already a display name (like "Administrador"), return as is
   if (Object.values(roleMap).includes(role)) {
     return role
   }
   
-  // Otherwise, map the role name to display name
   return roleMap[role] || role
 }
 
@@ -624,7 +588,6 @@ const getFilterPlaceholder = (filter) => {
     'category': 'Selecione a categoria'
   }
   
-  // Return specific placeholder or generic one
   return placeholders[filter.key] || `Selecione ${filter.label.toLowerCase()}`
 }
 
@@ -639,7 +602,6 @@ const exportCSV = () => {
 }
 
 const exportExcel = () => {
-  // Simple CSV export as Excel (for now)
   exportCSV()
 }
 
@@ -655,14 +617,12 @@ const downloadFile = (content, filename, mimeType) => {
   URL.revokeObjectURL(url)
 }
 
-// Watch for data changes
 watch(() => props.data, () => {
   currentPage.value = 1
 })
 </script>
 
 <style scoped>
-/* Ynex theme styles */
 .box {
   background-color: rgb(var(--default-background));
   border-color: rgb(var(--bootstrap-card-border));

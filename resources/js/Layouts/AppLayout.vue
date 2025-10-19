@@ -1,12 +1,10 @@
 <template>
   <div class="page">
-    <!-- HEADER -->
     <Header 
       :user="user" 
       @toggle-sidebar="toggleSidebar"
     />
 
-    <!-- SIDEBAR -->
     <aside :class="['app-sidebar', { 'sidebar-open': sidebarOpen }]" id="sidebar">
       <div class="main-sidebar-header">
         <a href="/" class="header-logo">
@@ -58,7 +56,6 @@
       </div>
     </aside>
 
-    <!-- MAIN-CONTENT -->
     <div :class="['content', { 'sidebar-open': sidebarOpen }]">
       <div class="main-content">
         <div class="container-fluid">
@@ -74,7 +71,6 @@
       </div>
     </div>
 
-    <!-- Overlay for mobile -->
     <div 
       v-if="sidebarOpen" 
       @click="closeSidebar"

@@ -1,9 +1,7 @@
 <template>
   <AppLayout :title="'Usuários'" :description="'Gerenciar usuários do sistema'" :user="user">
-    <!-- Start::row-1 -->
     <div class="grid grid-cols-12 gap-6">
       <div class="xl:col-span-12 col-span-12">
-        <!-- DataTable Component -->
         <DataTable
           title="Lista de Usuários"
           :data="users.data"
@@ -23,7 +21,6 @@
           @filter-change="handleFilterChange"
           @search-change="handleSearchChange"
         >
-          <!-- Custom Header Actions -->
           <template #header-actions>
             <button 
               @click="showCreateModal = true"
@@ -36,9 +33,6 @@
         </DataTable>
       </div>
     </div>
-    <!-- End::row-1 -->
-
-    <!-- Modals -->
     <CreateUserModal 
       :show="showCreateModal" 
       :available-roles="availableRoles"
@@ -72,7 +66,6 @@ import AppLayout from '@/Layouts/AppLayout.vue'
 import { router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 
-// Props from Inertia
 const props = defineProps({
   users: {
     type: Object,
@@ -92,13 +85,11 @@ const props = defineProps({
   }
 })
 
-// Modal states
 const showCreateModal = ref(false)
 const showUpdateModal = ref(false)
 const showDeleteModal = ref(false)
 const selectedUser = ref(null)
 
-// Table configuration
 const columns = [
   {
     key: 'name',
@@ -148,7 +139,6 @@ const actions = [
   }
 ]
 
-// Dynamic filters based on backend data
 const filterOptions = computed(() => [
   {
     key: 'status',
@@ -168,7 +158,6 @@ const filterOptions = computed(() => [
   }
 ])
 
-// Event handlers
 const handleAction = ({ action, row }) => {
   selectedUser.value = row
   
@@ -183,25 +172,18 @@ const handleAction = ({ action, row }) => {
 }
 
 const handleSelectionChange = (selectedItems) => {
-  console.log('Selected items:', selectedItems)
   // Handle bulk actions here
 }
 
-// Store current filters and search (initialize with backend values)
 const currentFilters = ref({ ...props.filters })
 const currentSearch = ref(props.filters.search || '')
 
 const handleFilterChange = (filters) => {
-  console.log('Filter changed:', filters)
-  console.log('Current filters before update:', currentFilters.value)
-  // Update current filters with new values
   currentFilters.value = { ...filters }
-  console.log('Current filters after update:', currentFilters.value)
   reloadWithFilters()
 }
 
 const handleSearchChange = (searchQuery) => {
-  console.log('Search changed:', searchQuery)
   currentSearch.value = searchQuery
   reloadWithFilters()
 }
@@ -212,16 +194,11 @@ const reloadWithFilters = () => {
     search: currentSearch.value
   }
   
-  console.log('Query params before cleanup:', queryParams)
-  
-  // Remove empty values
   Object.keys(queryParams).forEach(key => {
     if (!queryParams[key] || queryParams[key] === '') {
       delete queryParams[key]
     }
   })
-  
-  console.log('Final query params:', queryParams)
   
   router.visit('/users', {
     method: 'get',
@@ -233,7 +210,6 @@ const reloadWithFilters = () => {
 
 const handleUserCreated = () => {
   showCreateModal.value = false
-  // Reload page to show updated data
   router.visit('/users', {
     method: 'get',
     preserveState: false,
@@ -244,7 +220,6 @@ const handleUserCreated = () => {
 const handleUserUpdated = () => {
   showUpdateModal.value = false
   selectedUser.value = null
-  // Reload page to show updated data
   router.visit('/users', {
     method: 'get',
     preserveState: false,
@@ -255,7 +230,6 @@ const handleUserUpdated = () => {
 const handleUserDeleted = () => {
   showDeleteModal.value = false
   selectedUser.value = null
-  // Reload page to show updated data
   router.visit('/users', {
     method: 'get',
     preserveState: false,

@@ -11,13 +11,10 @@ use Inertia\Inertia;
 Route::middleware(['auth'])->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('home');
     
-    // Users CRUD routes
     Route::get('users', [UserController::class, 'index'])->name('users');
     
-    // Roles CRUD routes
     Route::get('roles', [RoleController::class, 'index'])->name('roles');
     
-    // Users API routes
     Route::prefix('api/users')->group(function () {
         Route::post('/', [UserController::class, 'store'])->name('users.store');
         Route::get('/{id}', [UserController::class, 'show'])->name('users.show');
@@ -29,7 +26,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/export/csv', [UserController::class, 'exportCsv'])->name('users.export.csv');
     });
     
-    // Roles API routes
     Route::prefix('api/roles')->group(function () {
         Route::post('/', [RoleController::class, 'store'])->name('roles.store');
         Route::get('/{id}', [RoleController::class, 'show'])->name('roles.show');
@@ -49,7 +45,6 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', fn() => redirect()->route('signin'))->name('login');
     Route::post('/login', [AuthController::class, 'login']);
     
-    // Temporary test route for login
     Route::get('/test-login', function () {
         $user = \App\Models\User::where('email', 'joao.silva@empresademo.com')->first();
         if ($user) {

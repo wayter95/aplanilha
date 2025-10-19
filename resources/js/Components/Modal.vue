@@ -13,12 +13,9 @@
         class="fixed inset-0 z-50 overflow-y-auto"
         @click.self="$emit('close')"
       >
-        <!-- Backdrop -->
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
         
-        <!-- Modal Container -->
         <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-          <!-- Modal Content -->
           <div
             :class="[
               'relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 text-left shadow-xl transition-all sm:my-8 sm:w-full',
@@ -26,7 +23,6 @@
             ]"
             @click.stop
           >
-            <!-- Modal Header -->
             <div v-if="title || $slots.header" class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4 border-b border-gray-200 dark:border-gray-700">
               <div class="flex items-center justify-between">
                 <div class="flex items-center">
@@ -52,12 +48,10 @@
               <slot name="header" />
             </div>
 
-            <!-- Modal Body -->
             <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6">
               <slot />
             </div>
 
-            <!-- Modal Footer -->
             <div v-if="$slots.footer" class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse border-t border-gray-200 dark:border-gray-600">
               <slot name="footer" />
             </div>
@@ -90,12 +84,12 @@ const props = defineProps({
   },
   type: {
     type: String,
-    default: 'default', // default, success, warning, danger
+    default: 'default',
     validator: (value) => ['default', 'success', 'warning', 'danger'].includes(value)
   },
   size: {
     type: String,
-    default: 'md', // sm, md, lg, xl
+    default: 'md',
     validator: (value) => ['sm', 'md', 'lg', 'xl'].includes(value)
   }
 })
