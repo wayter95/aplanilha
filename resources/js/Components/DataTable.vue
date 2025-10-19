@@ -175,7 +175,14 @@
                           column.badgeClass ? column.badgeClass(getNestedValue(row, column.key)) : 'bg-primary/10 text-primary'
                         ]"
                       >
-                        {{ getNestedValue(row, column.key) }}
+                        {{ column.key === 'permissions' ? (getNestedValue(row, column.key)?.length || 0) + ' permissões' : getNestedValue(row, column.key) }}
+                      </span>
+                    </div>
+
+                    <!-- Permissions Count Type -->
+                    <div v-else-if="column.type === 'permissions_count'">
+                      <span class="badge bg-info/10 text-info">
+                        {{ getNestedValue(row, column.key)?.length || 0 }} permissões
                       </span>
                     </div>
 

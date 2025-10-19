@@ -38,6 +38,13 @@
               </a>
             </li>
 
+            <li class="slide">
+              <a href="/roles" class="side-menu__item" :class="{ 'active': $page.url.startsWith('/roles') }">
+                <i class="bx bx-shield side-menu__icon"></i>
+                <span class="side-menu__label">Funções</span>
+              </a>
+            </li>
+
             <li class="slide__category"><span class="category-name">Configurações</span></li>
 
             <li class="slide">
