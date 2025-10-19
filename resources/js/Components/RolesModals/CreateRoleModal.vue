@@ -95,10 +95,12 @@
 
 <script setup>
 import Input from '@/Components/Input.vue'
+import { useToast } from '@/composables/useToast'
 import { usePage } from '@inertiajs/vue3'
 import { ref } from 'vue'
 
 const page = usePage()
+const { success, error } = useToast()
 
 const props = defineProps({
   show: {
@@ -141,15 +143,16 @@ const createRole = async () => {
     const result = await response.json()
 
     if (result.success) {
+      success('Função criada com sucesso!')
       emit('role-created', result.role)
       closeModal()
     } else {
       console.error('Error creating role:', result.message)
-      alert('Erro ao criar função: ' + result.message)
+      error('Erro ao criar função: ' + result.message)
     }
   } catch (error) {
     console.error('Error creating role:', error)
-    alert('Erro ao criar função')
+    error('Erro ao criar função')
   }
 }
 

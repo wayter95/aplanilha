@@ -72,9 +72,11 @@
 </template>
 
 <script setup>
+import { useToast } from '@/composables/useToast'
 import { usePage } from '@inertiajs/vue3'
 
 const page = usePage()
+const { success, error } = useToast()
 
 const props = defineProps({
   show: {
@@ -111,15 +113,16 @@ const deleteUser = async () => {
     const result = await response.json()
 
     if (result.success) {
+      success('Usuário excluído com sucesso!')
       emit('user-deleted', props.user)
       close()
     } else {
       console.error('Error deleting user:', result.message)
-      alert('Erro ao excluir usuário: ' + result.message)
+      error('Erro ao excluir usuário: ' + result.message)
     }
   } catch (error) {
     console.error('Error deleting user:', error)
-    alert('Erro ao excluir usuário')
+    error('Erro ao excluir usuário')
   }
 }
 

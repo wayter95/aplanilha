@@ -87,10 +87,12 @@
 </template>
 
 <script setup>
+import { useToast } from '@/composables/useToast'
 import { usePage } from '@inertiajs/vue3'
 import { ref } from 'vue'
 
 const page = usePage()
+const { success, error } = useToast()
 
 const props = defineProps({
   show: Boolean,
@@ -116,15 +118,16 @@ const deleteRole = async () => {
       const result = await response.json()
 
       if (result.success) {
+        success('Função excluída com sucesso!')
         emit('role-deleted')
         closeModal()
       } else {
         console.error('Error deleting role:', result.message)
-        alert('Erro ao excluir função: ' + result.message)
+        error('Erro ao excluir função: ' + result.message)
       }
     } catch (error) {
       console.error('Error deleting role:', error)
-      alert('Erro ao excluir função')
+      error('Erro ao excluir função')
     } finally {
       processing.value = false
     }

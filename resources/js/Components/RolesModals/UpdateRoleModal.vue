@@ -95,10 +95,12 @@
 
 <script setup>
 import Input from '@/Components/Input.vue'
+import { useToast } from '@/composables/useToast'
 import { usePage } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
 
 const page = usePage()
+const { success, error } = useToast()
 
 const props = defineProps({
   show: {
@@ -163,15 +165,16 @@ const updateRole = async () => {
     const result = await response.json()
 
     if (result.success) {
+      success('Função atualizada com sucesso!')
       emit('role-updated', result.role)
       closeModal()
     } else {
       console.error('Error updating role:', result.message)
-      alert('Erro ao atualizar função: ' + result.message)
+      error('Erro ao atualizar função: ' + result.message)
     }
   } catch (error) {
     console.error('Error updating role:', error)
-    alert('Erro ao atualizar função')
+    error('Erro ao atualizar função')
   }
 }
 
