@@ -5,6 +5,9 @@
       @toggle-sidebar="toggleSidebar"
     />
 
+    <!-- Toast Container -->
+    <ToastContainer position="top-right" />
+
     <aside :class="['app-sidebar', { 'sidebar-open': sidebarOpen }]" id="sidebar">
       <div class="main-sidebar-header">
         <a href="/" class="header-logo">
@@ -81,6 +84,7 @@
 
 <script setup>
 import Header from '@/Components/Header.vue'
+import ToastContainer from '@/Components/ToastContainer.vue'
 import { ref } from 'vue'
 
 const props = defineProps({

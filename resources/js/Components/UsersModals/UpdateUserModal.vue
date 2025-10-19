@@ -94,10 +94,12 @@
 <script setup>
 import Input from '@/Components/Input.vue'
 import InputPassword from '@/Components/InputPassword.vue'
+import { useToast } from '@/composables/useToast'
 import { usePage } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
 
 const page = usePage()
+const { success, error } = useToast()
 
 const props = defineProps({
   show: {
@@ -173,15 +175,16 @@ const updateUser = async () => {
     const result = await response.json()
 
     if (result.success) {
+      success('Usuário atualizado com sucesso!')
       emit('user-updated', result.user)
       close()
     } else {
       console.error('Error updating user:', result.message)
-      alert('Erro ao atualizar usuário: ' + result.message)
+      error('Erro ao atualizar usuário: ' + result.message)
     }
   } catch (error) {
     console.error('Error updating user:', error)
-    alert('Erro ao atualizar usuário')
+    error('Erro ao atualizar usuário')
   }
 }
 

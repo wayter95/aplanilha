@@ -1,12 +1,9 @@
 <template>
   <div v-if="show" class="fixed inset-0 z-50 overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-      <!-- Backdrop -->
       <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" @click="close"></div>
 
-      <!-- Modal -->
-      <div class="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-800 shadow-xl rounded-lg">
-        <!-- Header -->
+        <div class="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-800 shadow-xl rounded-lg">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-lg font-medium text-gray-900 dark:text-white">
             Novo Usuário
@@ -16,7 +13,6 @@
           </button>
         </div>
 
-        <!-- Form -->
         <form @submit.prevent="createUser">
           <div class="space-y-4">
             <Input
@@ -69,7 +65,6 @@
             </div>
           </div>
 
-          <!-- Actions -->
           <div class="flex justify-end gap-3 mt-6">
             <button
               type="button"
@@ -94,10 +89,12 @@
 <script setup>
 import Input from '@/Components/Input.vue'
 import InputPassword from '@/Components/InputPassword.vue'
+import { useToast } from '@/composables/useToast'
 import { usePage } from '@inertiajs/vue3'
 import { ref } from 'vue'
 
 const page = usePage()
+const { success, error } = useToast()
 
 const props = defineProps({
   show: {
@@ -120,7 +117,6 @@ const form = ref({
   status: ''
 })
 
-// Get role ID by name from available roles
 const getRoleIdByName = (roleName) => {
   const role = props.availableRoles.find(r => r.name === roleName)
   return role ? role.id : null
@@ -128,14 +124,11 @@ const getRoleIdByName = (roleName) => {
 
 const createUser = async () => {
   try {
-    // Get role ID from role name
     const roleId = getRoleIdByName(form.value.role)
     
-    // Prepare data with status instead of is_active
     const dataToSend = {
       ...form.value,
       role_id: roleId,
-      // Convert status to is_active for backend
       is_active: form.value.status === 'Ativo'
     }
 
@@ -151,15 +144,16 @@ const createUser = async () => {
     const result = await response.json()
 
     if (result.success) {
+      success('Usuário criado com sucesso!')
       emit('user-created', result.user)
       close()
     } else {
       console.error('Error creating user:', result.message)
-      alert('Erro ao criar usuário: ' + result.message)
+      error('Erro ao criar usuário: ' + result.message)
     }
   } catch (error) {
     console.error('Error creating user:', error)
-    alert('Erro ao criar usuário')
+    error('Erro ao criar usuário')
   }
 }
 

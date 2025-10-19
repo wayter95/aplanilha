@@ -110,6 +110,9 @@
         </div>
       </div>
     </div>
+    
+    <!-- Toast Container -->
+    <ToastContainer position="top-right" />
   </div>
 </template>
 
@@ -123,11 +126,14 @@ import { nextTick, onMounted, ref } from 'vue';
 
 import Input from '@/Components/Input.vue';
 import InputPassword from '@/Components/InputPassword.vue';
+import ToastContainer from '@/Components/ToastContainer.vue';
+import { useToast } from '@/composables/useToast';
 import backgroundImage from '../../../assets/images/authentication/1.jpg';
 import authImage1 from '../../../assets/images/authentication/2.png';
 import authImage2 from '../../../assets/images/authentication/3.png';
 
 const page = usePage();
+const { success, error, warning, info } = useToast();
 
 const form = ref({
     email: '',
@@ -145,11 +151,14 @@ const handleSubmit = async () => {
         router.post('/login', form.value, {
             onSuccess: (page) => {
                 console.log('Login successful:', page);
+                success('Login realizado com sucesso!');
                 router.visit('/');
             },
             onError: (errors) => {
                 console.error('Login failed:', errors);
-                alert('Erro no login: ' + JSON.stringify(errors));
+                // Extrair mensagem de erro mais amigável
+                const errorMessage = errors.email || errors.password || 'Credenciais inválidas';
+                error('Erro no login: ' + errorMessage);
             },
             onFinish: () => {
                 isLoading.value = false;
@@ -157,7 +166,7 @@ const handleSubmit = async () => {
         });
     } catch (error) {
         console.error('Login error:', error);
-        alert('Erro no login: ' + error.message);
+        error('Erro no login: ' + error.message);
         isLoading.value = false;
     }
 };
