@@ -8,22 +8,30 @@
     </div>
     <div class="box-body">
       <form @submit.prevent="createRole">
-        <div class="mb-4">
-          <label for="name" class="form-label">Nome</label>
-          <input type="text" class="ti-form-input" id="name" v-model="form.name" required>
-          <p v-if="form.errors.name" class="text-danger text-xs mt-1">{{ form.errors.name }}</p>
-        </div>
+        <Input
+          id="create-role-name"
+          v-model="form.name"
+          type="text"
+          label="Nome (identificador único)"
+          placeholder="Digite o nome da função"
+          required
+          :error="form.errors?.name"
+        />
         
-        <div class="mb-4">
-          <label for="display_name" class="form-label">Nome de Exibição</label>
-          <input type="text" class="ti-form-input" id="display_name" v-model="form.display_name" required>
-          <p v-if="form.errors.display_name" class="text-danger text-xs mt-1">{{ form.errors.display_name }}</p>
-        </div>
+        <Input
+          id="create-role-display-name"
+          v-model="form.display_name"
+          type="text"
+          label="Nome de Exibição"
+          placeholder="Digite o nome de exibição"
+          required
+          :error="form.errors?.display_name"
+        />
         
         <div class="mb-4">
           <label for="description" class="form-label">Descrição</label>
-          <textarea class="ti-form-input" id="description" v-model="form.description" rows="3"></textarea>
-          <p v-if="form.errors.description" class="text-danger text-xs mt-1">{{ form.errors.description }}</p>
+          <textarea class="ti-form-input" id="description" v-model="form.description" rows="3" placeholder="Digite uma descrição para a função"></textarea>
+          <p v-if="form.errors?.description" class="text-danger text-xs mt-1">{{ form.errors.description }}</p>
         </div>
         
         <div class="mb-4">
@@ -73,6 +81,7 @@
 </template>
 
 <script setup>
+import Input from '@/Components/Input.vue'
 import Modal from '@/Components/Modal.vue'
 import { usePage } from '@inertiajs/vue3'
 import { ref } from 'vue'

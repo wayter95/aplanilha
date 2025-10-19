@@ -19,44 +19,31 @@
         <!-- Form -->
         <form @submit.prevent="createUser">
           <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Nome
-              </label>
-              <input
-                v-model="form.name"
-                type="text"
-                required
-                class="ti-form-input"
-                placeholder="Digite o nome do usuário"
-              />
-            </div>
+            <Input
+              id="create-user-name"
+              v-model="form.name"
+              type="text"
+              label="Nome"
+              placeholder="Digite o nome do usuário"
+              required
+            />
 
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Email
-              </label>
-              <input
-                v-model="form.email"
-                type="email"
-                required
-                class="ti-form-input"
-                placeholder="Digite o email do usuário"
-              />
-            </div>
+            <Input
+              id="create-user-email"
+              v-model="form.email"
+              type="email"
+              label="E-mail"
+              placeholder="Digite o e-mail do usuário"
+              required
+            />
 
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Senha
-              </label>
-              <input
-                v-model="form.password"
-                type="password"
-                required
-                class="ti-form-input"
-                placeholder="Digite a senha"
-              />
-            </div>
+            <InputPassword
+              id="create-user-password"
+              v-model="form.password"
+              label="Senha"
+              placeholder="Digite a senha"
+              required
+            />
 
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -105,6 +92,8 @@
 </template>
 
 <script setup>
+import Input from '@/Components/Input.vue'
+import InputPassword from '@/Components/InputPassword.vue'
 import { usePage } from '@inertiajs/vue3'
 import { ref } from 'vue'
 

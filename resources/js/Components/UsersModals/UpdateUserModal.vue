@@ -19,43 +19,31 @@
         <!-- Form -->
         <form @submit.prevent="updateUser">
           <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Nome
-              </label>
-              <input
-                v-model="form.name"
-                type="text"
-                required
-                class="ti-form-input"
-                placeholder="Digite o nome do usuário"
-              />
-            </div>
+            <Input
+              id="update-user-name"
+              v-model="form.name"
+              type="text"
+              label="Nome"
+              placeholder="Digite o nome do usuário"
+              required
+            />
 
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Email
-              </label>
-              <input
-                v-model="form.email"
-                type="email"
-                required
-                class="ti-form-input"
-                placeholder="Digite o email do usuário"
-              />
-            </div>
+            <Input
+              id="update-user-email"
+              v-model="form.email"
+              type="email"
+              label="E-mail"
+              placeholder="Digite o e-mail do usuário"
+              required
+            />
 
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Nova Senha (deixe em branco para manter a atual)
-              </label>
-              <input
-                v-model="form.password"
-                type="password"
-                class="ti-form-input"
-                placeholder="Digite a nova senha"
-              />
-            </div>
+            <InputPassword
+              id="update-user-password"
+              v-model="form.password"
+              label="Nova Senha"
+              placeholder="Digite uma nova senha"
+              help="Deixe em branco para manter a atual"
+            />
 
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -104,6 +92,8 @@
 </template>
 
 <script setup>
+import Input from '@/Components/Input.vue'
+import InputPassword from '@/Components/InputPassword.vue'
 import { usePage } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
 

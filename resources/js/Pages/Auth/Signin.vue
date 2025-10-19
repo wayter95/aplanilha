@@ -17,53 +17,27 @@
               
               <form @submit.prevent="handleSubmit">
                 <div class="grid grid-cols-12">
-                  <div class="xl:col-span-12 col-span-12 mb-4">
-                    <label for="signin-email" class="form-label text-defaulttextcolor">E-mail</label>
-                    <input 
-                      type="email" 
-                      class="form-control form-control-lg w-full !rounded-md bg-defaultbackground border-inputborder text-defaulttextcolor" 
-                      id="signin-email" 
-                      placeholder="email@exemplo.com"
+                  <div class="xl:col-span-12 col-span-12">
+                    <Input
+                      id="signin-email"
                       v-model="form.email"
+                      type="email"
+                      label="E-mail"
+                      placeholder="email@exemplo.com"
                       required
-                    >
+                    />
                   </div>
-                  <div class="xl:col-span-12 col-span-12 mb-4">
-                    <label for="signin-password" class="form-label text-defaulttextcolor block">
-                      Senha
-                      <a href="/forgot-password" class="ltr:float-right rtl:float-left text-danger">Esqueceu a senha?</a>
-                    </label>
-                    <div class="input-group">
-                      <input 
-                        :type="passwordType" 
-                        class="form-control form-control-lg !border-s border-inputborder !rounded-e-none bg-defaultbackground text-defaulttextcolor" 
-                        id="signin-password" 
-                        placeholder="senha"
-                        v-model="form.password"
-                        required
-                      >
-                      <button 
-                        aria-label="button" 
-                        type="button" 
-                        class="ti-btn ti-btn-light !rounded-s-none !mb-0" 
-                        @click="togglePassword"
-                      >
-                        <i :class="passwordIcon" class="align-middle"></i>
-                      </button>
-                    </div>
-                    <div class="mt-2">
-                      <div class="form-check !ps-0">
-                        <input 
-                          class="form-check-input" 
-                          type="checkbox" 
-                          v-model="form.remember"
-                          id="defaultCheck1"
-                        >
-                        <label class="form-check-label text-textmuted font-normal" for="defaultCheck1">
-                          Lembrar senha?
-                        </label>
-                      </div>
-                    </div>
+                  <div class="xl:col-span-12 col-span-12">
+                    <InputPassword
+                      id="signin-password"
+                      v-model="form.password"
+                      v-model:remember="form.remember"
+                      label="Senha"
+                      placeholder="senha"
+                      required
+                      show-remember
+                      forgot-password-link="/forgot-password"
+                    />
                   </div>
                   <div class="xl:col-span-12 col-span-12 grid">
                     <button 
@@ -145,8 +119,10 @@ import { Autoplay, Keyboard, Navigation, Pagination, Swiper } from 'swiper';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import { computed, nextTick, onMounted, ref } from 'vue';
+import { nextTick, onMounted, ref } from 'vue';
 
+import Input from '@/Components/Input.vue';
+import InputPassword from '@/Components/InputPassword.vue';
 import backgroundImage from '../../../assets/images/authentication/1.jpg';
 import authImage1 from '../../../assets/images/authentication/2.png';
 import authImage2 from '../../../assets/images/authentication/3.png';
@@ -160,17 +136,7 @@ const form = ref({
 });
 
 const isLoading = ref(false);
-
-const showPassword = ref(false);
-
 const swiperContainer = ref(null);
-
-const passwordType = computed(() => showPassword.value ? 'text' : 'password');
-const passwordIcon = computed(() => showPassword.value ? 'ri-eye-line' : 'ri-eye-off-line');
-
-const togglePassword = () => {
-    showPassword.value = !showPassword.value;
-};
 
 const handleSubmit = async () => {
     isLoading.value = true;
