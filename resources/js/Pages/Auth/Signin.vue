@@ -12,33 +12,33 @@
                   <h2 class="text-2xl font-bold">Aplanilha</h2>
                 </a>
               </div>
-              <p class="h5 font-semibold mb-2 text-defaulttextcolor">Sign In</p>
-              <p class="mb-4 text-textmuted font-normal">Welcome back!</p>
+              <p class="h5 font-semibold mb-2 text-defaulttextcolor">Entrar</p>
+              <p class="mb-4 text-textmuted font-normal">Bem-vindo de volta!</p>
               
               <form @submit.prevent="handleSubmit">
                 <div class="grid grid-cols-12">
                   <div class="xl:col-span-12 col-span-12 mb-4">
-                    <label for="signin-email" class="form-label text-defaulttextcolor">Email</label>
+                    <label for="signin-email" class="form-label text-defaulttextcolor">E-mail</label>
                     <input 
                       type="email" 
                       class="form-control form-control-lg w-full !rounded-md bg-defaultbackground border-inputborder text-defaulttextcolor" 
                       id="signin-email" 
-                      placeholder="email@example.com"
+                      placeholder="email@exemplo.com"
                       v-model="form.email"
                       required
                     >
                   </div>
                   <div class="xl:col-span-12 col-span-12 mb-4">
                     <label for="signin-password" class="form-label text-defaulttextcolor block">
-                      Password
-                      <a href="/forgot-password" class="ltr:float-right rtl:float-left text-danger">Forget password ?</a>
+                      Senha
+                      <a href="/forgot-password" class="ltr:float-right rtl:float-left text-danger">Esqueceu a senha?</a>
                     </label>
                     <div class="input-group">
                       <input 
                         :type="passwordType" 
                         class="form-control form-control-lg !border-s border-inputborder !rounded-e-none bg-defaultbackground text-defaulttextcolor" 
                         id="signin-password" 
-                        placeholder="password"
+                        placeholder="senha"
                         v-model="form.password"
                         required
                       >
@@ -60,7 +60,7 @@
                           id="defaultCheck1"
                         >
                         <label class="form-check-label text-textmuted font-normal" for="defaultCheck1">
-                          Remember password ?
+                          Lembrar senha?
                         </label>
                       </div>
                     </div>
@@ -71,8 +71,8 @@
                       class="ti-btn ti-btn-lg bg-primary text-white btn-wave !font-medium w-full"
                       :disabled="isLoading"
                     >
-                      <span v-if="isLoading">Signing In...</span>
-                      <span v-else>Sign In</span>
+                      <span v-if="isLoading">Entrando...</span>
+                      <span v-else>Entrar</span>
                     </button>
                   </div>
                 </div>
@@ -94,9 +94,9 @@
                       <div class="mb-[3rem]">
                         <img :src="authImage1" class="authentication-image" alt="">
                       </div>
-                      <h6 class="font-semibold text-[1rem]">Sign In</h6>
+                      <h6 class="font-semibold text-[1rem]">Entrar</h6>
                       <p class="font-normal text-[0.875rem] opacity-[0.7]">
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsa eligendi expedita aliquam quaerat nulla voluptas facilis. Porro rem voluptates possimus, ad, autem quae culpa architecto, quam labore blanditiis at ratione.
+                        Bem-vindo ao Aplanilha! Acesse sua conta para gerenciar suas planilhas e dados de forma eficiente e segura.
                       </p>
                     </div>
                   </div>
@@ -107,9 +107,9 @@
                       <div class="mb-[3rem]">
                         <img :src="authImage2" class="authentication-image" alt="">
                       </div>
-                      <h6 class="font-semibold text-[1rem]">Sign In</h6>
+                      <h6 class="font-semibold text-[1rem]">Entrar</h6>
                       <p class="font-normal text-[0.875rem] opacity-[0.7]">
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsa eligendi expedita aliquam quaerat nulla voluptas facilis. Porro rem voluptates possimus, ad, autem quae culpa architecto, quam labore blanditiis at ratione.
+                        Bem-vindo ao Aplanilha! Acesse sua conta para gerenciar suas planilhas e dados de forma eficiente e segura.
                       </p>
                     </div>
                   </div>
@@ -120,9 +120,9 @@
                       <div class="mb-[3rem]">
                         <img :src="authImage1" class="authentication-image" alt="">
                       </div>
-                      <h6 class="font-semibold text-[1rem]">Sign In</h6>
+                      <h6 class="font-semibold text-[1rem]">Entrar</h6>
                       <p class="font-normal text-[0.875rem] opacity-[0.7]">
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsa eligendi expedita aliquam quaerat nulla voluptas facilis. Porro rem voluptates possimus, ad, autem quae culpa architecto, quam labore blanditiis at ratione.
+                        Bem-vindo ao Aplanilha! Acesse sua conta para gerenciar suas planilhas e dados de forma eficiente e segura.
                       </p>
                     </div>
                   </div>
