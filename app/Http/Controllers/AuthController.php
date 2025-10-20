@@ -128,9 +128,16 @@ class AuthController extends Controller
             }
         );
 
-        return $status === Password::PASSWORD_RESET
-            ? redirect()->route('signin')->with('status', __($status))
-            : back()->withErrors(['email' => [__($status)]]);
+        if ($status === Password::PASSWORD_RESET) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            
+            return redirect()->route('signin')
+                ->with('success', 'Sua senha foi alterada com sucesso! Por favor, faça login com sua nova senha.');
+        }
+
+        return back()->withErrors(['email' => [__($status)]]);
     }
 
     private function findUserForTenant(string $email): ?User
