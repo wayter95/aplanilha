@@ -16,16 +16,16 @@
               
               <form @submit.prevent="handleSubmit">
                 <div class="grid grid-cols-12">
-                  <div class="xl:col-span-12 col-span-12 mb-4">
-                    <label for="forgot-email" class="form-label text-defaulttextcolor">Email</label>
-                    <input 
-                      type="email" 
-                      class="form-control form-control-lg w-full !rounded-md bg-defaultbackground border-inputborder text-defaulttextcolor" 
-                      id="forgot-email" 
-                      placeholder="email@example.com"
+                  <div class="xl:col-span-12 col-span-12">
+                    <Input
+                      id="forgot-email"
                       v-model="form.email"
-                      required
-                    >
+                      type="email"
+                      label="Email"
+                      placeholder="email@example.com"
+                      :required="true"
+                      :error="errors.email"
+                    />
                   </div>
                   <div class="xl:col-span-12 col-span-12 grid">
                     <button 
@@ -34,7 +34,7 @@
                       :disabled="isLoading"
                     >
                       <span v-if="isLoading">Enviando...</span>
-                      <span v-else>Enviar Link de Recuperação</span>
+                      <span v-else">Enviar Link de Recuperação</span>
                     </button>
                   </div>
                   <div class="xl:col-span-12 col-span-12 text-center mt-4">
@@ -66,41 +66,52 @@
         </div>
       </div>
     </div>
+    
+    <!-- Toast Container -->
+    <ToastContainer position="top-right" />
   </div>
 </template>
 
 <script setup>
 import { router, usePage } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import Input from '@/Components/Input.vue';
+import ToastContainer from '@/Components/ToastContainer.vue';
+import { useToast } from '@/composables/useToast';
 
 import backgroundImage from '../../../assets/images/authentication/1.jpg';
 import authImage1 from '../../../assets/images/authentication/2.png';
 
 const page = usePage();
+const { success, error } = useToast();
 
 const form = ref({
   email: '',
 });
 
 const isLoading = ref(false);
+const errors = ref({});
 
 const handleSubmit = async () => {
   isLoading.value = true;
+  errors.value = {};
 
   try {
     router.post('/forgot-password', form.value, {
       onSuccess: () => {
-        console.log('Reset link sent');
+        success('Se o e-mail informado estiver cadastrado, você receberá instruções para redefinir sua senha.');
+        form.value.email = '';
       },
-      onError: (errors) => {
-        console.error('Reset failed:', errors);
+      onError: (responseErrors) => {
+        errors.value = responseErrors;
+        error(responseErrors.email || 'Erro ao enviar link de recuperação. Tente novamente.');
       },
       onFinish: () => {
         isLoading.value = false;
       }
     });
-  } catch (error) {
-    console.error('Reset error:', error);
+  } catch (err) {
+    error('Erro inesperado ao enviar link de recuperação. Tente novamente.');
     isLoading.value = false;
   }
 };

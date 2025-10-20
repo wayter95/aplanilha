@@ -35,7 +35,7 @@ class AuthController extends Controller
 
         if (!$user) {
             return back()->withErrors([
-                'email' => 'Usuário não encontrado para este tenant.',
+                'email' => 'Usuário não encontrado.',
             ]);
         }
 
@@ -76,7 +76,7 @@ class AuthController extends Controller
 
         if (!$user) {
             return back()->withErrors([
-                'email' => 'Usuário não encontrado para este tenant.',
+                'email' => 'Usuário não encontrado.',
             ]);
         }
 
@@ -111,7 +111,7 @@ class AuthController extends Controller
 
         if (!$user) {
             return back()->withErrors([
-                'email' => 'Usuário não encontrado para este tenant.',
+                'email' => 'Usuário não encontrado.',
             ]);
         }
 
