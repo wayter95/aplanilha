@@ -131,4 +131,14 @@ export default defineConfig({
         vue(),
         tailwindcss(),
     ],
+    server: {
+        host: '0.0.0.0',
+        port: 5173,
+        strictPort: true,
+        hmr: {
+            host: '127.0.0.1',
+            protocol: 'ws',
+            clientPort: 5173,
+        },
+    },
 });
