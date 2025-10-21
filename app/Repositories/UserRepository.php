@@ -178,4 +178,12 @@ class UserRepository
         $user->removeRole($role);
         return true;
     }
+    
+    public function findByClientAndEmail(string $clientId, string $email): ?User
+    {
+        return $this->model
+            ->where('client_id', $clientId)
+            ->where('email', $email)
+            ->first();
+    }
 }

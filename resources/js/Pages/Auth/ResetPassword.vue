@@ -16,57 +16,36 @@
               
               <form @submit.prevent="handleSubmit">
                 <div class="grid grid-cols-12">
-                  <div class="xl:col-span-12 col-span-12 mb-4">
-                    <label for="reset-email" class="form-label text-defaulttextcolor">Email</label>
-                    <input 
-                      type="email" 
-                      class="form-control form-control-lg w-full !rounded-md bg-defaultbackground border-inputborder text-defaulttextcolor" 
-                      id="reset-email" 
-                      :value="email"
-                      readonly
-                    >
+                  <div class="xl:col-span-12 col-span-12">
+                    <Input
+                      id="reset-email"
+                      :model-value="form.email"
+                      type="email"
+                      label="Email"
+                      :disabled="true"
+                      help="Este é o e-mail para o qual foi enviado o link de recuperação"
+                    />
                   </div>
-                  <div class="xl:col-span-12 col-span-12 mb-4">
-                    <label for="reset-password" class="form-label text-defaulttextcolor">Nova Senha</label>
-                    <div class="input-group">
-                      <input 
-                        :type="passwordType" 
-                        class="form-control form-control-lg !border-s border-inputborder !rounded-e-none bg-defaultbackground text-defaulttextcolor" 
-                        id="reset-password" 
-                        placeholder="Nova senha"
-                        v-model="form.password"
-                        required
-                      >
-                      <button 
-                        aria-label="button" 
-                        type="button" 
-                        class="ti-btn ti-btn-light !rounded-s-none !mb-0" 
-                        @click="togglePassword"
-                      >
-                        <i :class="passwordIcon" class="align-middle"></i>
-                      </button>
-                    </div>
+                  <div class="xl:col-span-12 col-span-12">
+                    <InputPassword
+                      id="reset-password"
+                      v-model="form.password"
+                      label="Nova Senha"
+                      placeholder="Digite sua nova senha"
+                      :required="true"
+                      :error="errors.password"
+                      help="Use pelo menos 8 caracteres"
+                    />
                   </div>
-                  <div class="xl:col-span-12 col-span-12 mb-4">
-                    <label for="reset-password-confirmation" class="form-label text-defaulttextcolor">Confirmar Nova Senha</label>
-                    <div class="input-group">
-                      <input 
-                        :type="confirmPasswordType" 
-                        class="form-control form-control-lg !border-s border-inputborder !rounded-e-none bg-defaultbackground text-defaulttextcolor" 
-                        id="reset-password-confirmation" 
-                        placeholder="Confirmar nova senha"
-                        v-model="form.password_confirmation"
-                        required
-                      >
-                      <button 
-                        aria-label="button" 
-                        type="button" 
-                        class="ti-btn ti-btn-light !rounded-s-none !mb-0" 
-                        @click="toggleConfirmPassword"
-                      >
-                        <i :class="confirmPasswordIcon" class="align-middle"></i>
-                      </button>
-                    </div>
+                  <div class="xl:col-span-12 col-span-12">
+                    <InputPassword
+                      id="reset-password-confirmation"
+                      v-model="form.password_confirmation"
+                      label="Confirmar Nova Senha"
+                      placeholder="Confirme sua nova senha"
+                      :required="true"
+                      :error="errors.password_confirmation"
+                    />
                   </div>
                   <div class="xl:col-span-12 col-span-12 grid">
                     <button 
@@ -107,17 +86,25 @@
         </div>
       </div>
     </div>
+    
+    <!-- Toast Container -->
+    <ToastContainer position="top-right" />
   </div>
 </template>
 
 <script setup>
 import { router, usePage } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
+import Input from '@/Components/Input.vue';
+import InputPassword from '@/Components/InputPassword.vue';
+import ToastContainer from '@/Components/ToastContainer.vue';
+import { useToast } from '@/composables/useToast';
 
 import backgroundImage from '../../../assets/images/authentication/1.jpg';
 import authImage1 from '../../../assets/images/authentication/2.png';
 
 const page = usePage();
+const { success, error } = useToast();
 
 const props = defineProps({
   token: String,
@@ -132,41 +119,36 @@ const form = ref({
 });
 
 const isLoading = ref(false);
-
-const showPassword = ref(false);
-const showConfirmPassword = ref(false);
-
-const passwordType = computed(() => showPassword.value ? 'text' : 'password');
-const passwordIcon = computed(() => showPassword.value ? 'ri-eye-line' : 'ri-eye-off-line');
-
-const confirmPasswordType = computed(() => showConfirmPassword.value ? 'text' : 'password');
-const confirmPasswordIcon = computed(() => showConfirmPassword.value ? 'ri-eye-line' : 'ri-eye-off-line');
-
-const togglePassword = () => {
-  showPassword.value = !showPassword.value;
-};
-
-const toggleConfirmPassword = () => {
-  showConfirmPassword.value = !showConfirmPassword.value;
-};
+const errors = ref({});
 
 const handleSubmit = async () => {
   isLoading.value = true;
+  errors.value = {};
 
   try {
     router.post('/reset-password', form.value, {
       onSuccess: () => {
-        router.visit('/sign-in');
+        success('Senha redefinida com sucesso! Você pode fazer login com sua nova senha.');
+        setTimeout(() => {
+          router.visit('/sign-in');
+        }, 2000);
       },
-      onError: (errors) => {
-        console.error('Reset failed:', errors);
+      onError: (responseErrors) => {
+        errors.value = responseErrors;
+        if (responseErrors.token) {
+          error('O link de redefinição de senha é inválido ou expirou. Solicite uma nova recuperação.');
+        } else if (responseErrors.password) {
+          error(responseErrors.password[0] || 'Erro na validação da senha.');
+        } else {
+          error('Não foi possível redefinir sua senha. Tente novamente.');
+        }
       },
       onFinish: () => {
         isLoading.value = false;
       }
     });
-  } catch (error) {
-    console.error('Reset error:', error);
+  } catch (err) {
+    error('Erro inesperado ao redefinir senha. Tente novamente.');
     isLoading.value = false;
   }
 };

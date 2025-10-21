@@ -43,9 +43,13 @@ return new class extends Migration
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
+            $table->uuid('client_id');
             $table->string('email')->primary();
             $table->string('token');
             $table->timestamp('created_at')->nullable();
+
+            $table->unique(['client_id', 'email']);
+            $table->foreign('client_id')->references('id')->on('client_subscribes')->onDelete('cascade');
         });
 
         Schema::create('sessions', function (Blueprint $table) {
