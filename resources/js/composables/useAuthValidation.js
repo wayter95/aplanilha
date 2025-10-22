@@ -1,19 +1,27 @@
-import { useForm, defineField } from 'vee-validate'
+import { useForm, defineRule} from 'vee-validate'
 import * as yup from 'yup'
+import { ptBR } from '@/plugins/validation'
 
 export function useAuthValidation() {
     const loginSchema = yup.object({
-        email: yup.string().required('Email é obrigatório').email('Email inválido'),
-        password: yup.string().required('Senha é obrigatória')
+        email: yup.string()
+            .required(ptBR.messages.required.replace('{field}', ptBR.names.email))
+            .email(ptBR.messages.email.replace('{field}', ptBR.names.email)),
+        password: yup.string()
+            .required(ptBR.messages.required.replace('{field}', ptBR.names.password))
     })
 
     const resetPasswordSchema = yup.object({
-        token: yup.string().required('Token é obrigatório'),
-        email: yup.string().required('Email é obrigatório').email('Email inválido'),
-        password: yup.string().required('Senha é obrigatória').min(8, 'A senha deve ter no mínimo 8 caracteres'),
+        token: yup.string().required(ptBR.messages.required.replace('{field}', 'Token')),
+        email: yup.string()
+            .required(ptBR.messages.required.replace('{field}', ptBR.names.email))
+            .email(ptBR.messages.email.replace('{field}', ptBR.names.email)),
+        password: yup.string()
+            .required(ptBR.messages.required.replace('{field}', ptBR.names.password))
+            .min(8, ptBR.messages.min.replace('{field}', ptBR.names.password).replace('{length}', '8')),
         password_confirmation: yup.string()
-            .required('Confirmação de senha é obrigatória')
-            .oneOf([yup.ref('password')], 'A confirmação de senha deve ser igual à senha')
+            .required(ptBR.messages.required.replace('{field}', ptBR.names.password_confirmation))
+            .oneOf([yup.ref('password')], ptBR.messages.confirmed.replace('{field}', ptBR.names.password))
     })
 
     function createLoginForm(initialValues = {}) {
@@ -27,8 +35,8 @@ export function useAuthValidation() {
             }
         })
 
-        const [email, emailAttrs] = defineField('email')
-        const [password, passwordAttrs] = defineField('password')
+        const [email, emailAttrs] = defineRule('email')
+        const [password, passwordAttrs] = defineRule('password')
 
         return {
             errors,
@@ -51,10 +59,10 @@ export function useAuthValidation() {
             }
         })
 
-        const [token, tokenAttrs] = defineField('token')
-        const [email, emailAttrs] = defineField('email')
-        const [password, passwordAttrs] = defineField('password')
-        const [passwordConfirmation, passwordConfirmationAttrs] = defineField('password_confirmation')
+        const [token, tokenAttrs] = defineRule('token')
+        const [email, emailAttrs] = defineRule('email')
+        const [password, passwordAttrs] = defineRule('password')
+        const [passwordConfirmation, passwordConfirmationAttrs] = defineRule('password_confirmation')
 
         return {
             errors,

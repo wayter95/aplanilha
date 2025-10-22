@@ -1,21 +1,42 @@
 import { useForm, defineField } from 'vee-validate'
 import * as yup from 'yup'
+import { ptBR } from '@/plugins/validation'
 
 export function useUserValidation() {
     const createUserSchema = yup.object({
-        first_name: yup.string().required('O primeiro nome é obrigatório').min(2).max(50)
-            .matches(/^[A-Za-zÀ-ÿ\s]+$/, 'O primeiro nome deve conter apenas letras e espaços'),
-        last_name: yup.string().required('O sobrenome é obrigatório').min(2).max(50)
-            .matches(/^[A-Za-zÀ-ÿ\s]+$/, 'O sobrenome deve conter apenas letras e espaços'),
-        email: yup.string().required('O email é obrigatório').email().max(100),
-        password: yup.string().required('A senha é obrigatória').min(8).max(50)
-            .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'A senha deve conter pelo menos 1 letra minúscula, 1 maiúscula e 1 número'),
-        password_confirmation: yup.string().required('A confirmação de senha é obrigatória')
-            .oneOf([yup.ref('password')], 'A confirmação de senha deve ser igual à senha'),
-        role_id: yup.string().required('O perfil é obrigatório').uuid(),
+        first_name: yup.string().required(ptBR.messages.required.replace('{field}', ptBR.names.first_name)).min(2).max(50)
+            .matches(/^[A-Za-zÀ-ÿ\s]+$/, ptBR.messages.alpha_spaces.replace('{field}', ptBR.names.first_name)),
+        last_name: yup.string().required(ptBR.messages.required.replace('{field}', ptBR.names.last_name)).min(2).max(50)
+            .matches(/^[A-Za-zÀ-ÿ\s]+$/, ptBR.messages.alpha_spaces.replace('{field}', ptBR.names.last_name)),
+        email: yup.string()
+            .required(ptBR.messages.required.replace('{field}', ptBR.names.email))
+            .email(ptBR.messages.email.replace('{field}', ptBR.names.email))
+            .max(100, ptBR.messages.max.replace('{field}', ptBR.names.email).replace('{length}', '100'))
+            .test('unique_email_tenant', ptBR.messages.unique_email_tenant, async function (value) {
+                const tenantId = this.parent.client_id || this.parent.tenant_id;
+                if (!value || !tenantId) return true;
+                try {
+                    const response = await fetch('/api/check-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: value, tenant_id: tenantId })
+                    });
+                    const data = await response.json();
+                    return data.unique === true;
+                } catch (e) {
+                    return this.createError({ message: 'Erro ao validar email.' });
+                }
+            }),
+        password: yup.string().required(ptBR.messages.required.replace('{field}', ptBR.names.password))
+            .min(8, ptBR.messages.min.replace('{field}', ptBR.names.password).replace('{length}', '8'))
+            .max(50, ptBR.messages.max.replace('{field}', ptBR.names.password).replace('{length}', '50'))
+            .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, ptBR.messages.password),
+        password_confirmation: yup.string().required(ptBR.messages.required.replace('{field}', ptBR.names.password_confirmation))
+            .oneOf([yup.ref('password')], ptBR.messages.confirmed.replace('{field}', ptBR.names.password)),
+        role_id: yup.string().required(ptBR.messages.required.replace('{field}', 'Perfil')).uuid(),
         is_active: yup.boolean().default(true),
-        phone: yup.string().nullable().matches(/^\(\d{2}\)\s\d{4,5}-\d{4}$/, 'Telefone inválido'),
-        birth_date: yup.date().nullable().max(new Date(), 'A data de nascimento não pode ser futura')
+        phone: yup.string().nullable().matches(/^(\d{2})\s\d{4,5}-\d{4}$/, ptBR.messages.numeric.replace('{field}', ptBR.names.phone)),
+        birth_date: yup.date().nullable().max(new Date(), 'A data de nascimento não pode ser futura.')
     })
 
     function createUserForm(initialValues = {}) {
