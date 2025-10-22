@@ -243,7 +243,7 @@ class UserService
         }
 
         if (isset($data['name']) && empty(trim($data['name']))) {
-            $errors['name'] = 'Nome é obrigatório.';
+            $errors['name'] = 'Nome obrigatório.';
         }
 
         return $errors;

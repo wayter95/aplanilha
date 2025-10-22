@@ -14,14 +14,15 @@
               <p class="h5 font-semibold mb-2 text-defaulttextcolor">Redefinir senha</p>
               <p class="mb-4 text-textmuted font-normal">Defina uma nova senha para sua conta</p>
               
-              <form @submit.prevent="handleSubmit">
+              <BaseForm @submit="handleSubmit">
                 <div class="grid grid-cols-12">
                   <div class="xl:col-span-12 col-span-12">
                     <Input
                       id="reset-email"
-                      :model-value="form.email"
+                      name="email"
                       type="email"
                       label="Email"
+                      :model-value="form.email"
                       :disabled="true"
                       help="Este é o e-mail para o qual foi enviado o link de recuperação"
                     />
@@ -29,22 +30,24 @@
                   <div class="xl:col-span-12 col-span-12">
                     <InputPassword
                       id="reset-password"
-                      v-model="form.password"
+                      name="password"
                       label="Nova Senha"
                       placeholder="Digite sua nova senha"
-                      :required="true"
-                      :error="errors.password"
+                      required
+                      :rules="passwordRules"
+                      v-model="form.password"
                       help="Use pelo menos 8 caracteres"
                     />
                   </div>
                   <div class="xl:col-span-12 col-span-12">
                     <InputPassword
                       id="reset-password-confirmation"
-                      v-model="form.password_confirmation"
+                      name="password_confirmation"
                       label="Confirmar Nova Senha"
                       placeholder="Confirme sua nova senha"
-                      :required="true"
-                      :error="errors.password_confirmation"
+                      required
+                      :rules="passwordConfirmationRules"
+                      v-model="form.password_confirmation"
                     />
                   </div>
                   <div class="xl:col-span-12 col-span-12 grid">
@@ -61,7 +64,7 @@
                     <a href="/sign-in" class="text-primary">Voltar ao Login</a>
                   </div>
                 </div>
-              </form>
+              </BaseForm>
             </div>
           </div>
           <div class="xxl:col-span-3 xl:col-span-3 lg:col-span-3 md:col-span-3 sm:col-span-2"></div>
@@ -95,6 +98,7 @@
 <script setup>
 import { router, usePage } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import BaseForm from '@/Components/Form/BaseForm.vue';
 import Input from '@/Components/Input.vue';
 import InputPassword from '@/Components/InputPassword.vue';
 import ToastContainer from '@/Components/ToastContainer.vue';
@@ -119,14 +123,21 @@ const form = ref({
 });
 
 const isLoading = ref(false);
-const errors = ref({});
 
-const handleSubmit = async () => {
+const passwordRules = 'required|min:8';
+const passwordConfirmationRules = 'required|confirmed:@password';
+
+
+const handleSubmit = async (values, { setErrors }) => {
   isLoading.value = true;
-  errors.value = {};
 
   try {
-    router.post('/reset-password', form.value, {
+    router.post('/reset-password', {
+      token: form.value.token,
+      email: form.value.email,
+      password: values.password,
+      password_confirmation: values.password_confirmation,
+    }, {
       onSuccess: () => {
         success('Senha redefinida com sucesso! Você pode fazer login com sua nova senha.');
         setTimeout(() => {
@@ -134,11 +145,15 @@ const handleSubmit = async () => {
         }, 2000);
       },
       onError: (responseErrors) => {
-        errors.value = responseErrors;
         if (responseErrors.token) {
+          setErrors({ password: responseErrors.token });
           error('O link de redefinição de senha é inválido ou expirou. Solicite uma nova recuperação.');
         } else if (responseErrors.password) {
+          setErrors({ password: responseErrors.password[0] });
           error(responseErrors.password[0] || 'Erro na validação da senha.');
+        } else if (responseErrors.password_confirmation) {
+          setErrors({ password_confirmation: responseErrors.password_confirmation[0] });
+          error(responseErrors.password_confirmation[0] || 'Erro na confirmação da senha.');
         } else {
           error('Não foi possível redefinir sua senha. Tente novamente.');
         }

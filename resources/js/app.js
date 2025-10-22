@@ -5,6 +5,7 @@ import "../assets/css/style.css";
 import "../css/app.css";
 import "../sass/app.scss";
 import "./bootstrap.js";
+import "./plugins/validation.js";
 
 createInertiaApp({
     resolve: (name) => {

@@ -14,17 +14,18 @@
               <p class="h5 font-semibold mb-2 text-defaulttextcolor">Esqueci minha senha</p>
               <p class="mb-4 text-textmuted font-normal">Digite seu email para receber o link de recuperação</p>
               
-              <form @submit.prevent="handleSubmit">
+              <BaseForm @submit="handleSubmit">
                 <div class="grid grid-cols-12">
                   <div class="xl:col-span-12 col-span-12">
                     <Input
                       id="forgot-email"
-                      v-model="form.email"
+                      name="email"
                       type="email"
                       label="Email"
                       placeholder="email@example.com"
-                      :required="true"
-                      :error="errors.email"
+                      required
+                      :rules="emailRules"
+                      v-model="form.email"
                     />
                   </div>
                   <div class="xl:col-span-12 col-span-12 grid">
@@ -34,14 +35,14 @@
                       :disabled="isLoading"
                     >
                       <span v-if="isLoading">Enviando...</span>
-                      <span v-else">Enviar Link de Recuperação</span>
+                      <span v-else>Enviar Link de Recuperação</span>
                     </button>
                   </div>
                   <div class="xl:col-span-12 col-span-12 text-center mt-4">
                     <a href="/sign-in" class="text-primary">Voltar ao Login</a>
                   </div>
                 </div>
-              </form>
+              </BaseForm>
             </div>
           </div>
           <div class="xxl:col-span-3 xl:col-span-3 lg:col-span-3 md:col-span-3 sm:col-span-2"></div>
@@ -75,6 +76,7 @@
 <script setup>
 import { router, usePage } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import BaseForm from '@/Components/Form/BaseForm.vue';
 import Input from '@/Components/Input.vue';
 import ToastContainer from '@/Components/ToastContainer.vue';
 import { useToast } from '@/composables/useToast';
@@ -90,20 +92,22 @@ const form = ref({
 });
 
 const isLoading = ref(false);
-const errors = ref({});
 
-const handleSubmit = async () => {
+const emailRules = 'required|email';
+
+const handleSubmit = async (values, { setErrors }) => {
   isLoading.value = true;
-  errors.value = {};
 
   try {
-    router.post('/forgot-password', form.value, {
+    router.post('/forgot-password', { email: values.email }, {
       onSuccess: () => {
         success('Se o e-mail informado estiver cadastrado, você receberá instruções para redefinir sua senha.');
         form.value.email = '';
       },
       onError: (responseErrors) => {
-        errors.value = responseErrors;
+        if (responseErrors.email) {
+          setErrors({ email: responseErrors.email });
+        }
         error(responseErrors.email || 'Erro ao enviar link de recuperação. Tente novamente.');
       },
       onFinish: () => {
