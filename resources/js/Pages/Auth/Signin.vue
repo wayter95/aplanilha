@@ -2,6 +2,7 @@
   <div class="min-h-screen bg-bodybg text-defaulttextcolor">
     <div class="grid grid-cols-12 authentication mx-0 min-h-screen">
 
+      <!-- 🟢 COLUNA DO FORMULÁRIO -->
       <div class="xxl:col-span-7 xl:col-span-7 lg:col-span-12 col-span-12 bg-bodybg">
         <div class="grid grid-cols-12 items-center h-full min-h-screen">
           <div class="xxl:col-span-3 xl:col-span-3 lg:col-span-3 md:col-span-3 sm:col-span-2"></div>
@@ -14,29 +15,34 @@
               </div>
               <p class="h5 font-semibold mb-2 text-defaulttextcolor">Entrar</p>
               <p class="mb-4 text-textmuted font-normal">Bem-vindo de volta!</p>
-              
-              <form @submit.prevent="handleSubmit">
+
+              <!-- ✅ FORMULÁRIO COM VEE-VALIDATE -->
+              <BaseForm @submit="handleSubmit">
                 <div class="grid grid-cols-12">
                   <div class="xl:col-span-12 col-span-12">
                     <Input
                       id="signin-email"
-                      v-model="form.email"
+                      name="email"
                       type="email"
                       label="E-mail"
                       placeholder="email@exemplo.com"
                       required
+                      :rules="emailRules"
+                      v-model="form.email"
                     />
                   </div>
                   <div class="xl:col-span-12 col-span-12">
                     <InputPassword
                       id="signin-password"
-                      v-model="form.password"
-                      v-model:remember="form.remember"
+                      name="password"
                       label="Senha"
                       placeholder="senha"
                       required
+                      :rules="passwordRules"
                       show-remember
                       forgot-password-link="/forgot-password"
+                      v-model="form.password"
+                      v-model:remember="form.remember"
                     />
                   </div>
                   <div class="xl:col-span-12 col-span-12 grid">
@@ -50,54 +56,30 @@
                     </button>
                   </div>
                 </div>
-              </form>
+              </BaseForm>
             </div>
           </div>
           <div class="xxl:col-span-3 xl:col-span-3 lg:col-span-3 md:col-span-3 sm:col-span-2"></div>
         </div>
       </div>
-      
-      <div class="xxl:col-span-5 xl:col-span-5 lg:col-span-5 col-span-12 xl:block hidden px-0 bg-cover bg-center bg-no-repeat" :style="{ backgroundImage: `url(${backgroundImage})` }">
+
+      <!-- 🟡 COLUNA DAS IMAGENS (SWIPER) -->
+      <div 
+        class="xxl:col-span-5 xl:col-span-5 lg:col-span-5 col-span-12 xl:block hidden px-0 bg-cover bg-center bg-no-repeat" 
+        :style="{ backgroundImage: `url(${backgroundImage})` }"
+      >
         <div class="authentication-cover bg-gradient-to-br from-primary/20 to-secondary/20">
           <div class="aunthentication-cover-content rounded bg-black/50">
             <div class="swiper keyboard-control" ref="swiperContainer">
               <div class="swiper-wrapper">
-                <div class="swiper-slide">
+                <div class="swiper-slide" v-for="(img, index) in slides" :key="index">
                   <div class="text-white text-center p-[3rem] flex items-center justify-center">
                     <div>
                       <div class="mb-[3rem]">
-                        <img :src="authImage1" class="authentication-image" alt="">
+                        <img :src="img.src" class="authentication-image" alt="">
                       </div>
-                      <h6 class="font-semibold text-[1rem]">Entrar</h6>
-                      <p class="font-normal text-[0.875rem] opacity-[0.7]">
-                        Bem-vindo ao Aplanilha! Acesse sua conta para gerenciar suas planilhas e dados de forma eficiente e segura.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div class="swiper-slide">
-                  <div class="text-white text-center p-[3rem] flex items-center justify-center">
-                    <div>
-                      <div class="mb-[3rem]">
-                        <img :src="authImage2" class="authentication-image" alt="">
-                      </div>
-                      <h6 class="font-semibold text-[1rem]">Entrar</h6>
-                      <p class="font-normal text-[0.875rem] opacity-[0.7]">
-                        Bem-vindo ao Aplanilha! Acesse sua conta para gerenciar suas planilhas e dados de forma eficiente e segura.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div class="swiper-slide">
-                  <div class="text-white text-center p-[3rem] flex items-center justify-center">
-                    <div>
-                      <div class="mb-[3rem]">
-                        <img :src="authImage1" class="authentication-image" alt="">
-                      </div>
-                      <h6 class="font-semibold text-[1rem]">Entrar</h6>
-                      <p class="font-normal text-[0.875rem] opacity-[0.7]">
-                        Bem-vindo ao Aplanilha! Acesse sua conta para gerenciar suas planilhas e dados de forma eficiente e segura.
-                      </p>
+                      <h6 class="font-semibold text-[1rem]">{{ img.title }}</h6>
+                      <p class="font-normal text-[0.875rem] opacity-[0.7]">{{ img.description }}</p>
                     </div>
                   </div>
                 </div>
@@ -110,8 +92,8 @@
         </div>
       </div>
     </div>
-    
-    <!-- Toast Container -->
+
+    <!-- TOASTS -->
     <ToastContainer position="top-right" />
   </div>
 </template>
@@ -124,16 +106,20 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import { nextTick, onMounted, ref } from 'vue';
 
+import BaseForm from '@/Components/Form/BaseForm.vue';
 import Input from '@/Components/Input.vue';
 import InputPassword from '@/Components/InputPassword.vue';
 import ToastContainer from '@/Components/ToastContainer.vue';
 import { useToast } from '@/composables/useToast';
+import { useAuthValidation } from '@/composables/useAuthValidation';
+
 import backgroundImage from '../../../assets/images/authentication/1.jpg';
 import authImage1 from '../../../assets/images/authentication/2.png';
 import authImage2 from '../../../assets/images/authentication/3.png';
 
 const page = usePage();
-const { success, error, warning, info } = useToast();
+const { success, error } = useToast();
+const { loginSchema } = useAuthValidation(); // opcional, se for usar schema
 
 const form = ref({
     email: '',
@@ -141,60 +127,73 @@ const form = ref({
     remember: false
 });
 
+const emailRules = 'required|email';
+const passwordRules = 'required|min:6';
 const isLoading = ref(false);
 const swiperContainer = ref(null);
 
-const handleSubmit = async () => {
-    isLoading.value = true;
+const slides = [
+  {
+    src: authImage1,
+    title: 'Entrar',
+    description: 'Bem-vindo ao Aplanilha! Acesse sua conta para gerenciar suas planilhas e dados de forma eficiente e segura.'
+  },
+  {
+    src: authImage2,
+    title: 'Entrar',
+    description: 'Bem-vindo ao Aplanilha! Acesse sua conta para gerenciar suas planilhas e dados de forma eficiente e segura.'
+  },
+  {
+    src: authImage1,
+    title: 'Entrar',
+    description: 'Bem-vindo ao Aplanilha! Acesse sua conta para gerenciar suas planilhas e dados de forma eficiente e segura.'
+  }
+];
 
+const handleSubmit = async (values, { setErrors }) => {
+    isLoading.value = true;
     try {
-        router.post('/login', form.value, {
-            onSuccess: (page) => {
-                console.log('Login successful:', page);
+        const formData = {
+            email: values.email,
+            password: values.password,
+            remember: form.value.remember
+        };
+
+        router.post('/login', formData, {
+            onSuccess: () => {
                 success('Login realizado com sucesso!');
                 router.visit('/');
             },
             onError: (errors) => {
-                console.error('Login failed:', errors);
-                // Extrair mensagem de erro mais amigável
-                const errorMessage = errors.email || errors.password || 'Credenciais inválidas';
-                error('Erro no login: ' + errorMessage);
+                if (errors.email) setErrors({ email: errors.email });
+                if (errors.password) setErrors({ password: errors.password });
+                if (!errors.email && !errors.password) {
+                    error('Credenciais inválidas.');
+                }
             },
             onFinish: () => {
                 isLoading.value = false;
             }
         });
-    } catch (error) {
-        console.error('Login error:', error);
-        error('Erro no login: ' + error.message);
+    } catch (err) {
+        console.error('Login error:', err);
+        error('Erro no login: ' + err.message);
         isLoading.value = false;
     }
 };
 
 onMounted(async () => {
     await nextTick();
-    
     if (swiperContainer.value) {
         new Swiper(swiperContainer.value, {
             modules: [Navigation, Pagination, Autoplay, Keyboard],
             slidesPerView: 1,
             spaceBetween: 30,
-            keyboard: {
-                enabled: true,
-            },
-            pagination: {
-                el: '.swiper-pagination',
-                clickable: true,
-            },
-            navigation: {
-                nextEl: '.swiper-button-next',
-                prevEl: '.swiper-button-prev',
-            },
+            keyboard: { enabled: true },
+            pagination: { el: '.swiper-pagination', clickable: true },
+            navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
             loop: true,
-            autoplay: {
-                delay: 1500,
-                disableOnInteraction: false
-            }
+            autoplay: { delay: 1500, disableOnInteraction: false }
         });
     }
 });

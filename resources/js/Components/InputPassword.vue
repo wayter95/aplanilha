@@ -2,7 +2,7 @@
   <div class="mb-4">
     <label 
       v-if="label" 
-      :for="id" 
+      :for="inputId" 
       class="form-label text-defaulttextcolor block"
     >
       {{ label }}
@@ -19,15 +19,16 @@
     <div class="input-group">
       <input 
         :type="passwordType"
-        :id="id"
+        :id="inputId"
         :name="name"
         :placeholder="placeholder"
-        :value="modelValue"
+        :value="fieldValue"
         :required="required"
         :disabled="disabled"
         :class="inputClasses"
-        @input="$emit('update:modelValue', $event.target.value)"
-        @blur="$emit('blur', $event)"
+        v-bind="fieldProps"
+        @input="handleInput"
+        @blur="handleBlur"
         @focus="$emit('focus', $event)"
       >
       <button 
@@ -40,31 +41,32 @@
       </button>
     </div>
     
+    <!-- Prioriza erro de validação do VeeValidate, depois o erro customizado -->
+    <p v-if="displayError" class="text-danger text-xs mt-1">{{ displayError }}</p>
+    <p v-if="help && !displayError" class="text-textmuted text-xs mt-1">{{ help }}</p>
     <div v-if="showRemember" class="mt-2">
       <div class="form-check !ps-0">
         <input 
           class="form-check-input" 
           type="checkbox" 
-          :id="`remember-${id}`"
+          :id="`remember-${inputId}`"
           v-model="rememberValue"
           @change="$emit('update:remember', $event.target.checked)"
         >
         <label 
           class="form-check-label text-textmuted font-normal" 
-          :for="`remember-${id}`"
+          :for="`remember-${inputId}`"
         >
           Lembrar senha?
         </label>
       </div>
     </div>
-    
-    <p v-if="error" class="text-danger text-xs mt-1">{{ error }}</p>
-    <p v-if="help" class="text-textmuted text-xs mt-1">{{ help }}</p>
   </div>
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, nextTick } from 'vue'
+import { useField } from 'vee-validate'
 
 const props = defineProps({
   modelValue: {
@@ -119,6 +121,19 @@ const props = defineProps({
   forgotPasswordLink: {
     type: String,
     default: ''
+  },
+  // Props para integração com VeeValidate
+  rules: {
+    type: [String, Function, Object, Array],
+    default: ''
+  },
+  validateOnBlur: {
+    type: Boolean,
+    default: true
+  },
+  validateOnInput: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -127,11 +142,76 @@ const emit = defineEmits(['update:modelValue', 'update:remember', 'blur', 'focus
 const showPassword = ref(false)
 const rememberValue = ref(props.remember)
 
+// Usar VeeValidate se houver um nome de campo definido
+const fieldName = computed(() => props.name || props.id)
+
+// Configurar VeeValidate field apenas se houver rules ou se estiver dentro de um Form
+let field = null
+let fieldValue = computed(() => props.modelValue)
+let fieldProps = computed(() => ({}))
+let errorMessage = computed(() => '')
+let meta = computed(() => ({ touched: false, valid: true }))
+
+// Tentar configurar VeeValidate (falhará silenciosamente se não estiver em um contexto de Form)
+try {
+  if (props.rules || fieldName.value) {
+    const veeField = useField(fieldName.value, props.rules, {
+      validateOnValueUpdate: props.validateOnInput,
+      initialValue: props.modelValue
+    })
+    
+    field = veeField
+    fieldValue = veeField.value
+    errorMessage = veeField.errorMessage
+    meta = veeField.meta
+    
+    fieldProps = computed(() => ({
+      onBlur: veeField.handleBlur,
+    }))
+  }
+} catch (error) {
+  // Se VeeValidate não estiver disponível, usar valores padrão
+  console.debug('VeeValidate não disponível para este campo:', fieldName.value)
+}
+
+// ID único para o input
+const inputId = computed(() => props.id)
+
+// Controle de visibilidade da senha
 const passwordType = computed(() => showPassword.value ? 'text' : 'password')
 const passwordIcon = computed(() => showPassword.value ? 'ri-eye-line' : 'ri-eye-off-line')
 
 const togglePassword = () => {
   showPassword.value = !showPassword.value
+}
+
+// Erro a ser exibido (prioriza VeeValidate, depois custom)
+const displayError = computed(() => {
+  return errorMessage.value || props.error
+})
+
+// Manipulação de input
+const handleInput = (event) => {
+  const value = event.target.value
+  
+  // Atualizar VeeValidate se disponível
+  if (field) {
+    fieldValue.value = value
+  }
+  
+  // Emitir para v-model
+  emit('update:modelValue', value)
+}
+
+// Manipulação de blur
+const handleBlur = (event) => {
+  // Chamar handler do VeeValidate se disponível
+  if (field && props.validateOnBlur) {
+    field.handleBlur(event)
+  }
+  
+  // Emitir evento
+  emit('blur', event)
 }
 
 const inputClasses = computed(() => {
@@ -141,14 +221,45 @@ const inputClasses = computed(() => {
     md: 'form-control',
     lg: 'form-control-lg'
   }
-  const errorClasses = props.error ? 'border-danger' : ''
+  
+  // Classes de validação
+  let validationClasses = ''
+  if (meta.value.touched) {
+    if (displayError.value) {
+      validationClasses = 'border-danger'
+    } else if (meta.value.valid && fieldValue.value) {
+      validationClasses = 'border-success'
+    }
+  } else if (displayError.value) {
+    validationClasses = 'border-danger'
+  }
+  
   const disabledClasses = props.disabled ? 'opacity-50 cursor-not-allowed' : ''
   
   return [
     baseClasses,
     sizeClasses[props.size],
-    errorClasses,
+    validationClasses,
     disabledClasses
   ].filter(Boolean).join(' ')
+})
+
+// Exposer métodos para acesso externo
+defineExpose({
+  focus: () => {
+    nextTick(() => {
+      document.getElementById(inputId.value)?.focus()
+    })
+  },
+  blur: () => {
+    nextTick(() => {
+      document.getElementById(inputId.value)?.blur()
+    })
+  },
+  fieldValue,
+  errorMessage: displayError,
+  meta,
+  validate: field?.validate,
+  togglePassword
 })
 </script>
