@@ -35,12 +35,13 @@
 
             <InputPassword
               id="create-user-password"
+              name="password"
               v-model="form.password"
               label="Senha"
               placeholder="Digite a senha"
               required
-            />
-
+            />  
+<!--  -->
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Função

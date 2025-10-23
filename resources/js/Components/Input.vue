@@ -171,10 +171,14 @@ const inputClasses = computed(() => {
   
   // Classes de validação
   let validationClasses = ''
-  if (meta.value.touched) {
+  // proteger acesso a meta.value (pode ser undefined quando não estiver em um Form)
+  const metaTouched = (meta && meta.value && typeof meta.value.touched !== 'undefined') ? meta.value.touched : false
+  const metaValid = (meta && meta.value && typeof meta.value.valid !== 'undefined') ? meta.value.valid : true
+
+  if (metaTouched) {
     if (displayError.value) {
       validationClasses = 'border-danger'
-    } else if (meta.value.valid && fieldValue.value) {
+    } else if (metaValid && fieldValue.value) {
       validationClasses = 'border-success'
     }
   } else if (displayError.value) {
