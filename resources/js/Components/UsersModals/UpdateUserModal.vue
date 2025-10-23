@@ -16,56 +16,89 @@
           </button>
         </div>
 
-        <!-- Form -->
-        <form @submit.prevent="updateUser">
+        <!-- ✅ BaseForm para validação -->
+        <BaseForm @submit="updateUser">
           <div class="space-y-4">
-            <Input
-              id="update-user-name"
-              v-model="form.name"
-              type="text"
-              label="Nome"
-              placeholder="Digite o nome do usuário"
-              required
-            />
+            <div>
+              <Input
+                id="update-user-name"
+                name="name"
+                v-model="form.name"
+                type="text"
+                label="Nome"
+                placeholder="Digite o nome do usuário"
+                required
+                :rules="nameRules"
+              />
+              <p v-if="errors.name" class="text-danger text-xs mt-1">{{ errors.name }}</p>
+            </div>
 
-            <Input
-              id="update-user-email"
-              v-model="form.email"
-              type="email"
-              label="E-mail"
-              placeholder="Digite o e-mail do usuário"
-              required
-            />
+            <div>
+              <Input
+                id="update-user-email"
+                name="email"
+                v-model="form.email"
+                type="email"
+                label="E-mail"
+                placeholder="Digite o e-mail do usuário"
+                required
+                :rules="emailRules"
+              />
+              <p v-if="errors.email" class="text-danger text-xs mt-1">{{ errors.email }}</p>
+            </div>
 
-            <InputPassword
-              id="update-user-password"
-              v-model="form.password"
-              label="Nova Senha"
-              placeholder="Digite uma nova senha"
-              help="Deixe em branco para manter a atual"
-            />
+            <div>
+              <InputPassword
+                id="update-user-password"
+                name="password"
+                v-model="form.password"
+                label="Nova Senha"
+                placeholder="Digite uma nova senha"
+                help="Deixe em branco para manter a atual"
+                :rules="passwordOptionalRules"
+              />
+              <p v-if="errors.password" class="text-danger text-xs mt-1">{{ errors.password }}</p>
+            </div>
 
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Função
               </label>
-              <select v-model="form.role" required class="ti-form-select">
+              <select
+                v-model="form.role"
+                name="role"
+                required
+                class="ti-form-select"
+                :class="{ 'border-danger': errors.role }"
+                v-validate
+                :rules="roleRules"
+              >
                 <option value="">Selecione uma função</option>
                 <option v-for="role in availableRoles" :key="role.id" :value="role.name">
                   {{ role.display_name }}
                 </option>
               </select>
+              <p v-if="errors.role" class="text-danger text-xs mt-1">{{ errors.role }}</p>
             </div>
 
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Status
               </label>
-              <select v-model="form.status" required class="ti-form-select">
+              <select
+                v-model="form.status"
+                name="status"
+                required
+                class="ti-form-select"
+                :class="{ 'border-danger': errors.status }"
+                v-validate
+                :rules="statusRules"
+              >
                 <option value="">Selecione um status</option>
                 <option value="Ativo">Ativo</option>
                 <option value="Inativo">Inativo</option>
               </select>
+              <p v-if="errors.status" class="text-danger text-xs mt-1">{{ errors.status }}</p>
             </div>
           </div>
 
@@ -81,11 +114,12 @@
             <button
               type="submit"
               class="ti-btn btn-wave ti-btn-primary"
+              :disabled="isSubmitting"
             >
               Atualizar Usuário
             </button>
           </div>
-        </form>
+        </BaseForm>
       </div>
     </div>
   </div>
@@ -94,26 +128,19 @@
 <script setup>
 import Input from '@/Components/Input.vue'
 import InputPassword from '@/Components/InputPassword.vue'
+import BaseForm from '@/Components/Form/BaseForm.vue'
 import { useToast } from '@/composables/useToast'
 import { usePage } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
+import { useForm } from 'vee-validate'
 
 const page = usePage()
 const { success, error } = useToast()
 
 const props = defineProps({
-  show: {
-    type: Boolean,
-    default: false
-  },
-  user: {
-    type: Object,
-    default: null
-  },
-  availableRoles: {
-    type: Array,
-    default: () => []
-  }
+  show: { type: Boolean, default: false },
+  user: { type: Object, default: null },
+  availableRoles: { type: Array, default: () => [] }
 })
 
 const emit = defineEmits(['close', 'user-updated'])
@@ -125,6 +152,16 @@ const form = ref({
   role: '',
   status: ''
 })
+
+// 🧭 Regras de validação
+const nameRules = 'required|min:2|max:100|alpha_spaces'
+const emailRules = 'required|email'
+const passwordOptionalRules = 'min:8' // senha não obrigatória na atualização
+const roleRules = 'required'
+const statusRules = 'required'
+
+// 📌 vee-validate
+const { errors, handleSubmit, isSubmitting } = useForm()
 
 // Get role ID by name from available roles
 const getRoleIdByName = (roleName) => {
@@ -145,7 +182,7 @@ watch(() => props.user, (newUser) => {
   }
 }, { immediate: true })
 
-const updateUser = async () => {
+const updateUser = handleSubmit(async () => {
   if (!props.user || !props.user.id) {
     console.error('No user ID provided')
     return
@@ -154,12 +191,11 @@ const updateUser = async () => {
   try {
     // Get role ID from role name
     const roleId = getRoleIdByName(form.value.role)
-    
+
     // Prepare data with status instead of is_active
     const dataToSend = {
       ...form.value,
       role_id: roleId,
-      // Convert status to is_active for backend
       is_active: form.value.status === 'Ativo'
     }
 
@@ -182,13 +218,11 @@ const updateUser = async () => {
       console.error('Error updating user:', result.message)
       error('Erro ao atualizar usuário: ' + result.message)
     }
-  } catch (error) {
-    console.error('Error updating user:', error)
+  } catch (err) {
+    console.error('Error updating user:', err)
     error('Erro ao atualizar usuário')
   }
-}
+})
 
-const close = () => {
-  emit('close')
-}
+const close = () => emit('close')
 </script>

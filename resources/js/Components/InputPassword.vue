@@ -44,6 +44,7 @@
     <!-- Prioriza erro de validação do VeeValidate, depois o erro customizado -->
     <p v-if="displayError" class="text-danger text-xs mt-1">{{ displayError }}</p>
     <p v-if="help && !displayError" class="text-textmuted text-xs mt-1">{{ help }}</p>
+
     <div v-if="showRemember" class="mt-2">
       <div class="form-check !ps-0">
         <input 
@@ -142,42 +143,37 @@ const emit = defineEmits(['update:modelValue', 'update:remember', 'blur', 'focus
 const showPassword = ref(false)
 const rememberValue = ref(props.remember)
 
-// Usar VeeValidate se houver um nome de campo definido
+// Campo e VeeValidate ------------------------------------------------
 const fieldName = computed(() => props.name || props.id)
 
-// Configurar VeeValidate field apenas se houver rules ou se estiver dentro de um Form
 let field = null
 let fieldValue = computed(() => props.modelValue)
 let fieldProps = computed(() => ({}))
 let errorMessage = computed(() => '')
 let meta = computed(() => ({ touched: false, valid: true }))
 
-// Tentar configurar VeeValidate (falhará silenciosamente se não estiver em um contexto de Form)
 try {
-  if (props.rules || fieldName.value) {
+  if ((props.rules && fieldName.value) || (fieldName.value && fieldName.value.trim() !== '')) {
     const veeField = useField(fieldName.value, props.rules, {
       validateOnValueUpdate: props.validateOnInput,
       initialValue: props.modelValue
     })
-    
+
     field = veeField
     fieldValue = veeField.value
     errorMessage = veeField.errorMessage
     meta = veeField.meta
-    
+
     fieldProps = computed(() => ({
-      onBlur: veeField.handleBlur,
+      onBlur: veeField.handleBlur
     }))
   }
 } catch (error) {
-  // Se VeeValidate não estiver disponível, usar valores padrão
   console.debug('VeeValidate não disponível para este campo:', fieldName.value)
 }
 
-// ID único para o input
+// Input IDs e visibilidade -------------------------------------------
 const inputId = computed(() => props.id)
-
-// Controle de visibilidade da senha
 const passwordType = computed(() => showPassword.value ? 'text' : 'password')
 const passwordIcon = computed(() => showPassword.value ? 'ri-eye-line' : 'ri-eye-off-line')
 
@@ -185,35 +181,26 @@ const togglePassword = () => {
   showPassword.value = !showPassword.value
 }
 
-// Erro a ser exibido (prioriza VeeValidate, depois custom)
+// Erro a exibir (prioriza VeeValidate) -------------------------------
 const displayError = computed(() => {
   return errorMessage.value || props.error
 })
 
-// Manipulação de input
+// Manipulação de eventos --------------------------------------------
 const handleInput = (event) => {
   const value = event.target.value
-  
-  // Atualizar VeeValidate se disponível
-  if (field) {
-    fieldValue.value = value
-  }
-  
-  // Emitir para v-model
+  if (field) fieldValue.value = value
   emit('update:modelValue', value)
 }
 
-// Manipulação de blur
 const handleBlur = (event) => {
-  // Chamar handler do VeeValidate se disponível
   if (field && props.validateOnBlur) {
     field.handleBlur(event)
   }
-  
-  // Emitir evento
   emit('blur', event)
 }
 
+// Classes ------------------------------------------------------------
 const inputClasses = computed(() => {
   const baseClasses = 'form-control w-full !border-s border-inputborder !rounded-e-none bg-defaultbackground text-defaulttextcolor'
   const sizeClasses = {
@@ -221,21 +208,23 @@ const inputClasses = computed(() => {
     md: 'form-control',
     lg: 'form-control-lg'
   }
-  
-  // Classes de validação
+
+  const metaTouched = (meta && meta.value && typeof meta.value.touched !== 'undefined') ? meta.value.touched : false
+  const metaValid = (meta && meta.value && typeof meta.value.valid !== 'undefined') ? meta.value.valid : true
+
   let validationClasses = ''
-  if (meta.value.touched) {
+  if (metaTouched) {
     if (displayError.value) {
       validationClasses = 'border-danger'
-    } else if (meta.value.valid && fieldValue.value) {
+    } else if (metaValid && fieldValue.value) {
       validationClasses = 'border-success'
     }
   } else if (displayError.value) {
     validationClasses = 'border-danger'
   }
-  
+
   const disabledClasses = props.disabled ? 'opacity-50 cursor-not-allowed' : ''
-  
+
   return [
     baseClasses,
     sizeClasses[props.size],
@@ -244,7 +233,7 @@ const inputClasses = computed(() => {
   ].filter(Boolean).join(' ')
 })
 
-// Exposer métodos para acesso externo
+// Métodos expostos ---------------------------------------------------
 defineExpose({
   focus: () => {
     nextTick(() => {
