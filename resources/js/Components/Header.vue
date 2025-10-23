@@ -187,17 +187,17 @@
               <ul class="text-defaulttextcolor font-medium dark:text-white/50">
                 <li>
                   <a class="w-full ti-dropdown-item !text-[0.8125rem] !gap-x-0 !p-[0.65rem] !inline-flex" href="/profile">
-                    <i class="bx bx-user-circle text-[1.125rem] me-2 opacity-[0.7]"></i>Profile
+                    <i class="bx bx-user-circle text-[1.125rem] me-2 opacity-[0.7]"></i>Perfil
                   </a>
                 </li>
                 <li>
                   <a class="w-full ti-dropdown-item !text-[0.8125rem] !gap-x-0 !p-[0.65rem] !inline-flex" href="/settings">
-                    <i class="bx bx-cog text-[1.125rem] me-2 opacity-[0.7]"></i>Settings
+                    <i class="bx bx-cog text-[1.125rem] me-2 opacity-[0.7]"></i>Configurações
                   </a>
                 </li>
                 <li>
                   <button @click="logout" class="w-full ti-dropdown-item !text-[0.8125rem] !p-[0.65rem] !gap-x-0 !inline-flex text-left">
-                    <i class="bx bx-log-out text-[1.125rem] me-2 opacity-[0.7]"></i>Log Out
+                    <i class="bx bx-log-out text-[1.125rem] me-2 opacity-[0.7]"></i>Sair
                   </button>
                 </li>
               </ul>
