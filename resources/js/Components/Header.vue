@@ -63,8 +63,8 @@
               class="absolute right-0 top-full mt-2 bg-white dark:bg-gray-800 !w-[22rem] border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 !m-0"
             >
               <div class="ti-dropdown-header !m-0 !p-4 !bg-transparent flex justify-between items-center">
-                <p class="mb-0 text-[1.0625rem] text-defaulttextcolor font-semibold dark:text-white/50">Notifications</p>
-                <span class="text-[0.75em] py-[0.25rem/2] px-[0.45rem] font-[600] rounded-sm bg-secondary/10 text-secondary" id="notifiation-data">3 Unread</span>
+                <p class="mb-0 text-[1.0625rem] text-defaulttextcolor font-semibold dark:text-white/50">Notificações</p>
+                <span class="text-[0.75em] py-[0.25rem/2] px-[0.45rem] font-[600] rounded-sm bg-secondary/10 text-secondary" id="notifiation-data">3 Não Lidas</span>
               </div>
               <div class="dropdown-divider"></div>
               
