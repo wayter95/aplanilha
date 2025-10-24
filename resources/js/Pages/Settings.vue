@@ -72,7 +72,10 @@
                     Informações básicas da sua conta
                   </p>
                 </div>
-                <button class="text-primary hover:text-primary-dark text-sm font-medium">
+                <button 
+                  @click="showPersonalDataModal = true"
+                  class="text-primary hover:text-primary-dark text-sm font-medium"
+                >
                   Alterar
                 </button>
               </div>
@@ -146,7 +149,10 @@
                     Credenciais para entrar na plataforma
                   </p>
                 </div>
-                <button class="text-primary hover:text-primary-dark text-sm font-medium">
+                <button 
+                  @click="showPasswordModal = true"
+                  class="text-primary hover:text-primary-dark text-sm font-medium"
+                >
                   Alterar
                 </button>
               </div>
@@ -260,14 +266,30 @@
       </div>
     </div>
   </AppLayout>
+
+  <!-- Modais -->
+  <UpdatePersonalDataModal 
+    :show="showPersonalDataModal" 
+    :user="props.user"
+    @close="showPersonalDataModal = false"
+    @personal-data-updated="handlePersonalDataUpdated"
+  />
+  
+  <UpdatePasswordModal 
+    :show="showPasswordModal" 
+    @close="showPasswordModal = false"
+    @password-updated="handlePasswordUpdated"
+  />
 </template>
 
 <script setup>
 import PhotoUpload from '@/Components/PhotoUpload.vue'
+import UpdatePasswordModal from '@/Components/SettingsModals/UpdatePasswordModal.vue'
+import UpdatePersonalDataModal from '@/Components/SettingsModals/UpdatePersonalDataModal.vue'
 import { usePhotoUrl } from '@/composables/usePhotoUrl'
 import { useToast } from '@/composables/useToast'
 import AppLayout from '@/Layouts/AppLayout.vue'
-import { usePage } from '@inertiajs/vue3'
+import { router, usePage } from '@inertiajs/vue3'
 import { onMounted, onUnmounted, ref } from 'vue'
 
 const { success, error: showError } = useToast()
@@ -284,6 +306,10 @@ const props = defineProps({
 const activeSection = ref('personal')
 const userPhoto = ref(props.user?.photo_key || null) // Mudança: usar photo_key em vez de avatar_path
 const currentPhotoUrl = ref(null)
+
+// Estados dos modais
+const showPersonalDataModal = ref(false)
+const showPasswordModal = ref(false)
 
 // Função para carregar a URL temporária da foto
 const loadUserPhotoUrl = async () => {
@@ -394,5 +420,19 @@ onMounted(async () => {
 onUnmounted(() => {
   window.removeEventListener('user-photo-updated', handlePhotoUpdate)
 })
+
+// Funções de callback para os modais
+const handlePersonalDataUpdated = (updatedUser) => {
+  // Atualizar os dados do usuário na página
+  if (updatedUser) {
+    // Recarregar a página para atualizar os dados
+    router.reload()
+  }
+}
+
+const handlePasswordUpdated = () => {
+  // Senha foi alterada com sucesso
+  // Não precisa fazer nada específico além do toast que já é exibido no modal
+}
 
 </script>

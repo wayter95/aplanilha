@@ -5,6 +5,7 @@ use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\Api\UserSettingsController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -53,6 +54,12 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/temporary-url', [FileUploadController::class, 'generateTemporaryUrl'])->name('files.temporary-url');
         Route::get('/signed-url', [FileUploadController::class, 'getSignedUrl'])->name('uploads.signed-url');
         Route::delete('/delete', [FileUploadController::class, 'deleteFile'])->name('files.delete');
+    });
+    
+    // Rotas para configurações do usuário
+    Route::prefix('api/user')->group(function () {
+        Route::put('/personal-data', [UserSettingsController::class, 'updatePersonalData'])->name('user.personal-data');
+        Route::put('/password', [UserSettingsController::class, 'updatePassword'])->name('user.password');
     });
     
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
