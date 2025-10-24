@@ -126,6 +126,8 @@ class UserController extends Controller
                 'password' => 'nullable|string|min:8',
                 'role_id' => 'nullable|exists:user_roles,id',
                 'is_active' => 'boolean',
+                'phone' => 'nullable|string|max:20',
+                'username' => 'nullable|string|max:50',
             ]);
 
             $user = $this->userService->updateUser($id, $validatedData);
@@ -133,6 +135,28 @@ class UserController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Usuário atualizado com sucesso!',
+                'user' => $user,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    public function updatePhoto(Request $request, string $id): JsonResponse
+    {
+        try {
+            $validatedData = $request->validate([
+                'photo_key' => 'required|string', // Validando photo_key em vez de avatar_path
+            ]);
+
+            $user = $this->userService->updateUser($id, $validatedData);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Foto atualizada com sucesso!',
                 'user' => $user,
             ]);
         } catch (Exception $e) {

@@ -106,7 +106,19 @@
                     <div v-if="column.type === 'user'">
                       <div class="flex items-center gap-3">
                         <div class="avatar avatar-sm avatar-rounded">
-                          <div class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                          <img 
+                            v-if="getUserPhoto(row, column.photoKey)"
+                            :src="getUserPhoto(row, column.photoKey)"
+                            :alt="getNestedValue(row, column.nameKey || 'name')"
+                            class="w-8 h-8 object-cover"
+                            style="border-radius: 50%;"
+                            @error="handleImageError"
+                          />
+                          <div 
+                            v-else
+                            class="w-8 h-8 bg-primary text-white flex items-center justify-center text-sm font-semibold fallback-initials"
+                            style="border-radius: 50%;"
+                          >
                             {{ getInitials(getNestedValue(row, column.nameKey || 'name')) }}
                           </div>
                         </div>
@@ -267,7 +279,14 @@
 </template>
 
 <script setup>
+import { usePhotoUrl } from '@/composables/usePhotoUrl'
 import { computed, ref, watch } from 'vue'
+
+// Composables
+const { getPhotoUrl } = usePhotoUrl()
+
+// Estado para URLs de fotos carregadas
+const photoUrls = ref(new Map())
 
 const props = defineProps({
   title: {
@@ -474,6 +493,42 @@ const getStatusValue = (obj, key) => {
 const getInitials = (name) => {
   if (!name) return ''
   return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+}
+
+const getUserPhoto = (row, photoKey) => {
+  if (!photoKey) return null
+  
+  const photoValue = getNestedValue(row, photoKey)
+  if (!photoValue) return null
+  
+  // Se é uma URL completa, usar diretamente
+  if (photoValue.startsWith('http')) {
+    return photoValue
+  }
+  
+  // Se é uma key, verificar se já temos a URL temporária carregada
+  if (photoUrls.value.has(photoValue)) {
+    return photoUrls.value.get(photoValue)
+  }
+  
+  // Se não temos, buscar a URL temporária
+  getPhotoUrl(photoValue).then(url => {
+    if (url) {
+      photoUrls.value.set(photoValue, url)
+    }
+  })
+  
+  return null
+}
+
+const handleImageError = (event) => {
+  // Se a imagem falhar ao carregar, esconder a img e mostrar as iniciais
+  event.target.style.display = 'none'
+  const parent = event.target.parentElement
+  const fallback = parent.querySelector('.fallback-initials')
+  if (fallback) {
+    fallback.style.display = 'flex'
+  }
 }
 
 const formatDate = (date) => {

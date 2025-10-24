@@ -31,8 +31,8 @@
 </template>
 
 <script setup>
-import { computed, nextTick } from 'vue'
 import { useField } from 'vee-validate'
+import { computed, nextTick } from 'vue'
 
 const props = defineProps({
   modelValue: {
@@ -171,7 +171,7 @@ const inputClasses = computed(() => {
   
   // Classes de validação
   let validationClasses = ''
-  if (meta.value.touched) {
+  if (meta.value && meta.value.touched) {
     if (displayError.value) {
       validationClasses = 'border-danger'
     } else if (meta.value.valid && fieldValue.value) {

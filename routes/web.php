@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
@@ -15,6 +16,12 @@ Route::middleware(['auth'])->group(function () {
     
     Route::get('roles', [RoleController::class, 'index'])->name('roles');
     
+    Route::get('settings', function () {
+        return Inertia::render('Settings', [
+            'user' => Auth::user()
+        ]);
+    })->name('settings');
+    
     Route::prefix('api/users')->group(function () {
         Route::post('/', [UserController::class, 'store'])->name('users.store');
         Route::get('/{id}', [UserController::class, 'show'])->name('users.show');
@@ -26,6 +33,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/export/csv', [UserController::class, 'exportCsv'])->name('users.export.csv');
     });
     
+    Route::prefix('api/users')->group(function () {
+        Route::patch('/{id}/photo', [UserController::class, 'updatePhoto'])->name('users.update-photo');
+    });
+    
     Route::prefix('api/roles')->group(function () {
         Route::post('/', [RoleController::class, 'store'])->name('roles.store');
         Route::get('/{id}', [RoleController::class, 'show'])->name('roles.show');
@@ -35,6 +46,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/statistics', [RoleController::class, 'statistics'])->name('roles.statistics');
         Route::get('/permissions', [RoleController::class, 'permissions'])->name('roles.permissions');
         Route::get('/export/csv', [RoleController::class, 'exportCsv'])->name('roles.export.csv');
+    });
+    
+    Route::prefix('api/files')->group(function () {
+        Route::post('/presigned-url', [FileUploadController::class, 'generatePresignedUrl'])->name('files.presigned-url');
+        Route::post('/temporary-url', [FileUploadController::class, 'generateTemporaryUrl'])->name('files.temporary-url');
+        Route::get('/signed-url', [FileUploadController::class, 'getSignedUrl'])->name('uploads.signed-url');
+        Route::delete('/delete', [FileUploadController::class, 'deleteFile'])->name('files.delete');
     });
     
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

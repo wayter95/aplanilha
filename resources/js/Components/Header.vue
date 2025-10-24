@@ -171,7 +171,16 @@
               class="header-link-icon inline-flex flex-shrink-0 justify-center items-center gap-3 !rounded-full font-medium dark:hover:bg-black/20 dark:text-white/50 dark:hover:text-white dark:focus:ring-white/10 dark:focus:ring-offset-white/10 hover:bg-gray-100 p-2"
             >
               <div class="user-avatar">
-                {{ user?.name?.charAt(0)?.toUpperCase() || 'U' }}
+                <img 
+                  v-if="userPhotoUrl" 
+                  :src="userPhotoUrl" 
+                  :alt="user?.name"
+                  class="w-full h-full object-cover"
+                  style="border-radius: 50%;"
+                />
+                <span v-else class="text-white font-semibold">
+                  {{ user?.name?.charAt(0)?.toUpperCase() || 'U' }}
+                </span>
               </div>
             </button>
             
@@ -185,11 +194,6 @@
               class="absolute right-0 top-full mt-2 border-0 w-[11rem] !p-0 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-50 pt-0 overflow-hidden header-profile-dropdown"
             >
               <ul class="text-defaulttextcolor font-medium dark:text-white/50">
-                <li>
-                  <a class="w-full ti-dropdown-item !text-[0.8125rem] !gap-x-0 !p-[0.65rem] !inline-flex" href="/profile">
-                    <i class="bx bx-user-circle text-[1.125rem] me-2 opacity-[0.7]"></i>Perfil
-                  </a>
-                </li>
                 <li>
                   <a class="w-full ti-dropdown-item !text-[0.8125rem] !gap-x-0 !p-[0.65rem] !inline-flex" href="/settings">
                     <i class="bx bx-cog text-[1.125rem] me-2 opacity-[0.7]"></i>Configurações
@@ -211,8 +215,9 @@
 </template>
 
 <script setup>
+import { usePhotoUrl } from '@/composables/usePhotoUrl'
 import { router } from '@inertiajs/vue3'
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 
 const props = defineProps({
   user: {
@@ -223,9 +228,13 @@ const props = defineProps({
 
 const emit = defineEmits(['toggle-sidebar'])
 
+// Composables
+const { getPhotoUrl } = usePhotoUrl()
+
 const showNotifications = ref(false)
 const showUserMenu = ref(false)
 const isFullscreen = ref(false)
+const userPhotoUrl = ref(null)
 const isDark = ref(false)
 const isLight = ref(false)
 
@@ -292,6 +301,61 @@ const toggleSidebarCollapse = () => {
 const logout = () => {
   router.post('/logout')
 }
+
+// Função para carregar a foto do usuário
+const loadUserPhoto = async () => {
+  console.log('Header: loadUserPhoto chamada')
+  if (props.user?.photo_key) { // Mudança: usar photo_key em vez de avatar_path
+    console.log('Header: Photo key encontrado:', props.user.photo_key)
+    // Usar o composable para buscar URL temporária
+    const url = await getPhotoUrl(props.user.photo_key)
+    if (url) {
+      console.log('Header: URL temporária gerada:', url)
+      userPhotoUrl.value = url
+    }
+  } else {
+    console.log('Header: Nenhum photo_key encontrado')
+    userPhotoUrl.value = null
+  }
+}
+
+// Escutar eventos de atualização da foto
+const handlePhotoUpdate = (event) => {
+  console.log('Header: Evento de atualização da foto recebido', event.detail)
+  if (event.detail.userId === props.user?.id) {
+    // Se recebeu uma nova key, buscar URL temporária
+    if (event.detail.photoKey) {
+      getPhotoUrl(event.detail.photoKey).then(url => {
+        if (url) {
+          userPhotoUrl.value = url
+        }
+      })
+    } else if (event.detail.photoUrl) {
+      // Se recebeu URL diretamente, usar
+      userPhotoUrl.value = event.detail.photoUrl
+    }
+  }
+}
+
+// Watch para carregar foto quando o usuário mudar
+watch(() => props.user, () => {
+  loadUserPhoto()
+}, { immediate: true })
+
+onMounted(() => {
+  console.log('Header: Usuário carregado:', props.user)
+  console.log('Header: Photo key:', props.user?.photo_key)
+  
+  loadUserPhoto()
+  
+  // Escutar eventos globais de atualização da foto
+  window.addEventListener('user-photo-updated', handlePhotoUpdate)
+})
+
+// Cleanup
+onUnmounted(() => {
+  window.removeEventListener('user-photo-updated', handlePhotoUpdate)
+})
 
 const getDisplayName = (fullName) => {
   if (!fullName) return 'Usuário'

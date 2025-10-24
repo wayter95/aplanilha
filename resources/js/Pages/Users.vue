@@ -91,14 +91,15 @@ const showDeleteModal = ref(false)
 const selectedUser = ref(null)
 
 const columns = [
-  {
-    key: 'name',
-    label: 'Nome do Usuário',
-    type: 'user',
-    nameKey: 'name',
-    emailKey: 'email',
-    sortable: true
-  },
+    {
+      key: 'name',
+      label: 'Nome do Usuário',
+      type: 'user',
+      nameKey: 'name',
+      emailKey: 'email',
+      photoKey: 'photo_key', // Mudança: usar photo_key em vez de avatar_path
+      sortable: true
+    },
   {
     key: 'is_active',
     label: 'Status',

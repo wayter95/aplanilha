@@ -154,41 +154,7 @@ class UserService
         return $user;
     }
 
-    public function uploadAvatar(string $userId, UploadedFile $file): string
-    {
-        $user = $this->userRepository->findById($userId);
-        
-        if (!$user) {
-            throw new \Exception('Usuário não encontrado.');
-        }
-
-        if ($user->avatar_path && Storage::exists($user->avatar_path)) {
-            Storage::delete($user->avatar_path);
-        }
-
-        $path = $file->store('avatars', 'public');
-        
-        $user->update(['avatar_path' => $path]);
-        
-        return $path;
-    }
-
-    public function removeAvatar(string $userId): bool
-    {
-        $user = $this->userRepository->findById($userId);
-        
-        if (!$user) {
-            throw new \Exception('Usuário não encontrado.');
-        }
-
-        if ($user->avatar_path && Storage::exists($user->avatar_path)) {
-            Storage::delete($user->avatar_path);
-        }
-
-        $user->update(['avatar_path' => null]);
-        
-        return true;
-    }
+    // Métodos de avatar removidos - agora usando photo_key com S3
 
     public function getUsersWithPermissions(): Collection
     {

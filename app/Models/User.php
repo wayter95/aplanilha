@@ -27,7 +27,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'avatar_path',
+        'phone',
+        'username',
+        'photo_key',
         'is_master',
         'is_active',
     ];
@@ -134,12 +136,12 @@ class User extends Authenticatable
 
     public function getAvatarUrlAttribute(): ?string
     {
-        if (!$this->avatar_path) {
+        if (!$this->photo_key) {
             return null;
         }
 
-        // Aqui  implementar a lógica para gerar URLs pré-assinadas do S3
-        // Por enquanto, retornamos o caminho como está
-        return $this->avatar_path;
+        // Retornar a URL pré-assinada para leitura
+        // O frontend deve chamar o endpoint /api/uploads/signed-url?key={photo_key}
+        return route('uploads.signed-url', ['key' => $this->photo_key]);
     }
 }

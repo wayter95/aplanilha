@@ -26,7 +26,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,NULL,id,client_id,' . app('tenant.context')->getClientId(),
             'password' => 'required|string|min:8',
-            'avatar_path' => 'nullable|string|max:255',
+            'photo_key' => 'nullable|string|max:255',
             'roles' => 'nullable|array',
             'roles.*' => 'exists:user_roles,id',
         ]);
@@ -59,7 +59,7 @@ class UserController extends Controller
             'name' => 'sometimes|string|max:255',
             'email' => 'sometimes|email|unique:users,email,' . $id . ',id,client_id,' . app('tenant.context')->getClientId(),
             'password' => 'sometimes|string|min:8',
-            'avatar_path' => 'nullable|string|max:255',
+            'photo_key' => 'nullable|string|max:255',
             'roles' => 'nullable|array',
             'roles.*' => 'exists:user_roles,id',
         ]);
