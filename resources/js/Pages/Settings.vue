@@ -204,7 +204,10 @@
                     Informações da sua organização
                   </p>
                 </div>
-                <button class="text-primary hover:text-primary-dark text-sm font-medium">
+                <button 
+                  @click="showCompanyDataModal = true"
+                  class="text-primary hover:text-primary-dark text-sm font-medium"
+                >
                   Alterar
                 </button>
               </div>
@@ -216,7 +219,7 @@
                   </div>
                   <div>
                     <p class="text-sm text-gray-500 dark:text-gray-400">Nome da empresa</p>
-                    <p class="font-medium text-gray-900 dark:text-white">{{ company.name || 'Não informado' }}</p>
+                    <p class="font-medium text-gray-900 dark:text-white">{{ props.company?.name || 'Não informado' }}</p>
                   </div>
                 </div>
 
@@ -226,7 +229,7 @@
                   </div>
                   <div>
                     <p class="text-sm text-gray-500 dark:text-gray-400">CNPJ</p>
-                    <p class="font-medium text-gray-900 dark:text-white">{{ company.cnpj || 'Não informado' }}</p>
+                    <p class="font-medium text-gray-900 dark:text-white">{{ props.company?.cnpj || 'Não informado' }}</p>
                   </div>
                 </div>
 
@@ -236,7 +239,7 @@
                   </div>
                   <div>
                     <p class="text-sm text-gray-500 dark:text-gray-400">E-mail comercial</p>
-                    <p class="font-medium text-gray-900 dark:text-white">{{ company.email || 'Não informado' }}</p>
+                    <p class="font-medium text-gray-900 dark:text-white">{{ props.company?.email || 'Não informado' }}</p>
                   </div>
                 </div>
 
@@ -246,7 +249,7 @@
                   </div>
                   <div>
                     <p class="text-sm text-gray-500 dark:text-gray-400">Telefone comercial</p>
-                    <p class="font-medium text-gray-900 dark:text-white">{{ company.phone || 'Não informado' }}</p>
+                    <p class="font-medium text-gray-900 dark:text-white">{{ props.company?.phone || 'Não informado' }}</p>
                   </div>
                 </div>
 
@@ -256,7 +259,7 @@
                   </div>
                   <div>
                     <p class="text-sm text-gray-500 dark:text-gray-400">Endereço</p>
-                    <p class="font-medium text-gray-900 dark:text-white">{{ company.address || 'Não informado' }}</p>
+                    <p class="font-medium text-gray-900 dark:text-white">{{ props.company?.address || 'Não informado' }}</p>
                   </div>
                 </div>
               </div>
@@ -280,10 +283,18 @@
     @close="showPasswordModal = false"
     @password-updated="handlePasswordUpdated"
   />
+
+  <UpdateCompanyDataModal 
+    :show="showCompanyDataModal" 
+    :company="props.company"
+    @close="showCompanyDataModal = false"
+    @company-data-updated="handleCompanyDataUpdated"
+  />
 </template>
 
 <script setup>
 import PhotoUpload from '@/Components/PhotoUpload.vue'
+import UpdateCompanyDataModal from '@/Components/SettingsModals/UpdateCompanyDataModal.vue'
 import UpdatePasswordModal from '@/Components/SettingsModals/UpdatePasswordModal.vue'
 import UpdatePersonalDataModal from '@/Components/SettingsModals/UpdatePersonalDataModal.vue'
 import { usePhotoUrl } from '@/composables/usePhotoUrl'
@@ -300,6 +311,10 @@ const props = defineProps({
   user: {
     type: Object,
     default: () => ({})
+  },
+  company: {
+    type: Object,
+    default: () => ({})
   }
 })
 
@@ -310,6 +325,7 @@ const currentPhotoUrl = ref(null)
 // Estados dos modais
 const showPersonalDataModal = ref(false)
 const showPasswordModal = ref(false)
+const showCompanyDataModal = ref(false)
 
 // Função para carregar a URL temporária da foto
 const loadUserPhotoUrl = async () => {
@@ -433,6 +449,14 @@ const handlePersonalDataUpdated = (updatedUser) => {
 const handlePasswordUpdated = () => {
   // Senha foi alterada com sucesso
   // Não precisa fazer nada específico além do toast que já é exibido no modal
+}
+
+const handleCompanyDataUpdated = (updatedCompany) => {
+  // Atualizar os dados da empresa na página
+  if (updatedCompany) {
+    // Recarregar a página para atualizar os dados
+    router.reload()
+  }
 }
 
 </script>

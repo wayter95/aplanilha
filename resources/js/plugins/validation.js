@@ -117,6 +117,7 @@ const ptBR = {
         subdomain: "Subdomínio",
         company_name: "Nome da empresa",
         phone: "Telefone",
+        address: "Endereço",
     },
 };
 

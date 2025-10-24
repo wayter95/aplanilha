@@ -6,6 +6,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Api\UserSettingsController;
+use App\Http\Controllers\Api\CompanySettingsController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -18,8 +19,16 @@ Route::middleware(['auth'])->group(function () {
     Route::get('roles', [RoleController::class, 'index'])->name('roles');
     
     Route::get('settings', function () {
+        $user = Auth::user();
+        $company = null;
+        
+        if ($user && $user->client_id) {
+            $company = \App\Models\ClientSubscribe::find($user->client_id);
+        }
+        
         return Inertia::render('Settings', [
-            'user' => Auth::user()
+            'user' => $user,
+            'company' => $company
         ]);
     })->name('settings');
     
@@ -60,6 +69,11 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('api/user')->group(function () {
         Route::put('/personal-data', [UserSettingsController::class, 'updatePersonalData'])->name('user.personal-data');
         Route::put('/password', [UserSettingsController::class, 'updatePassword'])->name('user.password');
+    });
+    
+    // Rotas para dados da empresa
+    Route::prefix('api/company')->group(function () {
+        Route::put('/data', [CompanySettingsController::class, 'updateData'])->name('company.data');
     });
     
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
