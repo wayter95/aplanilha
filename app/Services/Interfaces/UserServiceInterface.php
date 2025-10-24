@@ -4,6 +4,7 @@ namespace App\Services\Interfaces;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 interface UserServiceInterface
 {
@@ -13,6 +14,7 @@ interface UserServiceInterface
     public function getUser(string $id): ?User;
     public function getUserByEmail(string $email, ?string $clientId = null): ?User;
     public function getUsersByClient(string $clientId): Collection;
+    public function getUsersByClientPaginated(string $clientId, int $perPage = 10, array $filters = []): LengthAwarePaginator;
     public function getMasterUsers(): Collection;
     public function authenticateUser(string $email, string $password, ?string $clientId = null): ?User;
     public function assignRoleToUser(string $userId, string $roleId): bool;

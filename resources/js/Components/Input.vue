@@ -126,7 +126,7 @@ try {
   }
 } catch (error) {
   // Se VeeValidate não estiver disponível, usar valores padrão
-  console.debug('VeeValidate não disponível para este campo:', fieldName.value)
+  console.debug('VeeValidate não disponível para este campo:', fieldName.value, error.message)
 }
 
 // ID único para o input

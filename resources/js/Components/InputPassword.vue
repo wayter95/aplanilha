@@ -65,8 +65,8 @@
 </template>
 
 <script setup>
-import { computed, ref, nextTick } from 'vue'
 import { useField } from 'vee-validate'
+import { computed, nextTick, ref } from 'vue'
 
 const props = defineProps({
   modelValue: {
@@ -171,7 +171,7 @@ try {
   }
 } catch (error) {
   // Se VeeValidate não estiver disponível, usar valores padrão
-  console.debug('VeeValidate não disponível para este campo:', fieldName.value)
+  console.debug('VeeValidate não disponível para este campo:', fieldName.value, error.message)
 }
 
 // ID único para o input
@@ -224,7 +224,7 @@ const inputClasses = computed(() => {
   
   // Classes de validação
   let validationClasses = ''
-  if (meta.value.touched) {
+  if (meta.value && meta.value.touched) {
     if (displayError.value) {
       validationClasses = 'border-danger'
     } else if (meta.value.valid && fieldValue.value) {

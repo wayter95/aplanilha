@@ -40,6 +40,31 @@ class UserRepository
         return $query->paginate($perPage);
     }
 
+    public function getByClientPaginated(string $clientId, int $perPage = 10, array $filters = []): LengthAwarePaginator
+    {
+        $query = $this->model->with(['roles', 'client'])
+            ->where('client_id', $clientId);
+
+        if (isset($filters['search']) && $filters['search']) {
+            $query->where(function ($q) use ($filters) {
+                $q->where('name', 'like', '%' . $filters['search'] . '%')
+                  ->orWhere('email', 'like', '%' . $filters['search'] . '%');
+            });
+        }
+
+        if (isset($filters['status']) && $filters['status']) {
+            $query->where('is_active', $filters['status'] === 'Ativo');
+        }
+
+        if (isset($filters['role']) && $filters['role']) {
+            $query->whereHas('roles', function ($q) use ($filters) {
+                $q->where('name', $filters['role']);
+            });
+        }
+
+        return $query->paginate($perPage);
+    }
+
     public function getAll(array $filters = []): Collection
     {
         $query = $this->model->with(['roles', 'client']);

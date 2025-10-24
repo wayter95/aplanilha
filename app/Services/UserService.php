@@ -25,6 +25,16 @@ class UserService
         return $this->userRepository->getAllPaginated($perPage, $filters);
     }
 
+    public function getUsersByClient(string $clientId, int $perPage = 10, array $filters = []): LengthAwarePaginator
+    {
+        return $this->userRepository->getByClientPaginated($clientId, $perPage, $filters);
+    }
+
+    public function getUsersByClientPaginated(string $clientId, int $perPage = 10, array $filters = []): LengthAwarePaginator
+    {
+        return $this->userRepository->getByClientPaginated($clientId, $perPage, $filters);
+    }
+
     public function getAllUsersList(array $filters = []): Collection
     {
         return $this->userRepository->getAll($filters);

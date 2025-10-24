@@ -30,7 +30,14 @@ class UserController extends Controller
                 'role' => $request->get('role'),
             ];
 
-            $users = $this->userService->getAllUsers($perPage, $filters);
+            // Obter client_id do tenant context
+            $clientId = app('tenant.context')->getClientId();
+            if (!$clientId) {
+                // Fallback para o client_id do usuário logado
+                $clientId = Auth::user()?->client_id;
+            }
+
+            $users = $this->userService->getUsersByClient($clientId, $perPage, $filters);
             $availableRoles = $this->userService->getAvailableRoles();
 
             return Inertia::render('Users', [
@@ -61,6 +68,20 @@ class UserController extends Controller
                 'is_active' => 'boolean',
             ]);
 
+            // Obter client_id do tenant context ou do usuário logado
+            $clientId = app('tenant.context')->getClientId();
+            if (!$clientId) {
+                $clientId = Auth::user()?->client_id;
+            }
+
+            if (!$clientId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Client ID não encontrado. Usuário deve estar logado.',
+                ], 422);
+            }
+
+            $validatedData['client_id'] = $clientId;
             $user = $this->userService->createUser($validatedData);
 
             return response()->json([
