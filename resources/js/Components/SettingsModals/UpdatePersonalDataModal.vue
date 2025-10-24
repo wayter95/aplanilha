@@ -13,19 +13,22 @@
           </button>
         </div>
 
-        <form @submit.prevent="updatePersonalData">
+        <BaseForm @submit="handleSubmit">
           <div class="space-y-4">
             <Input
               id="update-name"
+              name="name"
               v-model="form.name"
               type="text"
               label="Nome"
               placeholder="Digite seu nome completo"
               required
+              :rules="nameRules"
             />
 
             <Input
               id="update-username"
+              name="username"
               v-model="form.username"
               type="text"
               label="Usuário"
@@ -34,15 +37,18 @@
 
             <Input
               id="update-email"
+              name="email"
               v-model="form.email"
               type="email"
               label="E-mail"
               placeholder="Digite seu e-mail"
               required
+              :rules="emailRules"
             />
 
             <Input
               id="update-phone"
+              name="phone"
               v-model="form.phone"
               type="tel"
               label="Telefone"
@@ -70,13 +76,14 @@
               <span v-else>Salvar Alterações</span>
             </button>
           </div>
-        </form>
+        </BaseForm>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import BaseForm from '@/Components/Form/BaseForm.vue'
 import Input from '@/Components/Input.vue'
 import { useToast } from '@/composables/useToast'
 import { usePage } from '@inertiajs/vue3'
@@ -99,6 +106,10 @@ const { success, error } = useToast()
 const page = usePage()
 
 const loading = ref(false)
+
+// Regras de validação para os campos
+const nameRules = 'required'
+const emailRules = 'required|email'
 
 const form = ref({
   name: '',
@@ -123,7 +134,7 @@ const close = () => {
   emit('close')
 }
 
-const updatePersonalData = async () => {
+const handleSubmit = async (values, { setErrors }) => {
   loading.value = true
   
   try {
@@ -133,7 +144,7 @@ const updatePersonalData = async () => {
         'Content-Type': 'application/json',
         'X-CSRF-TOKEN': page.props.csrf_token
       },
-      body: JSON.stringify(form.value)
+      body: JSON.stringify(values)
     })
 
     const data = await response.json()
@@ -143,7 +154,12 @@ const updatePersonalData = async () => {
       emit('personal-data-updated', data.user)
       close()
     } else {
-      error(data.message || 'Erro ao atualizar dados pessoais')
+      // Definir erros específicos se vierem do backend
+      if (data.errors) {
+        setErrors(data.errors)
+      } else {
+        error(data.message || 'Erro ao atualizar dados pessoais')
+      }
     }
   } catch (err) {
     error('Erro ao atualizar dados pessoais')

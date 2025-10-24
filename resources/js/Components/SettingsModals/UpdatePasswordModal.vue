@@ -13,30 +13,36 @@
           </button>
         </div>
 
-        <form @submit.prevent="updatePassword">
+        <BaseForm @submit="handleSubmit">
           <div class="space-y-4">
             <InputPassword
               id="current-password"
+              name="current_password"
               v-model="form.current_password"
               label="Senha Atual"
               placeholder="Digite sua senha atual"
               required
+              :rules="currentPasswordRules"
             />
 
             <InputPassword
               id="new-password"
+              name="password"
               v-model="form.password"
               label="Nova Senha"
               placeholder="Digite sua nova senha"
               required
+              :rules="passwordRules"
             />
 
             <InputPassword
               id="confirm-password"
+              name="password_confirmation"
               v-model="form.password_confirmation"
               label="Confirmar Nova Senha"
               placeholder="Confirme sua nova senha"
               required
+              :rules="passwordConfirmationRules"
             />
           </div>
 
@@ -60,13 +66,14 @@
               <span v-else>Alterar Senha</span>
             </button>
           </div>
-        </form>
+        </BaseForm>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import BaseForm from '@/Components/Form/BaseForm.vue'
 import InputPassword from '@/Components/InputPassword.vue'
 import { useToast } from '@/composables/useToast'
 import { usePage } from '@inertiajs/vue3'
@@ -86,6 +93,11 @@ const page = usePage()
 
 const loading = ref(false)
 
+// Regras de validação para os campos
+const currentPasswordRules = 'required'
+const passwordRules = 'required|min:8'
+const passwordConfirmationRules = 'required|confirmed:password'
+
 const form = ref({
   current_password: '',
   password: '',
@@ -102,18 +114,7 @@ const close = () => {
   emit('close')
 }
 
-const updatePassword = async () => {
-  // Validação básica
-  if (form.value.password !== form.value.password_confirmation) {
-    error('As senhas não coincidem')
-    return
-  }
-
-  if (form.value.password.length < 8) {
-    error('A nova senha deve ter pelo menos 8 caracteres')
-    return
-  }
-
+const handleSubmit = async (values, { setErrors }) => {
   loading.value = true
   
   try {
@@ -123,7 +124,7 @@ const updatePassword = async () => {
         'Content-Type': 'application/json',
         'X-CSRF-TOKEN': page.props.csrf_token
       },
-      body: JSON.stringify(form.value)
+      body: JSON.stringify(values)
     })
 
     const data = await response.json()
@@ -133,7 +134,12 @@ const updatePassword = async () => {
       emit('password-updated')
       close()
     } else {
-      error(data.message || 'Erro ao alterar senha')
+      // Definir erros específicos se vierem do backend
+      if (data.errors) {
+        setErrors(data.errors)
+      } else {
+        error(data.message || 'Erro ao alterar senha')
+      }
     }
   } catch (err) {
     error('Erro ao alterar senha')
