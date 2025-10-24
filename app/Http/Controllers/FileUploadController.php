@@ -52,7 +52,7 @@ class FileUploadController extends Controller
             $key = $folder . '/' . $filename;
 
             // Configurar parâmetros para URL pré-assinada
-            $expires = '+15 minutes'; // Tempo de expiração
+            $expires = '+15 minutes';
             $bucket = config('filesystems.disks.s3.bucket');
 
             // Gerar URL pré-assinada para PUT
@@ -92,7 +92,7 @@ class FileUploadController extends Controller
             ]);
 
             $key = $request->input('key');
-            $expires = '+1 hour'; // Tempo de expiração para visualização
+            $expires = '+1 hour';
             $bucket = config('filesystems.disks.s3.bucket');
 
             // Gerar URL pré-assinada para GET
@@ -129,7 +129,7 @@ class FileUploadController extends Controller
             ]);
 
             $key = $request->input('key');
-            $expires = '+5 minutes'; // Tempo de expiração para leitura
+            $expires = '+5 minutes';
             $bucket = config('filesystems.disks.s3.bucket');
 
             // Gerar URL pré-assinada para GET

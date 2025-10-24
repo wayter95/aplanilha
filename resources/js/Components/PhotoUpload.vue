@@ -283,7 +283,6 @@ const confirmUpload = async () => {
       throw new Error('Erro no upload para S3')
     }
 
-    // 3. Gerar URL temporária para visualização
     const tempUrlResponse = await fetch(`/api/files/signed-url?key=${presignedData.key}`, {
       method: 'GET',
       headers: {
@@ -297,19 +296,17 @@ const confirmUpload = async () => {
       throw new Error(tempUrlData.message || 'Erro ao gerar URL temporária')
     }
 
-    // 4. Atualizar o componente
-    currentPhotoUrl.value = tempUrlData.url // Mudança: usar 'url' em vez de 'temporary_url'
+    currentPhotoUrl.value = tempUrlData.url
     
-    // 5. Emitir eventos com a key (não a URL completa)
-    emit('update:modelValue', presignedData.key) // Mudança: enviar apenas a key
+    emit('update:modelValue', presignedData.key)
     emit('upload-success', {
       key: presignedData.key,
-      url: tempUrlData.url, // URL temporária para preview
+      url: tempUrlData.url,
       filename: selectedFile.value.name
     })
     emit('photo-updated', {
       key: presignedData.key,
-      url: tempUrlData.url, // URL temporária para preview
+      url: tempUrlData.url,
       filename: selectedFile.value.name
     })
 

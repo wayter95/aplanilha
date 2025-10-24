@@ -153,8 +153,6 @@ const close = () => {
 const handleSubmit = async (values, { setErrors }) => {
   loading.value = true
   
-  console.log('Dados enviados:', values) // Debug temporário
-  
   try {
     const response = await fetch('/api/company/data', {
       method: 'PUT',
@@ -165,17 +163,13 @@ const handleSubmit = async (values, { setErrors }) => {
       body: JSON.stringify(values)
     })
 
-    console.log('Resposta do servidor:', response.status) // Debug temporário
-    
     const data = await response.json()
-    console.log('Dados da resposta:', data) // Debug temporário
 
     if (data.success) {
       success('Dados da empresa atualizados com sucesso!')
       emit('company-data-updated', data.company)
       close()
     } else {
-      // Definir erros específicos se vierem do backend
       if (data.errors) {
         setErrors(data.errors)
       } else {

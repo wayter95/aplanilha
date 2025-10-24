@@ -305,9 +305,8 @@ const logout = () => {
 // Função para carregar a foto do usuário
 const loadUserPhoto = async () => {
   console.log('Header: loadUserPhoto chamada')
-  if (props.user?.photo_key) { // Mudança: usar photo_key em vez de avatar_path
+  if (props.user?.photo_key) {
     console.log('Header: Photo key encontrado:', props.user.photo_key)
-    // Usar o composable para buscar URL temporária
     const url = await getPhotoUrl(props.user.photo_key)
     if (url) {
       console.log('Header: URL temporária gerada:', url)
@@ -323,7 +322,6 @@ const loadUserPhoto = async () => {
 const handlePhotoUpdate = (event) => {
   console.log('Header: Evento de atualização da foto recebido', event.detail)
   if (event.detail.userId === props.user?.id) {
-    // Se recebeu uma nova key, buscar URL temporária
     if (event.detail.photoKey) {
       getPhotoUrl(event.detail.photoKey).then(url => {
         if (url) {

@@ -506,12 +506,10 @@ const getUserPhoto = (row, photoKey) => {
     return photoValue
   }
   
-  // Se é uma key, verificar se já temos a URL temporária carregada
   if (photoUrls.value.has(photoValue)) {
     return photoUrls.value.get(photoValue)
   }
   
-  // Se não temos, buscar a URL temporária
   getPhotoUrl(photoValue).then(url => {
     if (url) {
       photoUrls.value.set(photoValue, url)

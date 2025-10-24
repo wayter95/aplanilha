@@ -319,7 +319,7 @@ const props = defineProps({
 })
 
 const activeSection = ref('personal')
-const userPhoto = ref(props.user?.photo_key || null) // Mudança: usar photo_key em vez de avatar_path
+const userPhoto = ref(props.user?.photo_key || null)
 const currentPhotoUrl = ref(null)
 
 // Estados dos modais
@@ -327,10 +327,8 @@ const showPersonalDataModal = ref(false)
 const showPasswordModal = ref(false)
 const showCompanyDataModal = ref(false)
 
-// Função para carregar a URL temporária da foto
 const loadUserPhotoUrl = async () => {
   if (userPhoto.value) {
-    // Se é uma key, buscar URL temporária usando o composable
     return await getPhotoUrl(userPhoto.value)
   }
   return null
@@ -339,7 +337,7 @@ const loadUserPhotoUrl = async () => {
 // Função para atualizar a foto localmente
 const updateLocalPhoto = async (photoKey, photoUrl) => {
   console.log('Settings: Atualizando foto localmente', { photoKey, photoUrl })
-  userPhoto.value = photoKey // Mudança: usar key em vez de URL completa
+  userPhoto.value = photoKey
   currentPhotoUrl.value = photoUrl
   
   // Emitir evento global para atualizar outros componentes
@@ -423,7 +421,6 @@ onMounted(async () => {
   // Carregar a URL da foto atual se existir
   if (userPhoto.value) {
     console.log('Settings: Carregando foto existente:', userPhoto.value)
-    // Sempre usar o composable para gerar URL temporária
     currentPhotoUrl.value = await loadUserPhotoUrl()
   } else {
     console.log('Settings: Nenhuma foto encontrada')

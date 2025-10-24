@@ -29,7 +29,6 @@ class UserRole extends Model
 
     protected static function booted(): void
     {
-        // Temporarily disabled TenantScope for testing
         // static::addGlobalScope(new TenantScope);
     }
 

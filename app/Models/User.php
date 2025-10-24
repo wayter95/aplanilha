@@ -51,7 +51,6 @@ class User extends Authenticatable
      */
     protected static function booted(): void
     {
-        // Temporarily disabled TenantScope for testing
         // static::addGlobalScope(new TenantScope);
     }
 
