@@ -28,7 +28,14 @@ class RoleController extends Controller
                 'status' => $request->get('status'),
             ];
 
-            $roles = $this->roleService->getAllRoles($perPage, $filters);
+            // Obter client_id do tenant context
+            $clientId = app('tenant.context')->getClientId();
+            if (!$clientId) {
+                // Fallback para o client_id do usuário logado
+                $clientId = Auth::user()?->client_id;
+            }
+
+            $roles = $this->roleService->getRolesByClient($clientId, $perPage, $filters);
             $availablePermissions = $this->roleService->getAvailablePermissions();
 
             return Inertia::render('Roles', [
@@ -60,6 +67,20 @@ class RoleController extends Controller
                 'is_active' => 'boolean',
             ]);
 
+            // Obter client_id do tenant context ou do usuário logado
+            $clientId = app('tenant.context')->getClientId();
+            if (!$clientId) {
+                $clientId = Auth::user()?->client_id;
+            }
+
+            if (!$clientId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Client ID não encontrado. Usuário deve estar logado.',
+                ], 422);
+            }
+
+            $validatedData['client_id'] = $clientId;
             $role = $this->roleService->createRole($validatedData);
 
             return response()->json([

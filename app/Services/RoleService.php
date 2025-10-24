@@ -22,6 +22,11 @@ class RoleService
         return $this->roleRepository->getAllPaginated($perPage, $filters);
     }
 
+    public function getRolesByClient(string $clientId, int $perPage = 10, array $filters = []): LengthAwarePaginator
+    {
+        return $this->roleRepository->getByClientPaginated($clientId, $perPage, $filters);
+    }
+
     public function getAllRolesList(array $filters = []): Collection
     {
         return $this->roleRepository->getAll($filters);
