@@ -192,9 +192,9 @@ const updateUser = async (values, { setErrors }) => {
   try {
     const roleId = getRoleIdByName(values.role)
     const dataToSend = {
-      ...values,
+      ...form.value,
       role_id: roleId,
-      is_active: values.status === 'Ativo'
+      is_active: form.value.status === 'Ativo'
     }
 
     const response = await fetch(`/api/users/${props.user.id}`, {
