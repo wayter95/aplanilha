@@ -3,7 +3,7 @@
     <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
       <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" @click="close"></div>
 
-        <div class="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-800 shadow-xl rounded-lg">
+      <div class="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-800 shadow-xl rounded-lg">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-lg font-medium text-gray-900 dark:text-white">
             Novo Usuário
@@ -13,41 +13,57 @@
           </button>
         </div>
 
-        <form @submit.prevent="createUser">
+        <BaseForm @submit="createUser">
           <div class="space-y-4">
             <Input
               id="create-user-name"
+              name="name"
               v-model="form.name"
               type="text"
               label="Nome"
               placeholder="Digite o nome do usuário"
               required
+              :rules="nameRules"
             />
 
             <Input
               id="create-user-email"
+              name="email"
               v-model="form.email"
               type="email"
               label="E-mail"
               placeholder="Digite o e-mail do usuário"
               required
+              :rules="emailRules"
             />
 
             <InputPassword
               id="create-user-password"
+              name="password"
               v-model="form.password"
               label="Senha"
               placeholder="Digite a senha"
               required
+              :rules="passwordRules"
             />
 
+            <!-- Função -->
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Função
               </label>
-              <select v-model="form.role" required class="ti-form-select">
+              <select
+                v-model="form.role"
+                name="role"
+                required
+                class="ti-form-select w-full"
+              >
                 <option value="">Selecione uma função</option>
-                <option v-for="role in availableRoles" :key="role.id" :value="role.name">
+                <option
+                  v-for="role in availableRoles"
+                  :key="role.id"
+                  :value="role.name"
+                >
                   {{ role.display_name }}
                 </option>
               </select>
@@ -57,7 +73,12 @@
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Status
               </label>
-              <select v-model="form.status" required class="ti-form-select">
+              <select
+                v-model="form.status"
+                name="status"
+                required
+                class="ti-form-select w-full"
+              >
                 <option value="">Selecione um status</option>
                 <option value="Ativo">Ativo</option>
                 <option value="Inativo">Inativo</option>
@@ -75,26 +96,31 @@
             </button>
             <button
               type="submit"
+              :disabled="loading"
               class="ti-btn btn-wave ti-btn-primary"
             >
-              Criar Usuário
+              <span v-if="loading" class="flex items-center">
+                <i class="ri-loader-4-line animate-spin mr-2"></i>
+                Criando...
+              </span>
+              <span v-else>
+                Criar Usuário
+              </span>
             </button>
           </div>
-        </form>
+        </BaseForm>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import BaseForm from '@/Components/Form/BaseForm.vue'
 import Input from '@/Components/Input.vue'
 import InputPassword from '@/Components/InputPassword.vue'
 import { useToast } from '@/composables/useToast'
 import { usePage } from '@inertiajs/vue3'
 import { ref } from 'vue'
-
-const page = usePage()
-const { success, error } = useToast()
 
 const props = defineProps({
   show: {
@@ -109,6 +135,16 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'user-created'])
 
+const { success, error } = useToast()
+const page = usePage()
+const loading = ref(false)
+
+// 📋 Regras de validação
+const nameRules = 'required'
+const emailRules = 'required|email'
+const passwordRules = 'required|min:8'
+
+// 📌 Estado do formulário
 const form = ref({
   name: '',
   email: '',
@@ -117,19 +153,34 @@ const form = ref({
   status: ''
 })
 
+const close = () => {
+  form.value = {
+    name: '',
+    email: '',
+    password: '',
+    role: '',
+    status: ''
+  }
+  emit('close')
+}
+
+// 🧭 Buscar ID da função pelo nome
 const getRoleIdByName = (roleName) => {
   const role = props.availableRoles.find(r => r.name === roleName)
   return role ? role.id : null
 }
 
-const createUser = async () => {
+// 📨 Submissão com validação integrada do BaseForm
+const createUser = async (values, { setErrors }) => {
+  loading.value = true
+
   try {
-    const roleId = getRoleIdByName(form.value.role)
-    
+    const roleId = getRoleIdByName(values.role)
+
     const dataToSend = {
-      ...form.value,
+      ...values,
       role_id: roleId,
-      is_active: form.value.status === 'Ativo'
+      is_active: values.status === 'Ativo'
     }
 
     const response = await fetch('/api/users', {
@@ -148,16 +199,17 @@ const createUser = async () => {
       emit('user-created', result.user)
       close()
     } else {
-      console.error('Error creating user:', result.message)
-      error('Erro ao criar usuário: ' + result.message)
+      if (result.errors) {
+        setErrors(result.errors)
+      } else {
+        error(result.message || 'Erro ao criar usuário.')
+      }
     }
-  } catch (error) {
-    console.error('Error creating user:', error)
+  } catch (err) {
+    console.error('Erro ao criar usuário:', err)
     error('Erro ao criar usuário')
+  } finally {
+    loading.value = false
   }
-}
-
-const close = () => {
-  emit('close')
 }
 </script>
