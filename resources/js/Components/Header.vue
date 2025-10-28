@@ -17,7 +17,7 @@
               aria-label="Hide Sidebar"
               class="sidemenu-toggle animated-arrow hor-toggle horizontal-navtoggle inline-flex items-center" 
               href="javascript:void(0);"
-              @click="toggleSidebarCollapse"
+              @click="emit('toggle-sidebar')"
             >
               <span></span>
             </a>
@@ -26,12 +26,13 @@
 
         <div class="header-content-right">
 
+          <!-- Theme toggle -->
           <div class="header-element header-theme-mode hidden !items-center sm:block !py-[1rem] md:!px-[0.65rem] px-2">
             <button 
               v-if="isLight"
               @click="toggleTheme"
               aria-label="Switch to dark theme"
-              class="header-link-icon inline-flex flex-shrink-0 justify-center items-center gap-2 !rounded-full font-medium dark:hover:bg-black/20 dark:text-white/50 dark:hover:text-white dark:focus:ring-white/10 dark:focus:ring-offset-white/10 hover:bg-gray-100 p-2"
+              class="header-link-icon p-2"
             >
               <i class="bx bx-moon text-lg"></i>
             </button>
@@ -39,136 +40,30 @@
               v-if="isDark"
               @click="toggleTheme"
               aria-label="Switch to light theme"
-              class="header-link-icon inline-flex flex-shrink-0 justify-center items-center gap-2 !rounded-full font-medium dark:hover:bg-black/20 dark:text-white/50 dark:hover:text-white dark:focus:ring-white/10 dark:focus:ring-offset-white/10 hover:bg-gray-100 p-2"
+              class="header-link-icon p-2"
             >
               <i class="bx bx-sun text-lg"></i>
             </button>
           </div>
 
-          <div class="header-element py-[1rem] md:px-[0.65rem] px-2 notifications-dropdown header-notification !hidden md:!block">
-            <button 
-              @click="toggleNotifications"
-              type="button"
-              class="header-link-icon relative inline-flex flex-shrink-0 justify-center items-center gap-2 !rounded-full font-medium dark:hover:bg-black/20 dark:text-white/50 dark:hover:text-white dark:focus:ring-white/10 dark:focus:ring-offset-white/10 hover:bg-gray-100 p-2"
-            >
-              <i class="bx bx-bell text-lg"></i>
-              <span class="flex absolute h-5 w-5 -top-[0.25rem] end-0 -me-[0.6rem]">
-                <span class="animate-slow-ping absolute inline-flex -top-[2px] -start-[2px] h-full w-full rounded-full bg-secondary/40 opacity-75"></span>
-                <span class="relative inline-flex justify-center items-center rounded-full h-[14.7px] w-[14px] bg-secondary text-[0.625rem] text-white">3</span>
-              </span>
-            </button>
-            
-            <div 
-              v-show="showNotifications"
-              class="absolute right-0 top-full mt-2 bg-white dark:bg-gray-800 !w-[22rem] border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 !m-0"
-            >
-              <div class="ti-dropdown-header !m-0 !p-4 !bg-transparent flex justify-between items-center">
-                <p class="mb-0 text-[1.0625rem] text-defaulttextcolor font-semibold dark:text-white/50">Notificações</p>
-                <span class="text-[0.75em] py-[0.25rem/2] px-[0.45rem] font-[600] rounded-sm bg-secondary/10 text-secondary" id="notifiation-data">3 Não Lidas</span>
-              </div>
-              <div class="dropdown-divider"></div>
-              
-              <ul class="list-none !m-0 !p-0 end-0" id="header-notification-scroll">
-                <li class="ti-dropdown-item dropdown-item !block">
-                  <div class="flex items-start">
-                    <div class="pe-2">
-                      <span class="inline-flex text-primary justify-center items-center !w-[2.5rem] !h-[2.5rem] !leading-[2.5rem] !text-[0.8rem] !bg-primary/10 !rounded-[50%]">
-                        <i class="bx bx-user-check text-[1.125rem]"></i>
-                      </span>
-                    </div>
-                    <div class="grow flex items-center justify-between">
-                      <div>
-                        <p class="mb-0 text-defaulttextcolor dark:text-white text-[0.8125rem] font-semibold">
-                          <a href="/notifications">Novo Usuário Cadastrado</a>
-                        </p>
-                        <span class="text-[#8c9097] dark:text-white/50 font-normal text-[0.75rem] header-notification-text">
-                          Um novo usuário foi cadastrado no sistema
-                        </span>
-                      </div>
-                      <div>
-                        <a aria-label="anchor" href="javascript:void(0);" class="min-w-fit text-[#8c9097] dark:text-white/50 me-1 dropdown-item-close1">
-                          <i class="bx bx-x text-[1rem]"></i>
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </li>
-                
-                <li class="ti-dropdown-item dropdown-item !block">
-                  <div class="flex items-start">
-                    <div class="pe-2">
-                      <span class="inline-flex text-success justify-center items-center !w-[2.5rem] !h-[2.5rem] !leading-[2.5rem] !text-[0.8rem] bg-success/10 rounded-[50%]">
-                        <i class="bx bx-check-circle text-[1.125rem]"></i>
-                      </span>
-                    </div>
-                    <div class="grow flex items-center justify-between">
-                      <div>
-                        <p class="mb-0 text-defaulttextcolor dark:text-white text-[0.8125rem] font-semibold">
-                          <a href="/notifications">Sistema Atualizado</a>
-                        </p>
-                        <span class="text-[#8c9097] dark:text-white/50 font-normal text-[0.75rem] header-notification-text">
-                          Sistema foi atualizado com sucesso
-                        </span>
-                      </div>
-                      <div>
-                        <a aria-label="anchor" href="javascript:void(0);" class="min-w-fit text-[#8c9097] dark:text-white/50 me-1 dropdown-item-close1">
-                          <i class="bx bx-x text-[1rem]"></i>
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </li>
-                
-                <li class="ti-dropdown-item dropdown-item !block">
-                  <div class="flex items-start">
-                    <div class="pe-2">
-                      <span class="inline-flex text-warning justify-center items-center !w-[2.5rem] !h-[2.5rem] !leading-[2.5rem] !text-[0.8rem] bg-warning/10 rounded-[50%]">
-                        <i class="bx bx-info-circle text-[1.125rem]"></i>
-                      </span>
-                    </div>
-                    <div class="grow flex items-center justify-between">
-                      <div>
-                        <p class="mb-0 text-defaulttextcolor dark:text-white text-[0.8125rem] font-semibold">
-                          <a href="/notifications">Manutenção Programada</a>
-                        </p>
-                        <span class="text-[#8c9097] dark:text-white/50 font-normal text-[0.75rem] header-notification-text">
-                          Sistema em manutenção às 02:00
-                        </span>
-                      </div>
-                      <div>
-                        <a aria-label="anchor" href="javascript:void(0);" class="min-w-fit text-[#8c9097] dark:text-white/50 me-1 dropdown-item-close1">
-                          <i class="bx bx-x text-[1rem]"></i>
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </li>
-              </ul>
-
-              <div class="p-4 empty-header-item1 border-t mt-2">
-                <div class="grid">
-                  <a href="/notifications" class="ti-btn ti-btn-primary-full !m-0 w-full p-2">Ver Todas</a>
-                </div>
-              </div>
-            </div>
-          </div>
-
+          <!-- Fullscreen -->
           <div class="header-element header-fullscreen py-[1rem] md:px-[0.65rem] px-2">
             <button 
               @click="toggleFullscreen"
               aria-label="Toggle fullscreen" 
-              class="header-link-icon inline-flex flex-shrink-0 justify-center items-center gap-2 !rounded-full font-medium dark:hover:bg-black/20 dark:text-white/50 dark:hover:text-white dark:focus:ring-white/10 dark:focus:ring-offset-white/10 hover:bg-gray-100 p-2"
+              class="header-link-icon p-2"
             >
               <i v-if="!isFullscreen" class="bx bx-fullscreen text-lg"></i>
               <i v-else class="bx bx-exit-fullscreen text-lg"></i>
             </button>
           </div>
 
+          <!-- User Menu -->
           <div class="header-element md:!px-[0.65rem] px-2 !items-center relative user-dropdown">
             <button 
               @click="toggleUserMenu"
               type="button"
-              class="header-link-icon inline-flex flex-shrink-0 justify-center items-center gap-3 !rounded-full font-medium dark:hover:bg-black/20 dark:text-white/50 dark:hover:text-white dark:focus:ring-white/10 dark:focus:ring-offset-white/10 hover:bg-gray-100 p-2"
+              class="header-link-icon inline-flex flex-shrink-0 justify-center items-center gap-3 !rounded-full font-medium p-2"
             >
               <div class="user-avatar">
                 <img 
@@ -191,7 +86,7 @@
             
             <div 
               v-show="showUserMenu"
-              class="absolute right-0 top-full mt-2 border-0 w-[11rem] !p-0 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-50 pt-0 overflow-hidden header-profile-dropdown"
+              class="absolute right-0 top-full mt-2 border-0 w-[11rem] !p-0 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-50 pt-0 overflow-hidden header-profile-dropdown"
             >
               <ul class="text-defaulttextcolor font-medium dark:text-white/50">
                 <li>
@@ -228,33 +123,19 @@ const props = defineProps({
 
 const emit = defineEmits(['toggle-sidebar'])
 
-// Composables
 const { getPhotoUrl } = usePhotoUrl()
 
-const showNotifications = ref(false)
 const showUserMenu = ref(false)
 const isFullscreen = ref(false)
 const userPhotoUrl = ref(null)
 const isDark = ref(false)
 const isLight = ref(false)
 
-const toggleNotifications = () => {
-  showNotifications.value = !showNotifications.value
-  if (showNotifications.value) {
-    showUserMenu.value = false
-  }
-}
-
 const toggleUserMenu = () => {
   showUserMenu.value = !showUserMenu.value
-  if (showUserMenu.value) {
-    showNotifications.value = false
-  }
 }
 
 const toggleFullscreen = () => {
-  if (typeof document === 'undefined') return
-  
   if (!document.fullscreenElement) {
     document.documentElement.requestFullscreen?.()
   } else {
@@ -264,8 +145,6 @@ const toggleFullscreen = () => {
 }
 
 const toggleTheme = () => {
-  if (typeof document === 'undefined') return
-  
   const html = document.documentElement
   isDark.value = !isDark.value
   isLight.value = !isDark.value
@@ -276,125 +155,56 @@ const toggleTheme = () => {
     html.classList.remove('dark')
   }
   
-  if (typeof localStorage !== 'undefined') {
-    localStorage.setItem('app-theme', isDark.value ? 'dark' : 'light')
-  }
-}
-
-const toggleSidebarCollapse = () => {
-  if (typeof document === 'undefined') return
-  
-  const htmlElement = document.documentElement
-  const isCollapsed = htmlElement.classList.contains('sidebar-collapsed')
-  
-  if (isCollapsed) {
-    htmlElement.classList.remove('sidebar-collapsed')
-  } else {
-    htmlElement.classList.add('sidebar-collapsed')
-  }
-  
-  if (typeof localStorage !== 'undefined') {
-    localStorage.setItem('sidebar-collapsed', (!isCollapsed).toString())
-  }
+  localStorage.setItem('app-theme', isDark.value ? 'dark' : 'light')
 }
 
 const logout = () => {
   router.post('/logout')
 }
 
-// Função para carregar a foto do usuário
 const loadUserPhoto = async () => {
-  console.log('Header: loadUserPhoto chamada')
   if (props.user?.photo_key) {
-    console.log('Header: Photo key encontrado:', props.user.photo_key)
     const url = await getPhotoUrl(props.user.photo_key)
-    if (url) {
-      console.log('Header: URL temporária gerada:', url)
-      userPhotoUrl.value = url
-    }
+    if (url) userPhotoUrl.value = url
   } else {
-    console.log('Header: Nenhum photo_key encontrado')
     userPhotoUrl.value = null
   }
 }
 
-// Escutar eventos de atualização da foto
-const handlePhotoUpdate = (event) => {
-  console.log('Header: Evento de atualização da foto recebido', event.detail)
-  if (event.detail.userId === props.user?.id) {
-    if (event.detail.photoKey) {
-      getPhotoUrl(event.detail.photoKey).then(url => {
-        if (url) {
-          userPhotoUrl.value = url
-        }
-      })
-    } else if (event.detail.photoUrl) {
-      // Se recebeu URL diretamente, usar
-      userPhotoUrl.value = event.detail.photoUrl
-    }
-  }
-}
-
-// Watch para carregar foto quando o usuário mudar
 watch(() => props.user, () => {
   loadUserPhoto()
 }, { immediate: true })
 
 onMounted(() => {
-  console.log('Header: Usuário carregado:', props.user)
-  console.log('Header: Photo key:', props.user?.photo_key)
-  
+  const savedTheme = localStorage.getItem('app-theme')
+  if (savedTheme === 'dark') {
+    isDark.value = true
+    isLight.value = false
+    document.documentElement.classList.add('dark')
+  } else {
+    isDark.value = false
+    isLight.value = true
+  }
+
   loadUserPhoto()
-  
-  // Escutar eventos globais de atualização da foto
-  window.addEventListener('user-photo-updated', handlePhotoUpdate)
+  document.addEventListener('click', handleClickOutside)
 })
 
-// Cleanup
 onUnmounted(() => {
-  window.removeEventListener('user-photo-updated', handlePhotoUpdate)
+  document.removeEventListener('click', handleClickOutside)
 })
 
 const getDisplayName = (fullName) => {
   if (!fullName) return 'Usuário'
-  
-  const nameParts = fullName.trim().split(' ')
-  if (nameParts.length <= 2) {
-    return fullName
-  }
-  
-  return `${nameParts[0]} ${nameParts[1]}`
+  const parts = fullName.trim().split(' ')
+  return parts.length <= 2 ? fullName : `${parts[0]} ${parts[1]}`
 }
 
 const handleClickOutside = (event) => {
   if (!event.target.closest('.header-profile-dropdown') && !event.target.closest('.header-link-icon')) {
     showUserMenu.value = false
-    showNotifications.value = false
   }
 }
-
-onMounted(() => {
-  if (typeof localStorage !== 'undefined' && typeof document !== 'undefined') {
-    const savedTheme = localStorage.getItem('app-theme')
-    if (savedTheme === 'dark') {
-      isDark.value = true
-      isLight.value = false
-      document.documentElement.classList.add('dark')
-    } else {
-      isDark.value = false
-      isLight.value = true
-    }
-    
-      isFullscreen.value = !!document.fullscreenElement
-    
-    const savedSidebarState = localStorage.getItem('sidebar-collapsed')
-    if (savedSidebarState === 'true') {
-      document.documentElement.classList.add('sidebar-collapsed')
-    }
-  }
-  
-  document.addEventListener('click', handleClickOutside)
-})
 </script>
 
 <style scoped>
@@ -404,10 +214,6 @@ onMounted(() => {
 
 .header-link-icon:hover {
   transform: translateY(-1px);
-}
-
-.header-link-icon:active {
-  transform: translateY(0);
 }
 
 .user-avatar {
@@ -421,7 +227,6 @@ onMounted(() => {
   color: white;
   font-weight: 600;
   font-size: 0.875rem;
-  line-height: 1;
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -433,21 +238,5 @@ onMounted(() => {
 .user-dropdown {
   display: flex;
   align-items: center;
-}
-
-.dropdown-divider {
-  height: 1px;
-  background: rgb(229, 231, 235);
-  margin: 0.5rem 0;
-}
-
-@media (max-width: 768px) {
-  .header-center {
-    display: none;
-  }
-  
-  .d-sm-block {
-    display: none !important;
-  }
 }
 </style>
