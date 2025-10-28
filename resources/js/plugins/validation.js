@@ -118,6 +118,7 @@ const ptBR = {
         company_name: "Nome da empresa",
         phone: "Telefone",
         address: "Endereço",
+        display_name: "Nome de exibição",
     },
 };
 
