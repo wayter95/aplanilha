@@ -197,6 +197,7 @@ const handleClickOutside = (event) => {
 </script>
 
 <style scoped>
+/* Estilos do Header */
 .header-link-icon {
   transition: all 0.15s ease-in-out;
 }
@@ -205,6 +206,7 @@ const handleClickOutside = (event) => {
   transform: translateY(-1px);
 }
 
+/* Avatar do usuário */
 .user-avatar {
   width: 2rem;
   height: 2rem;

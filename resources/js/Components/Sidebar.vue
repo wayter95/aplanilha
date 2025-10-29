@@ -11,12 +11,8 @@ const props = defineProps({
 const emit = defineEmits(['link-click'])
 const emitLinkClick = () => emit('link-click')
 
-// Submenus abertos (armazenados por label)
 const openSubmenus = ref([])
 
-/**
- * Alterna o estado do submenu (com comportamento de acordeão)
- */
 const toggleSubmenu = (index) => {
     if (props.isCollapsed && !props.isHovered) return
 
@@ -24,40 +20,27 @@ const toggleSubmenu = (index) => {
     if (!label) return
 
     if (openSubmenus.value.includes(label)) {
-        // Fecha se já estiver aberto
         openSubmenus.value = []
     } else {
-        // Fecha todos e abre apenas o atual
         openSubmenus.value = [label]
     }
 
-    // Atualiza localStorage
     localStorage.setItem('sidebar-open-submenus', JSON.stringify(openSubmenus.value))
 }
 
-/**
- * Verifica se submenu está aberto
- */
 const isSubmenuOpen = (index) => {
     const label = props.menuItems[index]?.label
     return openSubmenus.value.includes(label)
 }
 
-/**
- * Exibir labels apenas quando sidebar estiver expandida
- */
 const showLabels = computed(() => !props.isCollapsed || props.isHovered)
 
-/**
- * Restaurar submenus abertos (com atraso para permitir animação)
- */
 onMounted(() => {
     const saved = localStorage.getItem('sidebar-open-submenus')
     if (saved) {
         try {
             const restored = JSON.parse(saved)
             if (Array.isArray(restored)) {
-                // Pequeno atraso para suavizar abertura
                 setTimeout(() => {
                     openSubmenus.value = restored
                 }, 200)
@@ -153,6 +136,8 @@ watch(openSubmenus, (val) => {
 </template>
 
 <style scoped>
+
+/* Sidebar geral */
 .app-sidebar {
     position: fixed;
     top: 0;
@@ -165,15 +150,16 @@ watch(openSubmenus, (val) => {
     z-index: 999;
 }
 
+/* Sidebar colapsada e expandida */
 .app-sidebar.sidebar-collapsed {
     width: 72px;
 }
-
 .app-sidebar.sidebar-hovered,
 .app-sidebar.sidebar-open {
     width: 250px;
 }
 
+/* Cabeçalho da sidebar */
 .side-menu__item {
     display: flex;
     align-items: center;
@@ -186,6 +172,7 @@ watch(openSubmenus, (val) => {
     transition: background 0.2s ease, color 0.2s ease;
 }
 
+/* Itens do menu */
 .side-menu__item:hover {
     background: rgba(255, 255, 255, 0.08);
     color: #fff;
@@ -195,11 +182,11 @@ watch(openSubmenus, (val) => {
     font-size: 1.5rem;
     margin-right: 1rem;
 }
-
 .sidebar-collapsed .side-menu__label {
     display: none;
 }
 
+/* Submenu */
 .submenu {
     background: transparent;
     padding-left: 1.5rem;
@@ -214,7 +201,6 @@ watch(openSubmenus, (val) => {
     margin-left: auto;
 }
 
-/* 🔥 Animação suave para abertura e fechamento dos submenus */
 .submenu-slide-enter-active,
 .submenu-slide-leave-active {
     transition: all 0.3s ease;

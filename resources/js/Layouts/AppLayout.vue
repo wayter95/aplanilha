@@ -74,12 +74,10 @@ const props = defineProps({
   user: Object
 })
 
-// Estado da sidebar
 const isSidebarCollapsed = ref(true)
 const isSidebarHovered = ref(false)
 const isMobile = ref(false)
 
-// Itens do menu
 const menuItems = [
   { label: 'Home', icon: 'bx bx-home', route: '/' },
   {
@@ -100,7 +98,6 @@ const menuItems = [
   }
 ]
 
-// Funções da sidebar
 const toggleSidebar = () => {
   isSidebarCollapsed.value = !isSidebarCollapsed.value
   if (isSidebarCollapsed.value) isSidebarHovered.value = false
@@ -126,7 +123,6 @@ const keepSidebarOpenOnNavigate = () => {
   }
 }
 
-// Responsividade
 onMounted(() => {
   const saved = localStorage.getItem('sidebar-fixed-open')
   if (saved === 'true') {
@@ -141,13 +137,13 @@ onMounted(() => {
   window.addEventListener('resize', checkMobile)
 })
 
-// Persistência
 watch(isSidebarCollapsed, (val) => {
   localStorage.setItem('sidebar-fixed-open', (!val).toString())
 })
 </script>
-
 <style scoped>
+
+/* Layout da página */
 .page {
   display: flex;
   flex-direction: column;
@@ -168,12 +164,12 @@ watch(isSidebarCollapsed, (val) => {
   padding-top: 4rem;
 }
 
-/* Quando a sidebar está expandida */
+/* Sidebar expandida */
 .content-expanded {
   margin-left: 250px;
 }
 
-/* Quando a sidebar está colapsada */
+/* Sidebar colapsada */
 .content-collapsed {
   margin-left: 72px;
 }
@@ -186,7 +182,7 @@ watch(isSidebarCollapsed, (val) => {
   }
 }
 
-/* Botão fixo de toggle */
+/* Botãode toggle */
 .sidebar-toggle-btn {
   position: fixed;
   top: 1rem;
@@ -206,7 +202,7 @@ watch(isSidebarCollapsed, (val) => {
   transition: left 0.3s ease, background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Quando a sidebar está aberta */
+/* Sidebar aberta */
 .sidebar-toggle-btn.sidebar-expanded {
   left: 266px;
 }
