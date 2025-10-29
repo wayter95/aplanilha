@@ -11,17 +11,6 @@
               </a>
             </div>
           </div>
-          
-          <div class="header-element md:px-[0.325rem] !items-center">
-            <a 
-              aria-label="Hide Sidebar"
-              class="sidemenu-toggle animated-arrow hor-toggle horizontal-navtoggle inline-flex items-center" 
-              href="javascript:void(0);"
-              @click="emit('toggle-sidebar')"
-            >
-              <span></span>
-            </a>
-          </div>
         </div>
 
         <div class="header-content-right">
