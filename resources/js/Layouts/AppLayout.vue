@@ -1,5 +1,6 @@
 <template>
   <div class="page">
+    <!-- Header Superior -->
     <Header 
       :user="user" 
       @toggle-sidebar="toggleSidebar"
@@ -8,58 +9,37 @@
     <!-- Toast Container -->
     <ToastContainer position="top-right" />
 
-    <aside :class="['app-sidebar', { 'sidebar-open': sidebarOpen }]" id="sidebar">
-      <div class="main-sidebar-header">
-        <a href="/" class="header-logo">
-          <h3 class="text-xl font-bold text-primary">Aplanilha</h3>
-        </a>
-      </div>
+    <!-- Sidebar -->
+    <Sidebar
+      :is-collapsed="isSidebarCollapsed"
+      :is-hovered="isSidebarHovered"
+      :menu-items="menuItems"
+      @mouseenter="handleMouseEnter"
+      @mouseleave="handleMouseLeave"
+      @link-click="keepSidebarOpenOnNavigate"
+    />
 
-      <div class="main-sidebar" id="sidebar-scroll">
-        <nav class="main-menu-container nav nav-pills flex-column sub-open">
-          <div class="slide-left" id="slide-left">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="#7b8191" width="24" height="24" viewBox="0 0 24 24">
-              <path d="M13.293 6.293 7.586 12l5.707 5.707 1.414-1.414L10.414 12l4.293-4.293z"></path>
-            </svg>
-          </div>
-          <ul class="main-menu">
-            <li class="slide__category"><span class="category-name">Principal</span></li>
-            
-            <li class="slide">
-              <a href="/" class="side-menu__item" :class="{ 'active': $page.url === '/' }">
-                <i class="bx bx-home side-menu__icon"></i>
-                <span class="side-menu__label">Dashboard</span>
-              </a>
-            </li>
+    <!-- Botão fixo de abrir/fechar -->
+    <button
+      class="sidebar-toggle-btn"
+      @click="toggleSidebar"
+      :class="{ 'sidebar-expanded': !isSidebarCollapsed || isSidebarHovered }"
+      :aria-label="(isSidebarCollapsed && !isSidebarHovered) ? 'Abrir sidebar' : 'Fechar sidebar'"
+    >
+      <i v-if="isSidebarCollapsed && !isSidebarHovered" class="bx bx-menu"></i>
+      <i v-else class="bx bx-x"></i>
+    </button>
 
-            <li class="slide">
-              <a href="/users" class="side-menu__item" :class="{ 'active': $page.url.startsWith('/users') }">
-                <i class="bx bx-user side-menu__icon"></i>
-                <span class="side-menu__label">Usuários</span>
-              </a>
-            </li>
-
-            <li class="slide">
-              <a href="/roles" class="side-menu__item" :class="{ 'active': $page.url.startsWith('/roles') }">
-                <i class="bx bx-shield side-menu__icon"></i>
-                <span class="side-menu__label">Funções</span>
-              </a>
-            </li>
-
-            <li class="slide__category"><span class="category-name">Configurações</span></li>
-
-            <li class="slide">
-              <a href="/settings" class="side-menu__item" :class="{ 'active': $page.url.startsWith('/settings') }">
-                <i class="bx bx-cog side-menu__icon"></i>
-                <span class="side-menu__label">Configurações</span>
-              </a>
-            </li>
-          </ul>
-        </nav>
-      </div>
-    </aside>
-
-    <div :class="['content', { 'sidebar-open': sidebarOpen }]">
+    <!-- Conteúdo principal -->
+    <div 
+      :class="[
+        'content', 
+        { 
+          'content-expanded': !isSidebarCollapsed || isSidebarHovered,
+          'content-collapsed': isSidebarCollapsed && !isSidebarHovered
+        }
+      ]"
+    >
       <div class="main-content">
         <div class="container-fluid">
           <div class="page-header">
@@ -68,15 +48,15 @@
               <p class="page-description">{{ description }}</p>
             </div>
           </div>
-          
           <slot />
         </div>
       </div>
     </div>
 
+    <!-- Overlay para mobile -->
     <div 
-      v-if="sidebarOpen" 
-      @click="closeSidebar"
+      v-if="!isSidebarCollapsed && isMobile"
+      @click="collapseSidebar"
       class="sidebar-overlay"
     ></div>
   </div>
@@ -84,8 +64,9 @@
 
 <script setup>
 import Header from '@/Components/Header.vue'
+import Sidebar from '@/Components/Sidebar.vue'
 import ToastContainer from '@/Components/ToastContainer.vue'
-import { ref } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 
 const props = defineProps({
   title: String,
@@ -93,32 +74,148 @@ const props = defineProps({
   user: Object
 })
 
-const sidebarOpen = ref(false)
+const isSidebarCollapsed = ref(true)
+const isSidebarHovered = ref(false)
+const isMobile = ref(false)
+
+const menuItems = [
+  { label: 'Home', icon: 'bx bx-home', route: '/' },
+  {
+    label: 'Administração',
+    icon: 'bx bx-cog',
+    children: [
+      { label: 'Usuários', icon: 'bx bx-user', route: '/users' },
+      { label: 'Funções', icon: 'bx bx-shield', route: '/roles' }
+    ]
+  },
+  {
+    label: 'Relatórios',
+    icon: 'bx bx-bar-chart',
+    children: [
+      { label: 'Financeiro', icon: 'bx bx-wallet', route: '/reports/financial' },
+      { label: 'Projetos', icon: 'bx bx-folder', route: '/reports/projects' }
+    ]
+  }
+]
 
 const toggleSidebar = () => {
-  sidebarOpen.value = !sidebarOpen.value
+  isSidebarCollapsed.value = !isSidebarCollapsed.value
+  if (isSidebarCollapsed.value) isSidebarHovered.value = false
 }
 
-const closeSidebar = () => {
-  sidebarOpen.value = false
+const handleMouseEnter = () => {
+  if (isSidebarCollapsed.value) isSidebarHovered.value = true
 }
+
+const handleMouseLeave = () => {
+  if (isSidebarCollapsed.value) isSidebarHovered.value = false
+}
+
+const collapseSidebar = () => {
+  isSidebarCollapsed.value = true
+}
+
+const keepSidebarOpenOnNavigate = () => {
+  if (isSidebarCollapsed.value) {
+    isSidebarCollapsed.value = false
+    isSidebarHovered.value = false
+    localStorage.setItem('sidebar-fixed-open', 'true')
+  }
+}
+
+onMounted(() => {
+  const saved = localStorage.getItem('sidebar-fixed-open')
+  if (saved === 'true') {
+    isSidebarCollapsed.value = false
+    isSidebarHovered.value = false
+  }
+
+  const checkMobile = () => {
+    isMobile.value = window.innerWidth <= 767
+  }
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+})
+
+watch(isSidebarCollapsed, (val) => {
+  localStorage.setItem('sidebar-fixed-open', (!val).toString())
+})
 </script>
-
 <style scoped>
+
+/* Layout da página */
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Overlay */
 .sidebar-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0, 0, 0, 0.5);
   z-index: 998;
-  display: none;
 }
 
+/* Conteúdo ajustável */
+.content {
+  transition: margin-left 0.3s ease;
+  padding-top: 4rem;
+}
+
+/* Sidebar expandida */
+.content-expanded {
+  margin-left: 250px;
+}
+
+/* Sidebar colapsada */
+.content-collapsed {
+  margin-left: 72px;
+}
+
+/* Mobile */
 @media (max-width: 767px) {
-  .sidebar-overlay {
-    display: block;
+  .content-expanded,
+  .content-collapsed {
+    margin-left: 0;
   }
+}
+
+/* Botãode toggle */
+.sidebar-toggle-btn {
+  position: fixed;
+  top: 1rem;
+  left: 88px;
+  z-index: 1000;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #9aa0a6;
+  transition: left 0.3s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Sidebar aberta */
+.sidebar-toggle-btn.sidebar-expanded {
+  left: 266px;
+}
+
+/* Efeitos */
+.sidebar-toggle-btn:hover,
+.sidebar-toggle-btn:focus-visible {
+  background-color: rgba(255, 255, 255, 0.06);
+  color: #e5e7eb;
+  outline: none;
+}
+
+.sidebar-toggle-btn i {
+  font-size: 24px;
 }
 </style>
