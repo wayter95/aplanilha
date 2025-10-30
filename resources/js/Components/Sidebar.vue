@@ -1,5 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+import logoFull from '../../assets/images/brand-logos/logo-full.png'
+import logoIcon from '../../assets/images/brand-logos/logo-icon.png'
 import { Link } from '@inertiajs/vue3'
 
 const props = defineProps({
@@ -15,7 +17,6 @@ const openSubmenus = ref([])
 
 const toggleSubmenu = (index) => {
     if (props.isCollapsed && !props.isHovered) return
-
     const label = props.menuItems[index]?.label
     if (!label) return
 
@@ -35,6 +36,11 @@ const isSubmenuOpen = (index) => {
 
 const showLabels = computed(() => !props.isCollapsed || props.isHovered)
 
+const currentLogo = computed(() => {
+    if (props.isCollapsed && !props.isHovered) return logoIcon
+    return logoFull
+})
+
 onMounted(() => {
     const saved = localStorage.getItem('sidebar-open-submenus')
     if (saved) {
@@ -51,7 +57,6 @@ onMounted(() => {
     }
 })
 
-// Atualizar localStorage quando mudar
 watch(openSubmenus, (val) => {
     localStorage.setItem('sidebar-open-submenus', JSON.stringify(val))
 }, { deep: true })
@@ -68,12 +73,24 @@ watch(openSubmenus, (val) => {
             }
         ]"
     >
-        <div class="main-sidebar-header">
-            <a href="/" class="header-logo">
-                <h3 class="text-xl font-bold text-white">Aplanilha</h3>
+        <!-- LOGO -->
+        <div 
+            class="sidebar-logo-area flex items-center justify-center"
+            :class="{
+                'logo-collapsed': isCollapsed && !isHovered,
+                'logo-expanded': !isCollapsed || isHovered
+            }"
+        >
+            <a href="/" class="header-logo flex items-center justify-center w-full h-full">
+                <img 
+                    :src="currentLogo"
+                    alt="Logo Aplanilha"
+                    class="sidebar-logo-img"
+                />
             </a>
         </div>
 
+        <!-- MENU -->
         <div class="main-sidebar" id="sidebar-scroll">
             <ul class="main-menu">
                 <li 
@@ -136,18 +153,41 @@ watch(openSubmenus, (val) => {
 </template>
 
 <style scoped>
-
-/* Sidebar geral */
+/* Estrutura principal */
 .app-sidebar {
     position: fixed;
     top: 0;
     left: 0;
     height: 100%;
-    background: #1f2937;
-    transition: width 0.3s ease;
+    background: #0f172a;
+    transition: width 0.35s ease-in-out, box-shadow 0.3s ease;
     overflow-y: auto;
     color: #fff;
     z-index: 999;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.25);
+}
+
+/* === LOGO AREA === */
+.sidebar-logo-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 64px; /* altura da barra superior */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+/* Centralização da imagem */
+.sidebar-logo-img {
+    max-width: 140px;
+    height: auto;
+    object-fit: contain;
+    transition: width 0.3s ease;
+}
+
+/* colapsada */
+.logo-collapsed .sidebar-logo-img {
+    max-width: 48px;
 }
 
 /* Sidebar colapsada e expandida */
@@ -159,61 +199,96 @@ watch(openSubmenus, (val) => {
     width: 250px;
 }
 
-/* Cabeçalho da sidebar */
+/* MENU */
+.main-sidebar {
+    padding-top: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+/* ITENS */
 .side-menu__item {
     display: flex;
     align-items: center;
-    padding: 0.75rem 1rem;
+    padding: 0.85rem 1rem;
     color: #d1d5db;
     text-decoration: none;
     border: none;
     width: 100%;
     background: transparent;
-    transition: background 0.2s ease, color 0.2s ease;
+    transition: all 0.25s ease;
+    border-left: 3px solid transparent;
 }
 
-/* Itens do menu */
 .side-menu__item:hover {
     background: rgba(255, 255, 255, 0.08);
     color: #fff;
+    border-left-color: #8b5cf6;
+    transform: translateX(2px);
 }
 
+/* ÍCONES */
 .side-menu__icon {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     margin-right: 1rem;
+    transition: transform 0.25s ease;
 }
+
+.side-menu__item:hover .side-menu__icon {
+    transform: scale(1.15);
+}
+
+/* Colapsada */
+.sidebar-collapsed .side-menu__item .side-menu__icon {
+    margin-right: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 1.5rem;
+}
+
 .sidebar-collapsed .side-menu__label {
     display: none;
 }
 
-/* Submenu */
-.submenu {
-    background: transparent;
+/* SUBMENU */
+.submenu {   
     padding-left: 1.5rem;
     overflow: hidden;
+    border-left: 2px solid rgba(139, 92, 246, 0.25);
+}
+
+.submenu-item {
+    padding: 0.7rem 1rem;
+    font-size: 0.95rem;
 }
 
 .submenu-item:hover {
     background: rgba(255, 255, 255, 0.08);
 }
 
+/* Arrow */
 .side-menu__arrow {
     margin-left: auto;
+    font-size: 1rem;
+    transition: transform 0.3s ease;
+}
+.is-open .side-menu__arrow {
+    transform: rotate(180deg);
 }
 
+/* Animações suaves */
 .submenu-slide-enter-active,
 .submenu-slide-leave-active {
-    transition: all 0.3s ease;
+    transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 .submenu-slide-enter-from,
 .submenu-slide-leave-to {
     max-height: 0;
     opacity: 0;
-    transform: translateY(-5px);
+    transform: translateY(-8px);
 }
 .submenu-slide-enter-to,
 .submenu-slide-leave-from {
-    max-height: 500px;
+    max-height: 400px;
     opacity: 1;
     transform: translateY(0);
 }
