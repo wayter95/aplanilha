@@ -5,6 +5,7 @@ use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\Api\DocumentTemplateController;
 use App\Http\Controllers\Api\UserSettingsController;
 use App\Http\Controllers\Api\CompanySettingsController;
 use Illuminate\Support\Facades\Auth;
@@ -31,6 +32,27 @@ Route::middleware(['auth'])->group(function () {
             'company' => $company
         ]);
     })->name('settings');
+    Route::get('document-templates', function () {
+        return Inertia::render('DocumentTemplates/Index', [
+            'user' => Auth::user(),
+        ]);
+    })->name('document-templates');
+    
+    // Rotas para criação/edição com IDs na URL (inclui tempId para novas abas)
+    Route::get('document-templates/new/{tempId}', function ($tempId) {
+        return Inertia::render('DocumentTemplates/Form', [
+            'id' => null,
+            'tempKey' => $tempId,
+            'user' => Auth::user(),
+        ]);
+    })->name('document-templates.new');
+    Route::get('document-templates/{id}/edit', function ($id) {
+        return Inertia::render('DocumentTemplates/Form', [
+            'id' => $id,
+            'tempKey' => null,
+            'user' => Auth::user(),
+        ]);
+    })->name('document-templates.edit');
     
     Route::prefix('api/users')->group(function () {
         Route::post('/', [UserController::class, 'store'])->name('users.store');
@@ -63,6 +85,22 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/temporary-url', [FileUploadController::class, 'generateTemporaryUrl'])->name('files.temporary-url');
         Route::get('/signed-url', [FileUploadController::class, 'getSignedUrl'])->name('uploads.signed-url');
         Route::delete('/delete', [FileUploadController::class, 'deleteFile'])->name('files.delete');
+    });
+    
+    Route::prefix('api/document-templates')->group(function () {
+        Route::get('/types', [DocumentTemplateController::class, 'types'])->name('document-templates.types');
+        Route::get('/', [DocumentTemplateController::class, 'index'])->name('document-templates.index');
+        Route::post('/', [DocumentTemplateController::class, 'store'])->name('document-templates.store');
+        Route::get('/placeholders', [DocumentTemplateController::class, 'placeholders'])->name('document-templates.placeholders');
+        Route::get('/{id}', [DocumentTemplateController::class, 'show'])->name('document-templates.show');
+        Route::put('/{id}', [DocumentTemplateController::class, 'update'])->name('document-templates.update');
+        Route::delete('/{id}', [DocumentTemplateController::class, 'destroy'])->name('document-templates.destroy');
+        Route::post('/{id}/set-default', [DocumentTemplateController::class, 'setDefault'])->name('document-templates.set-default');
+    });
+
+    Route::prefix('api/document-generation')->group(function () {
+        Route::post('/{id}/preview-html', [\App\Http\Controllers\Api\DocumentGenerationController::class, 'previewHtml'])->name('document-generation.preview-html');
+        Route::get('/{id}/export-pdf', [\App\Http\Controllers\Api\DocumentGenerationController::class, 'exportPdf'])->name('document-generation.export-pdf');
     });
     
     // Rotas para configurações do usuário

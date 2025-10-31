@@ -1,9 +1,9 @@
 <template>
   <header class="app-header">
     <nav class="main-header !h-[3.75rem]" aria-label="Global">
-      <div class="main-header-container ps-[0.725rem] pe-[1rem]">
+      <div class="main-header-container ps-[0.725rem] pe-[1rem] flex items-center">
         
-        <div class="header-content-left">
+        <div class="header-content-left flex-shrink-0">
           <div class="header-element">
             <div class="horizontal-logo">
               <a href="/" class="header-logo">
@@ -13,7 +13,16 @@
           </div>
         </div>
 
-        <div class="header-content-right">
+        <!-- Tabs Container - Central area -->
+        <div 
+          v-if="showTabs" 
+          class="header-content-center flex-1 flex items-center px-4 overflow-x-auto h-full min-w-0 transition-all duration-300"
+          :style="{ marginLeft: sidebarExpanded ? '3rem' : '-7rem' }"
+        >
+          <HeaderTabs @select="tabsStore.setActive" @close="tabsStore.closeTab" />
+        </div>
+
+        <div class="header-content-right flex-shrink-0">
 
           <!-- Theme toggle -->
           <div class="header-element header-theme-mode hidden !items-center sm:block !py-[1rem] md:!px-[0.65rem] px-2">
@@ -99,14 +108,25 @@
 </template>
 
 <script setup>
+import HeaderTabs from '@/Components/Tabs/HeaderTabs.vue'
 import { usePhotoUrl } from '@/composables/usePhotoUrl'
+import { useTabsStore } from '@/stores/useTabsStore'
 import { router } from '@inertiajs/vue3'
-import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { storeToRefs } from 'pinia'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+
+const tabsStore = useTabsStore()
+const { tabs, activeTab } = storeToRefs(tabsStore)
+const showTabs = computed(() => tabs.value.length > 0)
 
 const props = defineProps({
   user: {
     type: Object,
     default: () => ({})
+  },
+  sidebarExpanded: {
+    type: Boolean,
+    default: false
   }
 })
 

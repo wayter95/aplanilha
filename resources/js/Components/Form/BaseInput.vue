@@ -75,13 +75,18 @@
 </template>
 
 <script setup>
-import { computed, ref, nextTick, useSlots } from 'vue'
+import { computed, ref, nextTick, useSlots, watch } from 'vue'
 import { useField } from 'vee-validate'
 
 /**
  * 📝 Props do componente
  */
 const props = defineProps({
+    // v-model
+    modelValue: {
+        type: [String, Number],
+        default: undefined
+    },
     // Configuração básica
     name: {
         type: String,
@@ -177,8 +182,16 @@ const {
     handleChange,
     meta 
 } = useField(props.name, props.rules, {
-    validateOnValueUpdate: false
+    validateOnValueUpdate: false,
+    initialValue: props.modelValue
 })
+
+// Sincroniza value interno com modelValue externo
+watch(() => props.modelValue, (newVal) => {
+    if (newVal !== undefined && value.value !== newVal) {
+        value.value = newVal
+    }
+}, { immediate: true })
 
 /**
  * 🎯 ID único para o input
@@ -238,6 +251,7 @@ const field = computed(() => ({
 function handleInput(event) {
     value.value = event.target.value
     handleChange(event.target.value)
+    emit('update:modelValue', event.target.value)
 }
 
 /**
