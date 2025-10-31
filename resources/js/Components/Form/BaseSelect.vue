@@ -93,13 +93,18 @@
 </template>
 
 <script setup>
-import { computed, nextTick } from 'vue'
+import { computed, nextTick, watch } from 'vue'
 import { useField } from 'vee-validate'
 
 /**
  * 📝 Props do componente
  */
 const props = defineProps({
+    // v-model
+    modelValue: {
+        type: [String, Number, Array],
+        default: undefined
+    },
     // Configuração básica
     name: {
         type: String,
@@ -212,8 +217,16 @@ const {
     handleChange: veeHandleChange,
     meta 
 } = useField(props.name, props.rules, {
-    validateOnValueUpdate: false
+    validateOnValueUpdate: false,
+    initialValue: props.modelValue
 })
+
+// Sincroniza value interno com modelValue externo
+watch(() => props.modelValue, (newVal) => {
+    if (newVal !== undefined && value.value !== newVal) {
+        value.value = newVal
+    }
+}, { immediate: true })
 
 /**
  * 🎯 ID único para o select
@@ -252,7 +265,7 @@ const selectClasses = computed(() => {
     if (props.size === 'lg') baseClasses.push('form-select-lg')
     
     // Estado de validação
-    if (meta.value.touched) {
+    if (meta.value && meta.value.touched) {
         if (errorMessage.value) {
             baseClasses.push('is-invalid')
         } else if (meta.value.valid) {
@@ -289,6 +302,7 @@ function handleChange(event) {
     
     value.value = newValue
     veeHandleChange(newValue)
+    emit('update:modelValue', newValue)
 }
 
 /**
