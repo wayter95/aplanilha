@@ -427,19 +427,38 @@ export default {
       const formDataStore = useTabFormDataStore()
       const tabsStore = useTabsStore()
       const formData = values || this.form
-      if (!formData.name || !formData.content_html) return
-      if (this.mode === 'create') {
-        const { data } = await window.axios.post('/api/document-templates', formData)
-        if (formData.is_default && data?.id) await window.axios.post(`/api/document-templates/${data.id}/set-default`)
-        if (this.tempKey && data?.id) {
-          formDataStore.clearFormData(this.tempKey)
-          tabsStore.convertToEdit(this.tempKey, data.id, formData.name)
-          this.tabKey = data.id
-          this.$inertia.visit(`/document-templates/${data.id}/edit`)
+      if (!formData.name) {
+        console.warn('Salvar: nome é obrigatório')
+        window?.alert?.('Informe o nome do modelo')
+        return
+      }
+      if (!formData.content_html) {
+        console.warn('Salvar: conteúdo é obrigatório (content_html)')
+        window?.alert?.('O conteúdo do modelo é obrigatório')
+        return
+      }
+      try {
+        if (this.mode === 'create') {
+          const { data } = await window.axios.post('/api/document-templates', formData)
+          if (formData.is_default && data?.id) {
+            await window.axios.post(`/api/document-templates/${data.id}/set-default`)
+          }
+          if (this.tempKey && data?.id) {
+            formDataStore.clearFormData(this.tempKey)
+            tabsStore.convertToEdit(this.tempKey, data.id, formData.name)
+            this.tabKey = data.id
+            this.$inertia.visit(`/document-templates/${data.id}/edit`)
+          }
+        } else {
+          await window.axios.put(`/api/document-templates/${this.id}`, formData)
+          formDataStore.clearFormData(this.tabKey)
         }
-      } else {
-        await window.axios.put(`/api/document-templates/${this.id}`, formData)
-        formDataStore.clearFormData(this.tabKey)
+      } catch (error) {
+        console.error('Erro ao salvar modelo:', error)
+        const backendMsg = error?.response?.data?.message || 'Erro ao salvar modelo'
+        window?.alert?.(backendMsg)
+        // opcional: exibir notificação se houver sistema de toasts
+        // this.toast?.error?.(backendMsg)
       }
     },
   }
