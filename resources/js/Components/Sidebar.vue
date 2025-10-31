@@ -1,7 +1,5 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import logoFull from '../../assets/images/brand-logos/logo-full.png'
-import logoIcon from '../../assets/images/brand-logos/logo-icon.png'
 import { Link } from '@inertiajs/vue3'
 
 const props = defineProps({
@@ -36,10 +34,7 @@ const isSubmenuOpen = (index) => {
 
 const showLabels = computed(() => !props.isCollapsed || props.isHovered)
 
-const currentLogo = computed(() => {
-    if (props.isCollapsed && !props.isHovered) return logoIcon
-    return logoFull
-})
+// Logo removed: sidebar now only shows menu items. currentLogo removed.
 
 onMounted(() => {
     const saved = localStorage.getItem('sidebar-open-submenus')
@@ -72,23 +67,9 @@ watch(openSubmenus, (val) => {
                 'sidebar-open': !isCollapsed
             }
         ]"
+        :style="{ left: '0px', transform: 'none' }"
     >
-        <!-- LOGO -->
-        <div 
-            class="sidebar-logo-area flex items-center justify-center"
-            :class="{
-                'logo-collapsed': isCollapsed && !isHovered,
-                'logo-expanded': !isCollapsed || isHovered
-            }"
-        >
-            <a href="/" class="header-logo flex items-center justify-center w-full h-full">
-                <img 
-                    :src="currentLogo"
-                    alt="Logo Aplanilha"
-                    class="sidebar-logo-img"
-                />
-            </a>
-        </div>
+        <!-- LOGO removed -->
 
         <!-- MENU -->
         <div class="main-sidebar" id="sidebar-scroll">
@@ -156,39 +137,20 @@ watch(openSubmenus, (val) => {
 /* Estrutura principal */
 .app-sidebar {
     position: fixed;
-    top: 0;
+    /* keep sidebar visually below the header */
+    top: 3.75rem; /* same height as header */
     left: 0;
-    height: 100%;
+    height: calc(100% - 3.75rem);
     background: #0f172a;
-    transition: width 0.35s ease-in-out, box-shadow 0.3s ease;
+    transition: width 0.25s ease, box-shadow 0.25s ease;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     color: #fff;
-    z-index: 999;
+    z-index: 1000;
     box-shadow: 2px 0 12px rgba(0, 0, 0, 0.25);
 }
 
-/* === LOGO AREA === */
-.sidebar-logo-area {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 64px; /* altura da barra superior */
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    transition: all 0.3s ease;
-}
-
-/* Centralização da imagem */
-.sidebar-logo-img {
-    max-width: 140px;
-    height: auto;
-    object-fit: contain;
-    transition: width 0.3s ease;
-}
-
-/* colapsada */
-.logo-collapsed .sidebar-logo-img {
-    max-width: 48px;
-}
+/* Logo area removed — sidebar now shows only the menu */
 
 /* Sidebar colapsada e expandida */
 .app-sidebar.sidebar-collapsed {
@@ -292,4 +254,22 @@ watch(openSubmenus, (val) => {
     opacity: 1;
     transform: translateY(0);
 }
+@media (max-width: 992px) {
+    .app-sidebar {
+        width: 72px; /* collapsed default */
+        position: fixed;
+        top: 3.75rem;
+        left: 0;
+        transition: width 0.25s ease, box-shadow 0.25s ease;
+        z-index: 1100;
+    }
+
+    /* when opened, expand width to a mobile-friendly size */
+    .app-sidebar.sidebar-open {
+        width: min(250px, 92vw);
+        z-index: 1200; /* ensure above overlay */
+        box-shadow: 6px 0 24px rgba(0,0,0,0.45);
+    }
+}
+
 </style>
