@@ -2,8 +2,9 @@
   <div class="page">
     <!-- Header Superior -->
     <Header 
-      :user="user"
-      :sidebar-expanded="!isSidebarCollapsed || isSidebarHovered"
+      :user="user" 
+      :is-sidebar-collapsed="isSidebarCollapsed"
+      :is-sidebar-hovered="isSidebarHovered"
       @toggle-sidebar="toggleSidebar"
     />
 
@@ -20,16 +21,7 @@
       @link-click="keepSidebarOpenOnNavigate"
     />
 
-    <!-- Botão fixo de abrir/fechar -->
-    <button
-      class="sidebar-toggle-btn"
-      @click="toggleSidebar"
-      :class="{ 'sidebar-expanded': !isSidebarCollapsed || isSidebarHovered }"
-      :aria-label="(isSidebarCollapsed && !isSidebarHovered) ? 'Abrir sidebar' : 'Fechar sidebar'"
-    >
-      <i v-if="isSidebarCollapsed && !isSidebarHovered" class="bx bx-menu"></i>
-      <i v-else class="bx bx-x"></i>
-    </button>
+    <!-- toggle moved into Header to align with logo -->
 
     <!-- Conteúdo principal -->
     <div 
@@ -59,13 +51,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Overlay para mobile -->
-    <div 
-      v-if="!isSidebarCollapsed && isMobile"
-      @click="collapseSidebar"
-      class="sidebar-overlay"
-    ></div>
   </div>
 </template>
 
@@ -164,42 +149,13 @@ const keepSidebarOpenOnNavigate = () => {
 }
 
 onMounted(() => {
-  // Sincroniza tabs do localStorage
-  tabsStore.syncFromStorage()
-  
-  const saved = localStorage.getItem('sidebar-fixed-open')
-  if (saved === 'true') {
-    isSidebarCollapsed.value = false
-    isSidebarHovered.value = false
-  }
-
-  const checkMobile = () => {
-    isMobile.value = window.innerWidth <= 767
-  }
-  checkMobile()
-  window.addEventListener('resize', checkMobile)
+    const checkMobile = () => {
+        isMobile.value = window.innerWidth <= 992
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
 })
 
-// Monitora mudanças na URL e limpa activeTab se não corresponder a nenhuma tab
-watch(() => page.url, (newUrl) => {
-  // Remove query string para comparar apenas o path
-  const currentPath = newUrl.split('?')[0]
-  const matchingTab = tabsStore.tabs.find(tab => {
-    const tabPath = tab.path.split('?')[0]
-    return tabPath === currentPath
-  })
-  
-  if (!matchingTab && tabsStore.activeTab) {
-    // Se a URL não corresponde à tab ativa, limpa a tab ativa
-    const activeTabPath = tabsStore.activeTab.path.split('?')[0]
-    if (activeTabPath !== currentPath) {
-      tabsStore.clearActive()
-    }
-  } else if (matchingTab && tabsStore.activeTab?.key !== matchingTab.key) {
-    // Se encontrou uma tab que corresponde mas não está ativa, ativa ela
-    tabsStore.setActive(matchingTab)
-  }
-}, { immediate: true })
 
 watch(isSidebarCollapsed, (val) => {
   localStorage.setItem('sidebar-fixed-open', (!val).toString())
@@ -212,14 +168,6 @@ watch(isSidebarCollapsed, (val) => {
   display: flex;
   flex-direction: column;
   height: 100vh;
-}
-
-/* Overlay */
-.sidebar-overlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 998;
 }
 
 /* Conteúdo ajustável */
@@ -254,48 +202,12 @@ watch(isSidebarCollapsed, (val) => {
   margin-left: 72px;
 }
 
-/* Mobile */
+/* Keep content shifted to make the sidebar visible even on small screens */
+/* Do not zero margin-left on mobile: the collapsed sidebar (72px) should remain visible */
 @media (max-width: 767px) {
-  .content-expanded,
-  .content-collapsed {
-    margin-left: 0;
-  }
+  .content-expanded { margin-left: 250px; }
+  .content-collapsed { margin-left: 72px; }
 }
 
-/* Botãode toggle */
-.sidebar-toggle-btn {
-  position: fixed;
-  top: 1rem;
-  left: 88px;
-  z-index: 1000;
-  background: transparent;
-  border: 0;
-  padding: 0;
-  width: 32px;
-  height: 32px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  cursor: pointer;
-  color: #9aa0a6;
-  transition: left 0.3s ease, background-color 0.2s ease, color 0.2s ease;
-}
-
-/* Sidebar aberta */
-.sidebar-toggle-btn.sidebar-expanded {
-  left: 266px;
-}
-
-/* Efeitos */
-.sidebar-toggle-btn:hover,
-.sidebar-toggle-btn:focus-visible {
-  background-color: rgba(255, 255, 255, 0.06);
-  color: #e5e7eb;
-  outline: none;
-}
-
-.sidebar-toggle-btn i {
-  font-size: 24px;
-}
+/* toggle button moved into Header.vue */
 </style>

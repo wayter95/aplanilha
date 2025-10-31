@@ -15,7 +15,6 @@ const openSubmenus = ref([])
 
 const toggleSubmenu = (index) => {
     if (props.isCollapsed && !props.isHovered) return
-
     const label = props.menuItems[index]?.label
     if (!label) return
 
@@ -35,6 +34,8 @@ const isSubmenuOpen = (index) => {
 
 const showLabels = computed(() => !props.isCollapsed || props.isHovered)
 
+// Logo removed: sidebar now only shows menu items. currentLogo removed.
+
 onMounted(() => {
     const saved = localStorage.getItem('sidebar-open-submenus')
     if (saved) {
@@ -51,7 +52,6 @@ onMounted(() => {
     }
 })
 
-// Atualizar localStorage quando mudar
 watch(openSubmenus, (val) => {
     localStorage.setItem('sidebar-open-submenus', JSON.stringify(val))
 }, { deep: true })
@@ -67,13 +67,11 @@ watch(openSubmenus, (val) => {
                 'sidebar-open': !isCollapsed
             }
         ]"
+        :style="{ left: '0px', transform: 'none' }"
     >
-        <div class="main-sidebar-header">
-            <a href="/" class="header-logo">
-                <h3 class="text-xl font-bold text-white">Aplanilha</h3>
-            </a>
-        </div>
+        <!-- LOGO removed -->
 
+        <!-- MENU -->
         <div class="main-sidebar" id="sidebar-scroll">
             <ul class="main-menu">
                 <li 
@@ -136,19 +134,23 @@ watch(openSubmenus, (val) => {
 </template>
 
 <style scoped>
-
-/* Sidebar geral */
+/* Estrutura principal */
 .app-sidebar {
     position: fixed;
-    top: 0;
+    /* keep sidebar visually below the header */
+    top: 3.75rem; /* same height as header */
     left: 0;
-    height: 100%;
-    background: #1f2937;
-    transition: width 0.3s ease;
+    height: calc(100% - 3.75rem);
+    background: #0f172a;
+    transition: width 0.25s ease, box-shadow 0.25s ease;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     color: #fff;
-    z-index: 999;
+    z-index: 1000;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.25);
 }
+
+/* Logo area removed — sidebar now shows only the menu */
 
 /* Sidebar colapsada e expandida */
 .app-sidebar.sidebar-collapsed {
@@ -159,62 +161,115 @@ watch(openSubmenus, (val) => {
     width: 250px;
 }
 
-/* Cabeçalho da sidebar */
+/* MENU */
+.main-sidebar {
+    padding-top: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+/* ITENS */
 .side-menu__item {
     display: flex;
     align-items: center;
-    padding: 0.75rem 1rem;
+    padding: 0.85rem 1rem;
     color: #d1d5db;
     text-decoration: none;
     border: none;
     width: 100%;
     background: transparent;
-    transition: background 0.2s ease, color 0.2s ease;
+    transition: all 0.25s ease;
+    border-left: 3px solid transparent;
 }
 
-/* Itens do menu */
 .side-menu__item:hover {
     background: rgba(255, 255, 255, 0.08);
     color: #fff;
+    border-left-color: #8b5cf6;
+    transform: translateX(2px);
 }
 
+/* ÍCONES */
 .side-menu__icon {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     margin-right: 1rem;
+    transition: transform 0.25s ease;
 }
+
+.side-menu__item:hover .side-menu__icon {
+    transform: scale(1.15);
+}
+
+/* Colapsada */
+.sidebar-collapsed .side-menu__item .side-menu__icon {
+    margin-right: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 1.5rem;
+}
+
 .sidebar-collapsed .side-menu__label {
     display: none;
 }
 
-/* Submenu */
-.submenu {
-    background: transparent;
+/* SUBMENU */
+.submenu {   
     padding-left: 1.5rem;
     overflow: hidden;
+    border-left: 2px solid rgba(139, 92, 246, 0.25);
+}
+
+.submenu-item {
+    padding: 0.7rem 1rem;
+    font-size: 0.95rem;
 }
 
 .submenu-item:hover {
     background: rgba(255, 255, 255, 0.08);
 }
 
+/* Arrow */
 .side-menu__arrow {
     margin-left: auto;
+    font-size: 1rem;
+    transition: transform 0.3s ease;
+}
+.is-open .side-menu__arrow {
+    transform: rotate(180deg);
 }
 
+/* Animações suaves */
 .submenu-slide-enter-active,
 .submenu-slide-leave-active {
-    transition: all 0.3s ease;
+    transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 .submenu-slide-enter-from,
 .submenu-slide-leave-to {
     max-height: 0;
     opacity: 0;
-    transform: translateY(-5px);
+    transform: translateY(-8px);
 }
 .submenu-slide-enter-to,
 .submenu-slide-leave-from {
-    max-height: 500px;
+    max-height: 400px;
     opacity: 1;
     transform: translateY(0);
 }
+@media (max-width: 992px) {
+    .app-sidebar {
+        width: 72px; /* collapsed default */
+        position: fixed;
+        top: 3.75rem;
+        left: 0;
+        transition: width 0.25s ease, box-shadow 0.25s ease;
+        z-index: 1100;
+    }
+
+    /* when opened, expand width to a mobile-friendly size */
+    .app-sidebar.sidebar-open {
+        width: min(250px, 92vw);
+        z-index: 1200; /* ensure above overlay */
+        box-shadow: 6px 0 24px rgba(0,0,0,0.45);
+    }
+}
+
 </style>

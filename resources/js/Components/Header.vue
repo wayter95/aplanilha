@@ -1,13 +1,26 @@
 <template>
   <header class="app-header">
     <nav class="main-header !h-[3.75rem]" aria-label="Global">
-      <div class="main-header-container ps-[0.725rem] pe-[1rem] flex items-center">
-        
+        <!-- Header side box that matches the sidebar width; contains clickable logo -->
+        <div class="header-sidebox" :style="{ width: boxWidth }">
+          <a href="/" class="header-sidebox-logo" aria-label="Home">
+            <img :src="currentLogo" alt="Aplanilha" class="header-sidebox-logo-img" />
+          </a>
+        </div>
+        <!-- Toggle button placed to the right of the header-sidebox -->
+        <button
+          class="header-sidebox-toggle"
+          @click="toggleSidebar"
+          :style="{ left: buttonLeft }"
+          :aria-label="(isSidebarCollapsed && !isSidebarHovered) ? 'Abrir sidebar' : 'Fechar sidebar'"
+        >
+          <i v-if="isSidebarCollapsed && !isSidebarHovered" class="bx bx-menu"></i>
+          <i v-else class="bx bx-x"></i>
+        </button>
         <div class="header-content-left flex-shrink-0">
           <div class="header-element">
             <div class="horizontal-logo">
               <a href="/" class="header-logo">
-                <h2 class="text-2xl font-bold text-white">Aplanilha</h2>
               </a>
             </div>
           </div>
@@ -112,8 +125,11 @@ import HeaderTabs from '@/Components/Tabs/HeaderTabs.vue'
 import { usePhotoUrl } from '@/composables/usePhotoUrl'
 import { useTabsStore } from '@/stores/useTabsStore'
 import { router } from '@inertiajs/vue3'
+
+import { onMounted, onUnmounted, ref, watch, computed } from 'vue'
 import { storeToRefs } from 'pinia'
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import logoFull from '../../assets/images/brand-logos/logo-full.png'
+import logoIcon from '../../assets/images/brand-logos/logo-icon.png'
 
 const tabsStore = useTabsStore()
 const { tabs, activeTab } = storeToRefs(tabsStore)
@@ -124,10 +140,8 @@ const props = defineProps({
     type: Object,
     default: () => ({})
   },
-  sidebarExpanded: {
-    type: Boolean,
-    default: false
-  }
+  isSidebarCollapsed: { type: Boolean, default: true },
+  isSidebarHovered: { type: Boolean, default: false }
 })
 
 const emit = defineEmits(['toggle-sidebar'])
@@ -140,8 +154,27 @@ const userPhotoUrl = ref(null)
 const isDark = ref(false)
 const isLight = ref(false)
 
+// compute header box width to match sidebar (collapsed:72px, expanded:250px)
+const boxWidth = computed(() => {
+  const collapsedAndNotHovered = props.isSidebarCollapsed && !props.isSidebarHovered
+  return collapsedAndNotHovered ? '72px' : '250px'
+})
+
+// choose logo image depending on sidebar state
+const currentLogo = computed(() => {
+  const collapsedAndNotHovered = props.isSidebarCollapsed && !props.isSidebarHovered
+  return collapsedAndNotHovered ? logoIcon : logoFull
+})
+
+// position for toggle button (8px gap to the right of box)
+const buttonLeft = computed(() => `calc(${boxWidth.value} + 8px)`)
+
 const toggleUserMenu = () => {
   showUserMenu.value = !showUserMenu.value
+}
+
+const toggleSidebar = () => {
+  emit('toggle-sidebar')
 }
 
 const toggleFullscreen = () => {
@@ -249,5 +282,61 @@ const handleClickOutside = (event) => {
 .user-dropdown {
   display: flex;
   align-items: center;
+}
+
+/* Header sidebox that mirrors the sidebar width */
+.header-sidebox {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  height: 3.75rem; /* same as header */
+  /* match Sidebar.vue background */
+  background: #111C43;
+  border-right: 1px solid rgba(255,255,255,0.05);
+  transition: width 0.25s ease;
+  z-index: 1001; /* below header content but above page background */
+}
+
+/* ensure same appearance in dark mode (when html has class 'dark') */
+.dark .header-sidebox {
+  background: #1A1C1E;
+  border-right-color: rgba(255,255,255,0.05);
+}
+
+.header-sidebox-logo { display: flex; align-items: center; justify-content: center; height: 100%; }
+.header-sidebox-logo-img { max-height: 36px; object-fit: contain; transition: opacity 0.15s ease, transform 0.15s ease; margin: 0 auto; }
+
+.main-header-container {
+  transition: padding-left 0.25s ease;
+}
+
+/* Toggle button placed right of the header-sidebox (absolute) */
+.header-sidebox-toggle{
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  color: #9aa0a6;
+  z-index: 1004; /* above header-sidebox */
+  transition: left 0.25s ease, background 0.15s ease, color 0.15s ease;
+}
+.header-sidebox-toggle:hover{ background: rgba(255,255,255,0.04); color: #fff }
+
+/* Make the toggle icon match sidebar icons */
+.header-sidebox-toggle i {
+  /* Match collapsed sidebar icon size */
+  font-size: 1.5rem;
+  color: #d1d5db;
+}
+.header-sidebox-toggle:hover i {
+  color: #fff;
 }
 </style>
