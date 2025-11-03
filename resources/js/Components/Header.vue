@@ -1,3 +1,4 @@
+// ...existing code...
 <template>
   <header class="app-header">
     <nav class="main-header !h-[3.75rem]" aria-label="Global">
@@ -35,10 +36,10 @@
           <HeaderTabs @select="tabsStore.setActive" @close="tabsStore.closeTab" />
         </div>
 
-        <div class="header-content-right flex-shrink-0">
-
+        <!-- RIGHT: theme / fullscreen / user (horizontal, top-right) -->
+        <div class="header-content-right">
           <!-- Theme toggle -->
-          <div class="header-element header-theme-mode hidden !items-center sm:block !py-[1rem] md:!px-[0.65rem] px-2">
+          <div class="header-element header-theme-mode hidden sm:inline-flex !items-center !py-[1rem] md:!px-[0.65rem] px-2">
             <button 
               v-if="isLight"
               @click="toggleTheme"
@@ -97,7 +98,7 @@
             
             <div 
               v-show="showUserMenu"
-              class="absolute right-0 top-full mt-2 border-0 w-[11rem] !p-0 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-50 pt-0 overflow-hidden header-profile-dropdown"
+              class="absolute header-profile-dropdown !p-0 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-50 pt-0 overflow-hidden"
             >
               <ul class="text-defaulttextcolor font-medium dark:text-white/50">
                 <li>
@@ -115,7 +116,6 @@
           </div>
 
         </div>
-      </div>
     </nav>
   </header>
 </template>
@@ -339,4 +339,38 @@ const handleClickOutside = (event) => {
 .header-sidebox-toggle:hover i {
   color: #fff;
 }
+
+/* NEW: align right-side elements horizontally */
+.header-content-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  padding-right: 0.5rem;
+  position: absolute;
+  right: 0.75rem;
+  top: 0;
+  height: 3.75rem;
+  z-index: 1005;
+}
+
+/* ensure header elements share inline layout */
+.header-element {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* profile dropdown placement */
+.header-profile-dropdown {
+  right: 0;
+  top: calc(100% + 0.25rem);
+  min-width: 11rem;
+}
+
+/* keep dropdown visible above other elements */
+.header-profile-dropdown[style] {
+  z-index: 1006;
+}
 </style>
+// ...existing code...
