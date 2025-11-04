@@ -1,8 +1,8 @@
 <!--
-    📋 BaseSelect - Componente base para campos de seleção com validação
+    📝 Textarea - Componente para campos de textarea com validação
     
     Componente reutilizável que integra VeeValidate com design system
-    suporta options simples e complexas para multi-tenant
+    seguindo padrões de nomenclatura e multi-tenant
 -->
 
 <template>
@@ -10,7 +10,7 @@
         <!-- Label -->
         <label 
             v-if="label" 
-            :for="selectId" 
+            :for="textareaId" 
             class="form-label text-default"
             :class="{ 'required': required }"
         >
@@ -18,60 +18,40 @@
             <span v-if="required" class="text-danger ms-1">*</span>
         </label>
 
-        <!-- Select Field -->
+        <!-- Textarea Field -->
         <div class="input-group">
             <!-- Left Icon -->
             <span v-if="leftIcon" class="input-group-text">
                 <i :class="leftIcon"></i>
             </span>
 
-            <!-- Select -->
-            <select
-                :id="selectId"
+            <!-- Textarea -->
+            <textarea
+                :id="textareaId"
                 :name="name"
+                :placeholder="placeholder"
                 :disabled="disabled"
-                :class="selectClasses"
+                :readonly="readonly"
+                :rows="rows"
+                :cols="cols"
+                :maxlength="maxlength"
+                :class="textareaClasses"
+                :style="{ resize: props.resize }"
                 v-bind="field"
                 @blur="handleBlur"
-                @change="handleChange"
-            >
-                <!-- Placeholder Option -->
-                <option v-if="placeholder" value="" disabled>
-                    {{ placeholder }}
-                </option>
-
-                <!-- Options -->
-                <option
-                    v-for="option in normalizedOptions"
-                    :key="option.value"
-                    :value="option.value"
-                    :disabled="option.disabled"
-                >
-                    {{ option.label }}
-                </option>
-
-                <!-- Grouped Options -->
-                <optgroup
-                    v-for="group in groupedOptions"
-                    :key="group.label"
-                    :label="group.label"
-                >
-                    <option
-                        v-for="option in group.options"
-                        :key="option.value"
-                        :value="option.value"
-                        :disabled="option.disabled"
-                    >
-                        {{ option.label }}
-                    </option>
-                </optgroup>
-            </select>
+                @input="handleInput"
+            ></textarea>
 
             <!-- Right Icon -->
             <span v-if="rightIcon" class="input-group-text">
                 <i :class="rightIcon"></i>
             </span>
         </div>
+
+        <!-- Character Counter -->
+        <small v-if="maxlength && showCounter" class="form-text text-muted text-end d-block">
+            {{ characterCount }} / {{ maxlength }}
+        </small>
 
         <!-- Help Text -->
         <small v-if="helpText && !errorMessage" class="form-text text-muted">
@@ -93,7 +73,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, watch } from 'vue'
+import { computed, ref, nextTick, watch } from 'vue'
 import { useField } from 'vee-validate'
 
 /**
@@ -102,7 +82,7 @@ import { useField } from 'vee-validate'
 const props = defineProps({
     // v-model
     modelValue: {
-        type: [String, Number, Array],
+        type: String,
         default: undefined
     },
     // Configuração básica
@@ -116,40 +96,21 @@ const props = defineProps({
     },
     placeholder: {
         type: String,
-        default: 'Selecione uma opção'
+        default: ''
     },
     
-    // Options
-    options: {
-        type: Array,
-        default: () => [],
-        validator: (options) => {
-            return options.every(option => {
-                // String simples ou objeto com value/label
-                return typeof option === 'string' || 
-                       (typeof option === 'object' && option.value !== undefined && option.label !== undefined)
-            })
-        }
+    // Dimensões
+    rows: {
+        type: Number,
+        default: 3
     },
-    
-    // Options agrupadas
-    groupedOptions: {
-        type: Array,
-        default: () => []
+    cols: {
+        type: Number,
+        default: undefined
     },
-    
-    // Configuração de valor
-    valueKey: {
-        type: String,
-        default: 'value'
-    },
-    labelKey: {
-        type: String,
-        default: 'label'
-    },
-    disabledKey: {
-        type: String,
-        default: 'disabled'
+    maxlength: {
+        type: Number,
+        default: undefined
     },
     
     // Validação
@@ -164,6 +125,10 @@ const props = defineProps({
     
     // Estados
     disabled: {
+        type: Boolean,
+        default: false
+    },
+    readonly: {
         type: Boolean,
         default: false
     },
@@ -200,10 +165,15 @@ const props = defineProps({
         default: ''
     },
     
-    // Multi-tenant
-    multiple: {
+    // Funcionalidades
+    showCounter: {
         type: Boolean,
         default: false
+    },
+    resize: {
+        type: String,
+        default: 'vertical',
+        validator: (value) => ['none', 'both', 'horizontal', 'vertical'].includes(value)
     }
 })
 
@@ -214,7 +184,7 @@ const {
     value, 
     errorMessage, 
     handleBlur, 
-    handleChange: veeHandleChange,
+    handleChange,
     meta 
 } = useField(props.name, props.rules, {
     validateOnValueUpdate: false,
@@ -229,40 +199,26 @@ watch(() => props.modelValue, (newVal) => {
 }, { immediate: true })
 
 /**
- * 🎯 ID único para o select
+ * 🎯 ID único para o textarea
  */
-const selectId = computed(() => `select-${props.name}-${Math.random().toString(36).substr(2, 9)}`)
+const textareaId = computed(() => `textarea-${props.name}-${Math.random().toString(36).substr(2, 9)}`)
 
 /**
- * 📋 Normalização das options
+ * 🔢 Contador de caracteres
  */
-const normalizedOptions = computed(() => {
-    return props.options.map(option => {
-        if (typeof option === 'string') {
-            return {
-                value: option,
-                label: option,
-                disabled: false
-            }
-        }
-        
-        return {
-            value: option[props.valueKey],
-            label: option[props.labelKey],
-            disabled: option[props.disabledKey] || false
-        }
-    })
+const characterCount = computed(() => {
+    return value.value ? value.value.length : 0
 })
 
 /**
- * 🎨 Classes dinâmicas do select
+ * 🎨 Classes dinâmicas do textarea
  */
-const selectClasses = computed(() => {
-    const baseClasses = ['form-select']
+const textareaClasses = computed(() => {
+    const baseClasses = ['form-control']
     
     // Tamanho
-    if (props.size === 'sm') baseClasses.push('form-select-sm')
-    if (props.size === 'lg') baseClasses.push('form-select-lg')
+    if (props.size === 'sm') baseClasses.push('form-control-sm')
+    if (props.size === 'lg') baseClasses.push('form-control-lg')
     
     // Estado de validação
     if (meta.value && meta.value.touched) {
@@ -275,7 +231,7 @@ const selectClasses = computed(() => {
     
     // Variante
     if (props.variant !== 'default') {
-        baseClasses.push(`form-select-${props.variant}`)
+        baseClasses.push(`form-control-${props.variant}`)
     }
     
     return baseClasses
@@ -286,40 +242,34 @@ const selectClasses = computed(() => {
  */
 const field = computed(() => ({
     value: value.value,
-    multiple: props.multiple
+    onInput: handleInput,
+    onBlur: handleBlur
 }))
 
 /**
- * 📝 Manipulação de mudança
+ * 📝 Manipulação de input
  */
-function handleChange(event) {
-    let newValue = event.target.value
-    
-    // Para selects múltiplos
-    if (props.multiple) {
-        newValue = Array.from(event.target.selectedOptions, option => option.value)
-    }
-    
-    value.value = newValue
-    veeHandleChange(newValue)
-    emit('update:modelValue', newValue)
+function handleInput(event) {
+    value.value = event.target.value
+    handleChange(event.target.value)
+    emit('update:modelValue', event.target.value)
 }
 
 /**
  * 🎬 Emits
  */
-const emit = defineEmits(['update:modelValue', 'change'])
+const emit = defineEmits(['update:modelValue', 'blur', 'focus', 'input'])
 
 // Exposição para acesso externo
 defineExpose({
     focus: () => {
         nextTick(() => {
-            document.getElementById(selectId.value)?.focus()
+            document.getElementById(textareaId.value)?.focus()
         })
     },
     blur: () => {
         nextTick(() => {
-            document.getElementById(selectId.value)?.blur()
+            document.getElementById(textareaId.value)?.blur()
         })
     },
     value,
@@ -336,18 +286,24 @@ defineExpose({
 .input-group-text {
     background-color: var(--bs-gray-50);
     border-color: var(--bs-gray-300);
+    align-items: flex-start;
+    padding-top: 0.5rem;
 }
 
-.form-select:focus {
+textarea.form-control {
+    min-height: calc(1.5em + 0.75rem + 2px);
+}
+
+.form-control:focus {
     border-color: var(--bs-primary);
     box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
 }
 
-.form-select.is-valid {
+.form-control.is-valid {
     border-color: var(--bs-success);
 }
 
-.form-select.is-invalid {
+.form-control.is-invalid {
     border-color: var(--bs-danger);
 }
 
@@ -362,3 +318,4 @@ defineExpose({
     margin-top: 0.25rem;
 }
 </style>
+

@@ -1,5 +1,5 @@
 <!--
-    📝 BaseTextarea - Componente base para campos de textarea com validação
+    🔄 Switch - Componente para switches/toggles com validação
     
     Componente reutilizável que integra VeeValidate com design system
     seguindo padrões de nomenclatura e multi-tenant
@@ -10,48 +10,49 @@
         <!-- Label -->
         <label 
             v-if="label" 
-            :for="textareaId" 
-            class="form-label text-default"
+            :for="switchId" 
+            class="form-label text-default d-flex align-items-center"
             :class="{ 'required': required }"
         >
-            {{ label }}
+            <span>{{ label }}</span>
             <span v-if="required" class="text-danger ms-1">*</span>
         </label>
 
-        <!-- Textarea Field -->
-        <div class="input-group">
+        <!-- Switch Container -->
+        <div class="d-flex align-items-center gap-3">
             <!-- Left Icon -->
             <span v-if="leftIcon" class="input-group-text">
                 <i :class="leftIcon"></i>
             </span>
 
-            <!-- Textarea -->
-            <textarea
-                :id="textareaId"
-                :name="name"
-                :placeholder="placeholder"
-                :disabled="disabled"
-                :readonly="readonly"
-                :rows="rows"
-                :cols="cols"
-                :maxlength="maxlength"
-                :class="textareaClasses"
-                :style="{ resize: props.resize }"
-                v-bind="field"
-                @blur="handleBlur"
-                @input="handleInput"
-            ></textarea>
+            <!-- Switch -->
+            <div class="form-check form-switch">
+                <input
+                    :id="switchId"
+                    :name="name"
+                    type="checkbox"
+                    class="ti-switch"
+                    :class="switchClasses"
+                    :disabled="disabled"
+                    :checked="isChecked"
+                    @change="handleChange"
+                    @blur="handleBlur"
+                />
+                <label 
+                    v-if="!label || showInlineLabel" 
+                    :for="switchId" 
+                    class="form-check-label ms-2"
+                    :class="{ 'text-muted': !isChecked }"
+                >
+                    {{ inlineLabel || (isChecked ? activeLabel : inactiveLabel) }}
+                </label>
+            </div>
 
             <!-- Right Icon -->
             <span v-if="rightIcon" class="input-group-text">
                 <i :class="rightIcon"></i>
             </span>
         </div>
-
-        <!-- Character Counter -->
-        <small v-if="maxlength && showCounter" class="form-text text-muted text-end d-block">
-            {{ characterCount }} / {{ maxlength }}
-        </small>
 
         <!-- Help Text -->
         <small v-if="helpText && !errorMessage" class="form-text text-muted">
@@ -73,7 +74,7 @@
 </template>
 
 <script setup>
-import { computed, ref, nextTick, watch } from 'vue'
+import { computed, nextTick, watch } from 'vue'
 import { useField } from 'vee-validate'
 
 /**
@@ -82,8 +83,8 @@ import { useField } from 'vee-validate'
 const props = defineProps({
     // v-model
     modelValue: {
-        type: String,
-        default: undefined
+        type: Boolean,
+        default: false
     },
     // Configuração básica
     name: {
@@ -94,23 +95,23 @@ const props = defineProps({
         type: String,
         default: ''
     },
-    placeholder: {
+    
+    // Labels inline
+    activeLabel: {
+        type: String,
+        default: 'Ativo'
+    },
+    inactiveLabel: {
+        type: String,
+        default: 'Inativo'
+    },
+    inlineLabel: {
         type: String,
         default: ''
     },
-    
-    // Dimensões
-    rows: {
-        type: Number,
-        default: 3
-    },
-    cols: {
-        type: Number,
-        default: undefined
-    },
-    maxlength: {
-        type: Number,
-        default: undefined
+    showInlineLabel: {
+        type: Boolean,
+        default: false
     },
     
     // Validação
@@ -128,10 +129,6 @@ const props = defineProps({
         type: Boolean,
         default: false
     },
-    readonly: {
-        type: Boolean,
-        default: false
-    },
     
     // Aparência
     size: {
@@ -142,7 +139,7 @@ const props = defineProps({
     variant: {
         type: String,
         default: 'default',
-        validator: (value) => ['default', 'success', 'warning', 'danger'].includes(value)
+        validator: (value) => ['default', 'primary', 'success', 'warning', 'danger'].includes(value)
     },
     
     // Ícones
@@ -163,17 +160,6 @@ const props = defineProps({
     successMessage: {
         type: String,
         default: ''
-    },
-    
-    // Funcionalidades
-    showCounter: {
-        type: Boolean,
-        default: false
-    },
-    resize: {
-        type: String,
-        default: 'vertical',
-        validator: (value) => ['none', 'both', 'horizontal', 'vertical'].includes(value)
     }
 })
 
@@ -184,41 +170,47 @@ const {
     value, 
     errorMessage, 
     handleBlur, 
-    handleChange,
+    handleChange: veeHandleChange,
     meta 
 } = useField(props.name, props.rules, {
     validateOnValueUpdate: false,
-    initialValue: props.modelValue
+    initialValue: props.modelValue,
+    type: 'checkbox'
 })
 
 // Sincroniza value interno com modelValue externo
 watch(() => props.modelValue, (newVal) => {
-    if (newVal !== undefined && value.value !== newVal) {
+    if (value.value !== newVal) {
         value.value = newVal
     }
 }, { immediate: true })
 
 /**
- * 🎯 ID único para o textarea
+ * 🎯 ID único para o switch
  */
-const textareaId = computed(() => `textarea-${props.name}-${Math.random().toString(36).substr(2, 9)}`)
+const switchId = computed(() => `switch-${props.name}-${Math.random().toString(36).substr(2, 9)}`)
 
 /**
- * 🔢 Contador de caracteres
+ * ✅ Estado checked
  */
-const characterCount = computed(() => {
-    return value.value ? value.value.length : 0
+const isChecked = computed(() => {
+    return value.value === true || value.value === 'true' || value.value === 1 || value.value === '1'
 })
 
 /**
- * 🎨 Classes dinâmicas do textarea
+ * 🎨 Classes dinâmicas do switch
  */
-const textareaClasses = computed(() => {
-    const baseClasses = ['form-control']
+const switchClasses = computed(() => {
+    const baseClasses = []
     
     // Tamanho
-    if (props.size === 'sm') baseClasses.push('form-control-sm')
-    if (props.size === 'lg') baseClasses.push('form-control-lg')
+    if (props.size === 'sm') baseClasses.push('ti-switch-sm')
+    if (props.size === 'lg') baseClasses.push('ti-switch-lg')
+    
+    // Variante (pode ser aplicado via CSS customizado se necessário)
+    if (props.variant !== 'default') {
+        baseClasses.push(`ti-switch-${props.variant}`)
+    }
     
     // Estado de validação
     if (meta.value && meta.value.touched) {
@@ -229,52 +221,42 @@ const textareaClasses = computed(() => {
         }
     }
     
-    // Variante
-    if (props.variant !== 'default') {
-        baseClasses.push(`form-control-${props.variant}`)
-    }
-    
     return baseClasses
 })
 
-/**
- * 🔄 Field binding para VeeValidate
- */
-const field = computed(() => ({
-    value: value.value,
-    onInput: handleInput,
-    onBlur: handleBlur
-}))
 
 /**
- * 📝 Manipulação de input
+ * 📝 Manipulação de mudança
  */
-function handleInput(event) {
-    value.value = event.target.value
-    handleChange(event.target.value)
-    emit('update:modelValue', event.target.value)
+function handleChange(event) {
+    const newValue = event.target.checked
+    value.value = newValue
+    veeHandleChange(newValue)
+    emit('update:modelValue', newValue)
+    emit('change', newValue)
 }
 
 /**
  * 🎬 Emits
  */
-const emit = defineEmits(['update:modelValue', 'blur', 'focus', 'input'])
+const emit = defineEmits(['update:modelValue', 'change', 'blur'])
 
 // Exposição para acesso externo
 defineExpose({
     focus: () => {
         nextTick(() => {
-            document.getElementById(textareaId.value)?.focus()
+            document.getElementById(switchId.value)?.focus()
         })
     },
     blur: () => {
         nextTick(() => {
-            document.getElementById(textareaId.value)?.blur()
+            document.getElementById(switchId.value)?.blur()
         })
     },
     value,
     errorMessage,
-    meta
+    meta,
+    isChecked
 })
 </script>
 
@@ -283,27 +265,36 @@ defineExpose({
     font-weight: 500;
 }
 
+.form-label.d-flex {
+    display: flex;
+    align-items: center;
+}
+
 .input-group-text {
     background-color: var(--bs-gray-50);
     border-color: var(--bs-gray-300);
-    align-items: flex-start;
-    padding-top: 0.5rem;
 }
 
-textarea.form-control {
-    min-height: calc(1.5em + 0.75rem + 2px);
+.form-check {
+    display: flex;
+    align-items: center;
 }
 
-.form-control:focus {
-    border-color: var(--bs-primary);
-    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+.form-check-label {
+    cursor: pointer;
+    user-select: none;
 }
 
-.form-control.is-valid {
+.ti-switch:focus {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 2px;
+}
+
+.ti-switch.is-valid {
     border-color: var(--bs-success);
 }
 
-.form-control.is-invalid {
+.ti-switch.is-invalid {
     border-color: var(--bs-danger);
 }
 
@@ -316,6 +307,23 @@ textarea.form-control {
 .form-text {
     font-size: 0.875rem;
     margin-top: 0.25rem;
+}
+
+/* Variantes de cor customizadas (opcional) */
+.ti-switch-primary {
+    /* Usa a cor primária padrão do sistema */
+}
+
+.ti-switch-success:checked {
+    background-color: var(--bs-success);
+}
+
+.ti-switch-warning:checked {
+    background-color: var(--bs-warning);
+}
+
+.ti-switch-danger:checked {
+    background-color: var(--bs-danger);
 }
 </style>
 

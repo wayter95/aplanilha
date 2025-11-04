@@ -12,12 +12,12 @@
 
       <div class="grid grid-cols-2 gap-6">
       <div class="grid grid-cols-2 gap-4">
-        <BaseSelect name="type" label="Tipo" :options="typeOptions" v-model="form.type" />
-        <BaseInput name="name" label="Nome" rules="required" v-model="form.name" />
-        <BaseInput name="language" label="Idioma" v-model="form.language" />
-        <BaseInput name="country" label="País" v-model="form.country" />
-        <BaseSelect name="status" label="Status" :options="statusOptions" v-model="form.status" />
-        <BaseSwitch 
+        <Select name="type" label="Tipo" :options="typeOptions" v-model="form.type" />
+        <Input name="name" label="Nome" rules="required" v-model="form.name" />
+        <Input name="language" label="Idioma" v-model="form.language" />
+        <Input name="country" label="País" v-model="form.country" />
+        <Select name="status" label="Status" :options="statusOptions" v-model="form.status" />
+        <Switch 
           name="is_default" 
           label="Definir como padrão" 
           v-model="form.is_default"
@@ -30,14 +30,14 @@
     </div>
 
     <div class="grid grid-cols-1 gap-4 mt-6">
-      <BaseTextarea 
+      <Textarea 
         name="header_html" 
         label="Cabeçalho (HTML)" 
         :rows="3"
         placeholder="<h1>Título</h1>"
         v-model="form.header_html"
       />
-      <BaseTextarea 
+      <Textarea 
         name="content_html" 
         label="Conteúdo (HTML)" 
         :rows="8"
@@ -45,7 +45,7 @@
         placeholder="<p>Olá ${name}, ${current_date}</p>"
         v-model="form.content_html"
       />
-      <BaseTextarea 
+      <Textarea 
         name="footer_html" 
         label="Rodapé (HTML)" 
         :rows="3"
@@ -67,12 +67,12 @@
 
       <div class="grid grid-cols-2 gap-6">
       <div class="grid grid-cols-2 gap-4">
-        <BaseSelect name="type" label="Tipo" :options="typeOptions" v-model="form.type" />
-        <BaseInput name="name" label="Nome" rules="required" v-model="form.name" />
-        <BaseInput name="language" label="Idioma" v-model="form.language" />
-        <BaseInput name="country" label="País" v-model="form.country" />
-        <BaseSelect name="status" label="Status" :options="statusOptions" v-model="form.status" />
-        <BaseSwitch 
+        <Select name="type" label="Tipo" :options="typeOptions" v-model="form.type" />
+        <Input name="name" label="Nome" rules="required" v-model="form.name" />
+        <Input name="language" label="Idioma" v-model="form.language" />
+        <Input name="country" label="País" v-model="form.country" />
+        <Select name="status" label="Status" :options="statusOptions" v-model="form.status" />
+        <Switch 
           name="is_default" 
           label="Definir como padrão" 
           v-model="form.is_default"
@@ -85,14 +85,14 @@
     </div>
 
     <div class="grid grid-cols-1 gap-4 mt-6">
-      <BaseTextarea 
+      <Textarea 
         name="header_html" 
         label="Cabeçalho (HTML)" 
         :rows="3"
         placeholder="<h1>Título</h1>"
         v-model="form.header_html"
       />
-      <BaseTextarea 
+      <Textarea 
         name="content_html" 
         label="Conteúdo (HTML)" 
         :rows="8"
@@ -100,7 +100,7 @@
         placeholder="<p>Olá ${name}, ${current_date}</p>"
         v-model="form.content_html"
       />
-      <BaseTextarea 
+      <Textarea 
         name="footer_html" 
         label="Rodapé (HTML)" 
         :rows="3"
@@ -114,17 +114,17 @@
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue'
 import { Form as VeeForm } from 'vee-validate'
-import BaseInput from '@/Components/Form/BaseInput.vue'
-import BaseSelect from '@/Components/Form/BaseSelect.vue'
-import BaseTextarea from '@/Components/Form/BaseTextarea.vue'
-import BaseSwitch from '@/Components/Form/BaseSwitch.vue'
+import Input from '@/Components/Input.vue'
+import Select from '@/Components/Select.vue'
+import Textarea from '@/Components/Textarea.vue'
+import Switch from '@/Components/Switch.vue'
 import { useTabsStore } from '@/stores/useTabsStore'
 import { useTabFormDataStore } from '@/stores/useTabFormDataStore'
 import { storeToRefs } from 'pinia'
 import { usePage } from '@inertiajs/vue3'
 
 export default {
-  components: { AppLayout, Form: VeeForm, BaseInput, BaseSelect, BaseTextarea, BaseSwitch },
+  components: { AppLayout, Form: VeeForm, Input, Select, Textarea, Switch },
   props: {
     mode: { type: String, default: 'create' },
     id: { type: String, default: null },
