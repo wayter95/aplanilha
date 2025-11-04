@@ -1,130 +1,157 @@
 <template>
   <AppLayout v-if="standalone" :title="computedTitle" :description="''" :user="user">
   <Form @submit="save" :initial-values="form">
-    <div class="border rounded-lg p-4 bg-white dark:bg-gray-800 border-default-200 dark:border-gray-700">
-      <div class="flex items-center justify-between mb-4">
-        <div class="text-lg font-semibold dark:text-default-100">{{ computedTitle }}</div>
-        <div class="flex gap-2">
-          <button type="button" class="ti-btn ti-btn-outline-secondary !py-1 !px-2 !text-[0.75rem]" @click="reset">Reset</button>
-          <button type="submit" class="ti-btn ti-btn-primary-full !py-1 !px-2 !text-[0.75rem]">Salvar</button>
+    <div class="overflow-hidden">
+      <!-- Conteúdo do formulário -->
+      <div class="p-6">
+        <div class="flex flex-col md:flex-row gap-6">
+          <!-- Card esquerdo: Informações básicas e marca d'água (30%) -->
+          <div class="w-full md:w-[30%] flex-shrink-0 bg-white dark:bg-gray-800 rounded-lg p-5 border border-gray-200 dark:border-gray-700 shadow-sm space-y-5">
+            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Informações</h3>
+            
+            <div class="space-y-4">
+              <Select name="type" label="Tipo" :options="typeOptions" v-model="form.type" />
+              <Input name="name" label="Nome" rules="required" v-model="form.name" />
+              <Switch 
+                name="is_default" 
+                label="Definir como padrão" 
+                v-model="form.is_default"
+              />
+            </div>
+
+            <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
+              <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-4">Marca d'água</h4>
+              <ImageUpload
+                v-model="form.watermark_image_key"
+                folder="document-templates/watermarks"
+                alt-text="Marca d'água"
+              />
+            </div>
+          </div>
+
+          <!-- Card direito: Conteúdo HTML (70%) -->
+          <div class="flex-1 w-full md:w-[70%] bg-white dark:bg-gray-800 rounded-lg p-5 border border-gray-200 dark:border-gray-700 shadow-sm space-y-4">
+            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Conteúdo HTML</h3>
+            <div class="space-y-4">
+              <Textarea 
+                name="header_html" 
+                label="Cabeçalho (HTML)" 
+                :rows="3"
+                placeholder="<h1>Título</h1>"
+                v-model="form.header_html"
+              />
+              <Textarea 
+                name="content_html" 
+                label="Conteúdo (HTML)" 
+                :rows="8"
+                rules="required"
+                placeholder="<p>Olá ${name}, ${current_date}</p>"
+                v-model="form.content_html"
+              />
+              <Textarea 
+                name="footer_html" 
+                label="Rodapé (HTML)" 
+                :rows="3"
+                v-model="form.footer_html"
+              />
+            </div>
+            
+            <!-- Botão Salvar dentro do card -->
+            <div class="pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+              <button type="submit" class="px-6 h-10 py-2.5 text-sm font-medium text-white bg-primary hover:bg-primary-dark rounded-lg transition-colors shadow-sm">
+                <i class="ri-save-line mr-2"></i>Salvar
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-
-      <div class="grid grid-cols-2 gap-6">
-      <div class="grid grid-cols-2 gap-4">
-        <Select name="type" label="Tipo" :options="typeOptions" v-model="form.type" />
-        <Input name="name" label="Nome" rules="required" v-model="form.name" />
-        <Input name="language" label="Idioma" v-model="form.language" />
-        <Input name="country" label="País" v-model="form.country" />
-        <Select name="status" label="Status" :options="statusOptions" v-model="form.status" />
-        <Switch 
-          name="is_default" 
-          label="Definir como padrão" 
-          v-model="form.is_default"
-        />
-      </div>
-      <div>
-        <label class="block text-sm mb-1 dark:text-default-200">Plano de fundo (URL)</label>
-        <input v-model="form.background_image_path" type="text" class="w-full border rounded px-2 py-1 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="https://..." />
-      </div>
-    </div>
-
-    <div class="grid grid-cols-1 gap-4 mt-6">
-      <Textarea 
-        name="header_html" 
-        label="Cabeçalho (HTML)" 
-        :rows="3"
-        placeholder="<h1>Título</h1>"
-        v-model="form.header_html"
-      />
-      <Textarea 
-        name="content_html" 
-        label="Conteúdo (HTML)" 
-        :rows="8"
-        rules="required"
-        placeholder="<p>Olá ${name}, ${current_date}</p>"
-        v-model="form.content_html"
-      />
-      <Textarea 
-        name="footer_html" 
-        label="Rodapé (HTML)" 
-        :rows="3"
-        v-model="form.footer_html"
-      />
-    </div>
     </div>
   </Form>
   </AppLayout>
   <Form v-else @submit="save" :initial-values="form">
-    <div class="border rounded-lg p-4 bg-white dark:bg-gray-800 border-default-200 dark:border-gray-700">
-      <div class="flex items-center justify-between mb-4">
-        <div class="text-lg font-semibold dark:text-default-100">{{ computedTitle }}</div>
-        <div class="flex gap-2">
-          <button type="button" class="ti-btn ti-btn-outline-secondary !py-1 !px-2 !text-[0.75rem]" @click="reset">Reset</button>
-          <button type="submit" class="ti-btn ti-btn-primary-full !py-1 !px-2 !text-[0.75rem]">Salvar</button>
+    <div class="overflow-hidden">
+      <!-- Conteúdo do formulário -->
+      <div class="p-6">
+        <div class="flex flex-col md:flex-row gap-6">
+          <!-- Card esquerdo: Informações básicas e marca d'água (30%) -->
+          <div class="w-full md:w-[30%] flex-shrink-0 bg-white dark:bg-gray-800 rounded-lg p-5 border border-gray-200 dark:border-gray-700 shadow-sm space-y-5">
+            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Informações</h3>
+            
+            <div class="space-y-4">
+              <Select name="type" label="Tipo" :options="typeOptions" v-model="form.type" />
+              <Input name="name" label="Nome" rules="required" v-model="form.name" />
+              <Switch 
+                name="is_default" 
+                label="Definir como padrão" 
+                v-model="form.is_default"
+              />
+            </div>
+
+            <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
+              <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-4">Marca d'água</h4>
+              <ImageUpload
+                v-model="form.watermark_image_key"
+                folder="document-templates/watermarks"
+                alt-text="Marca d'água"
+              />
+            </div>
+          </div>
+
+          <!-- Card direito: Conteúdo HTML (70%) -->
+          <div class="flex-1 w-full md:w-[70%] bg-white dark:bg-gray-800 rounded-lg p-5 border border-gray-200 dark:border-gray-700 shadow-sm space-y-4">
+            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Conteúdo HTML</h3>
+            <div class="space-y-4">
+              <Textarea 
+                name="header_html" 
+                label="Cabeçalho (HTML)" 
+                :rows="3"
+                placeholder="<h1>Título</h1>"
+                v-model="form.header_html"
+              />
+              <Textarea 
+                name="content_html" 
+                label="Conteúdo (HTML)" 
+                :rows="8"
+                rules="required"
+                placeholder="<p>Olá ${name}, ${current_date}</p>"
+                v-model="form.content_html"
+              />
+              <Textarea 
+                name="footer_html" 
+                label="Rodapé (HTML)" 
+                :rows="3"
+                v-model="form.footer_html"
+              />
+            </div>
+            
+            <!-- Botão Salvar dentro do card -->
+            <div class="pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+              <button type="submit" class="px-6 py-2.5 text-sm font-medium text-white bg-primary hover:bg-primary-dark rounded-lg transition-colors shadow-sm">
+                <i class="ri-save-line mr-2"></i>Salvar
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-
-      <div class="grid grid-cols-2 gap-6">
-      <div class="grid grid-cols-2 gap-4">
-        <Select name="type" label="Tipo" :options="typeOptions" v-model="form.type" />
-        <Input name="name" label="Nome" rules="required" v-model="form.name" />
-        <Input name="language" label="Idioma" v-model="form.language" />
-        <Input name="country" label="País" v-model="form.country" />
-        <Select name="status" label="Status" :options="statusOptions" v-model="form.status" />
-        <Switch 
-          name="is_default" 
-          label="Definir como padrão" 
-          v-model="form.is_default"
-        />
-      </div>
-      <div>
-        <label class="block text-sm mb-1 dark:text-default-200">Plano de fundo (URL)</label>
-        <input v-model="form.background_image_path" type="text" class="w-full border rounded px-2 py-1 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="https://..." />
-      </div>
-    </div>
-
-    <div class="grid grid-cols-1 gap-4 mt-6">
-      <Textarea 
-        name="header_html" 
-        label="Cabeçalho (HTML)" 
-        :rows="3"
-        placeholder="<h1>Título</h1>"
-        v-model="form.header_html"
-      />
-      <Textarea 
-        name="content_html" 
-        label="Conteúdo (HTML)" 
-        :rows="8"
-        rules="required"
-        placeholder="<p>Olá ${name}, ${current_date}</p>"
-        v-model="form.content_html"
-      />
-      <Textarea 
-        name="footer_html" 
-        label="Rodapé (HTML)" 
-        :rows="3"
-        v-model="form.footer_html"
-      />
-    </div>
     </div>
   </Form>
 </template>
 
 <script>
-import AppLayout from '@/Layouts/AppLayout.vue'
-import { Form as VeeForm } from 'vee-validate'
+import ImageUpload from '@/Components/ImageUpload.vue'
 import Input from '@/Components/Input.vue'
 import Select from '@/Components/Select.vue'
-import Textarea from '@/Components/Textarea.vue'
 import Switch from '@/Components/Switch.vue'
-import { useTabsStore } from '@/stores/useTabsStore'
+import Textarea from '@/Components/Textarea.vue'
+import AppLayout from '@/Layouts/AppLayout.vue'
 import { useTabFormDataStore } from '@/stores/useTabFormDataStore'
-import { storeToRefs } from 'pinia'
+import { useTabsStore } from '@/stores/useTabsStore'
 import { usePage } from '@inertiajs/vue3'
+import { storeToRefs } from 'pinia'
+import { Form as VeeForm } from 'vee-validate'
 
 export default {
-  components: { AppLayout, Form: VeeForm, Input, Select, Textarea, Switch },
+  components: { AppLayout, Form: VeeForm, Input, Select, Textarea, Switch, ImageUpload },
   props: {
     mode: { type: String, default: 'create' },
     id: { type: String, default: null },
@@ -147,7 +174,7 @@ export default {
         header_html: '',
         content_html: '',
         footer_html: '',
-        background_image_path: '',
+        watermark_image_key: '',
       },
       typeOptions: [
         { value: 'contract', label: 'Contratos' },
@@ -162,7 +189,16 @@ export default {
   },
   computed: {
     computedTitle() {
-      return this.mode === 'create' ? `Novo Modelo (${this.typeOptions.find(o => o.value === this.form.type)?.label || this.form.type})` : 'Editar Modelo'
+      if (this.mode === 'edit' && this.form.name) {
+        return this.form.name
+      }
+      if (this.mode === 'create') {
+        const typeLabel = this.typeOptions.find(o => o.value === this.form.type)?.label || this.form.type
+        // Converte para singular: Contratos -> Contrato, Faturas -> Fatura, Orçamentos -> Orçamento
+        const singularLabel = typeLabel.endsWith('s') ? typeLabel.slice(0, -1) : typeLabel
+        return `Novo ${singularLabel}`
+      }
+      return 'Editar Modelo'
     },
   },
   watch: {
@@ -281,7 +317,11 @@ export default {
       const path = this.id ? `/document-templates/${this.id}/edit` : `/document-templates/new/${this.tempKey}`
       tabsStore.addTab({
         key: tabKey,
-        title: this.id ? 'Carregando…' : `Novo Modelo (${this.typeOptions.find(o => o.value === this.form.type)?.label || this.form.type})`,
+        title: this.id ? 'Carregando…' : (() => {
+          const typeLabel = this.typeOptions.find(o => o.value === this.form.type)?.label || this.form.type
+          const singularLabel = typeLabel.endsWith('s') ? typeLabel.slice(0, -1) : typeLabel
+          return `Novo ${singularLabel}`
+        })(),
         mode: this.id ? 'edit' : 'create',
         componentName: 'DocumentTemplatesForm',
         path,
@@ -416,7 +456,7 @@ export default {
         header_html: '',
         content_html: '',
         footer_html: '',
-        background_image_path: '',
+        watermark_image_key: '',
       }
     },
     async load() {
