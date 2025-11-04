@@ -22,11 +22,11 @@
         <div v-if="activeTab==='dados'" class="grid grid-cols-2 gap-6 bg-white dark:bg-bgdark rounded-md border border-default-200 dark:border-white/10 p-6">
             <div class="space-y-4">
                 <div class="grid grid-cols-2 gap-4">
-                    <BaseSelect name="type" label="Tipo" :options="typeOptions" v-model="form.type" />
-                    <BaseInput name="name" label="Nome" rules="required" v-model="form.name" />
-                    <BaseInput name="language" label="Idioma" v-model="form.language" />
-                    <BaseInput name="country" label="País" v-model="form.country" />
-                    <BaseSelect name="status" label="Status" :options="statusOptions" v-model="form.status" />
+                    <Select name="type" label="Tipo" :options="typeOptions" v-model="form.type" />
+                    <Input name="name" label="Nome" rules="required" v-model="form.name" />
+                    <Input name="language" label="Idioma" v-model="form.language" />
+                    <Input name="country" label="País" v-model="form.country" />
+                    <Select name="status" label="Status" :options="statusOptions" v-model="form.status" />
                     <div class="flex items-end">
                         <label class="flex items-center gap-2 text-sm"><input type="checkbox" v-model="form.is_default" /> Definir como padrão</label>
                     </div>
@@ -85,10 +85,10 @@
 
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue'
-import BaseInput from '@/Components/Form/BaseInput.vue'
-import BaseSelect from '@/Components/Form/BaseSelect.vue'
+import Input from '@/Components/Input.vue'
+import Select from '@/Components/Select.vue'
 export default {
-    components: { AppLayout, BaseInput, BaseSelect },
+    components: { AppLayout, Input, Select },
     props: {
         templateId: { type: String, default: null }
     },
