@@ -17,9 +17,11 @@
         <BaseInput name="language" label="Idioma" v-model="form.language" />
         <BaseInput name="country" label="País" v-model="form.country" />
         <BaseSelect name="status" label="Status" :options="statusOptions" v-model="form.status" />
-        <div class="flex items-end">
-          <label class="flex items-center gap-2 text-sm dark:text-default-200"><input type="checkbox" v-model="form.is_default" /> Definir como padrão</label>
-        </div>
+        <BaseSwitch 
+          name="is_default" 
+          label="Definir como padrão" 
+          v-model="form.is_default"
+        />
       </div>
       <div>
         <label class="block text-sm mb-1 dark:text-default-200">Plano de fundo (URL)</label>
@@ -28,18 +30,27 @@
     </div>
 
     <div class="grid grid-cols-1 gap-4 mt-6">
-      <div>
-        <label class="block text-sm mb-1 dark:text-default-200">Cabeçalho (HTML)</label>
-        <textarea v-model="form.header_html" rows="3" class="w-full border rounded px-2 py-1 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="<h1>Título</h1>"></textarea>
-      </div>
-      <div>
-        <label class="block text-sm mb-1 dark:text-default-200">Conteúdo (HTML)</label>
-        <textarea v-model="form.content_html" rows="8" class="w-full border rounded px-2 py-1 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="<p>Olá ${name}, ${current_date}</p>"></textarea>
-      </div>
-      <div>
-        <label class="block text-sm mb-1 dark:text-default-200">Rodapé (HTML)</label>
-        <textarea v-model="form.footer_html" rows="3" class="w-full border rounded px-2 py-1 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
-      </div>
+      <BaseTextarea 
+        name="header_html" 
+        label="Cabeçalho (HTML)" 
+        :rows="3"
+        placeholder="<h1>Título</h1>"
+        v-model="form.header_html"
+      />
+      <BaseTextarea 
+        name="content_html" 
+        label="Conteúdo (HTML)" 
+        :rows="8"
+        rules="required"
+        placeholder="<p>Olá ${name}, ${current_date}</p>"
+        v-model="form.content_html"
+      />
+      <BaseTextarea 
+        name="footer_html" 
+        label="Rodapé (HTML)" 
+        :rows="3"
+        v-model="form.footer_html"
+      />
     </div>
     </div>
   </Form>
@@ -61,9 +72,11 @@
         <BaseInput name="language" label="Idioma" v-model="form.language" />
         <BaseInput name="country" label="País" v-model="form.country" />
         <BaseSelect name="status" label="Status" :options="statusOptions" v-model="form.status" />
-        <div class="flex items-end">
-          <label class="flex items-center gap-2 text-sm dark:text-default-200"><input type="checkbox" v-model="form.is_default" /> Definir como padrão</label>
-        </div>
+        <BaseSwitch 
+          name="is_default" 
+          label="Definir como padrão" 
+          v-model="form.is_default"
+        />
       </div>
       <div>
         <label class="block text-sm mb-1 dark:text-default-200">Plano de fundo (URL)</label>
@@ -72,18 +85,27 @@
     </div>
 
     <div class="grid grid-cols-1 gap-4 mt-6">
-      <div>
-        <label class="block text-sm mb-1 dark:text-default-200">Cabeçalho (HTML)</label>
-        <textarea v-model="form.header_html" rows="3" class="w-full border rounded px-2 py-1 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="<h1>Título</h1>"></textarea>
-      </div>
-      <div>
-        <label class="block text-sm mb-1 dark:text-default-200">Conteúdo (HTML)</label>
-        <textarea v-model="form.content_html" rows="8" class="w-full border rounded px-2 py-1 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="<p>Olá ${name}, ${current_date}</p>"></textarea>
-      </div>
-      <div>
-        <label class="block text-sm mb-1 dark:text-default-200">Rodapé (HTML)</label>
-        <textarea v-model="form.footer_html" rows="3" class="w-full border rounded px-2 py-1 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
-      </div>
+      <BaseTextarea 
+        name="header_html" 
+        label="Cabeçalho (HTML)" 
+        :rows="3"
+        placeholder="<h1>Título</h1>"
+        v-model="form.header_html"
+      />
+      <BaseTextarea 
+        name="content_html" 
+        label="Conteúdo (HTML)" 
+        :rows="8"
+        rules="required"
+        placeholder="<p>Olá ${name}, ${current_date}</p>"
+        v-model="form.content_html"
+      />
+      <BaseTextarea 
+        name="footer_html" 
+        label="Rodapé (HTML)" 
+        :rows="3"
+        v-model="form.footer_html"
+      />
     </div>
     </div>
   </Form>
@@ -94,13 +116,15 @@ import AppLayout from '@/Layouts/AppLayout.vue'
 import { Form as VeeForm } from 'vee-validate'
 import BaseInput from '@/Components/Form/BaseInput.vue'
 import BaseSelect from '@/Components/Form/BaseSelect.vue'
+import BaseTextarea from '@/Components/Form/BaseTextarea.vue'
+import BaseSwitch from '@/Components/Form/BaseSwitch.vue'
 import { useTabsStore } from '@/stores/useTabsStore'
 import { useTabFormDataStore } from '@/stores/useTabFormDataStore'
 import { storeToRefs } from 'pinia'
 import { usePage } from '@inertiajs/vue3'
 
 export default {
-  components: { AppLayout, Form: VeeForm, BaseInput, BaseSelect },
+  components: { AppLayout, Form: VeeForm, BaseInput, BaseSelect, BaseTextarea, BaseSwitch },
   props: {
     mode: { type: String, default: 'create' },
     id: { type: String, default: null },
