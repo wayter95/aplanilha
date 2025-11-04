@@ -30,8 +30,8 @@
         <!-- Tabs Container - Central area -->
         <div 
           v-if="showTabs" 
-          class="header-content-center flex-1 flex items-center px-4 overflow-x-auto h-full min-w-0 transition-all duration-300"
-          :style="{ marginLeft: sidebarExpanded ? '3rem' : '-7rem' }"
+          class="header-content-center flex items-center px-4 overflow-x-auto h-full transition-all duration-300"
+          :style="{ left: tabsLeft }"
         >
           <HeaderTabs @select="tabsStore.setActive" @close="tabsStore.closeTab" />
         </div>
@@ -168,6 +168,17 @@ const currentLogo = computed(() => {
 
 // position for toggle button (8px gap to the right of box)
 const buttonLeft = computed(() => `calc(${boxWidth.value} + 8px)`)
+
+// position for tabs container (1rem to the right of toggle button)
+// toggle button width is 36px, so: buttonLeft + 36px + 1rem
+const tabsLeft = computed(() => {
+  const collapsedAndNotHovered = props.isSidebarCollapsed && !props.isSidebarHovered
+  const boxWidthPx = collapsedAndNotHovered ? 72 : 250
+  const buttonLeftPx = boxWidthPx + 8
+  const buttonWidthPx = 36
+  const gapPx = 16 // 1rem
+  return `${buttonLeftPx + buttonWidthPx + gapPx}px`
+})
 
 const toggleUserMenu = () => {
   showUserMenu.value = !showUserMenu.value
@@ -371,6 +382,21 @@ const handleClickOutside = (event) => {
 /* keep dropdown visible above other elements */
 .header-profile-dropdown[style] {
   z-index: 1006;
+}
+
+/* Ensure nav has relative positioning for absolute children */
+.main-header {
+  position: relative;
+}
+
+/* Tabs container positioning */
+.header-content-center {
+  position: absolute;
+  top: 0;
+  height: 3.75rem;
+  right: 12rem; /* Reserve space for right-side elements (theme, fullscreen, user menu) */
+  z-index: 1003;
+  align-items: center;
 }
 </style>
 // ...existing code...
