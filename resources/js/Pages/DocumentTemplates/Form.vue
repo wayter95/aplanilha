@@ -1,6 +1,6 @@
 <template>
   <AppLayout v-if="standalone" :title="computedTitle || 'Novo Modelo'" :description="''" :user="user">
-  <Form @submit="save" :initial-values="form">
+  <Form @submit="save" @invalid="handleInvalid" :initial-values="form" :key="formKey">
     <div class="overflow-hidden">
       <!-- Conteúdo do formulário -->
       <div class="p-6">
@@ -68,7 +68,7 @@
     </div>
   </Form>
   </AppLayout>
-  <Form v-else @submit="save" :initial-values="form">
+  <Form v-else @submit="save" @invalid="handleInvalid" :initial-values="form" :key="formKey">
     <div class="overflow-hidden">
       <!-- Conteúdo do formulário -->
       <div class="p-6">
@@ -149,6 +149,7 @@ import { useTabsStore } from '@/stores/useTabsStore'
 import { usePage } from '@inertiajs/vue3'
 import { storeToRefs } from 'pinia'
 import { Form as VeeForm } from 'vee-validate'
+import { useToast } from '@/composables/useToast'
 
 export default {
   components: { AppLayout, Form: VeeForm, Input, Select, Textarea, Switch, ImageUpload },
@@ -166,6 +167,7 @@ export default {
       user: this.$page?.props?.user || null,
       tabKey: null,
       isInitializing: true,
+      formKey: 0,
       form: {
         type: initialType,
         name: '',
@@ -295,8 +297,9 @@ export default {
   setup() {
     const tabsStore = useTabsStore()
     const page = usePage()
+    const toast = useToast()
     const { activeTab } = storeToRefs(tabsStore)
-    return { activeTab, page }
+    return { activeTab, page, toast }
   },
   async created() {
     this.isInitializing = true
@@ -411,6 +414,13 @@ export default {
     // Este hook pode ser usado para ações que precisam do DOM
   },
   methods: {
+    handleInvalid({ errors, values }) {
+      console.warn('DocumentTemplates/Form.vue: Validação falhou', { errors, values })
+      const firstError = Object.values(errors)[0]
+      if (firstError) {
+        window?.alert?.(firstError)
+      }
+    },
     async fetchTypeOptions() {
       try {
         const { data } = await window.axios.get('/api/document-types')
@@ -528,6 +538,9 @@ export default {
       const { data } = await window.axios.get(`/api/document-templates/${this.id}`)
       Object.assign(this.form, data)
       formDataStore.setFormData(this.tabKey, data)
+      // Força re-render do VeeForm para refletir os novos valores iniciais
+      await this.$nextTick()
+      this.formKey++
       
       // Atualiza o título da aba após carregar
       const tab = tabsStore.tabs.find(t => t.key === this.tabKey)
@@ -551,9 +564,13 @@ export default {
       })
     },
     async save(values) {
+      console.log('DocumentTemplates/Form.vue: save() chamado', { values, mode: this.mode, id: this.id })
       const formDataStore = useTabFormDataStore()
       const tabsStore = useTabsStore()
       const formData = values || this.form
+      
+      console.log('DocumentTemplates/Form.vue: Dados preparados para salvar', formData)
+      
       if (!formData.name) {
         console.warn('Salvar: nome é obrigatório')
         window?.alert?.('Informe o nome do modelo')
@@ -566,7 +583,9 @@ export default {
       }
       try {
         if (this.mode === 'create') {
+          console.log('DocumentTemplates/Form.vue: Criando novo modelo...')
           const { data } = await window.axios.post('/api/document-templates', formData)
+          console.log('DocumentTemplates/Form.vue: Modelo criado com sucesso', data)
           if (formData.is_default && data?.id) {
             await window.axios.post(`/api/document-templates/${data.id}/set-default`)
           }
@@ -577,15 +596,33 @@ export default {
             this.$inertia.visit(`/document-templates/${data.id}/edit`)
           }
         } else {
+          console.log('DocumentTemplates/Form.vue: Atualizando modelo existente...', this.id)
           await window.axios.put(`/api/document-templates/${this.id}`, formData)
+          console.log('DocumentTemplates/Form.vue: Modelo atualizado com sucesso')
           formDataStore.clearFormData(this.tabKey)
+          
+          this.toast.success('Modelo atualizado com sucesso!')
+          
+          const tab = tabsStore.tabs.find(t => t.key === this.tabKey)
+          if (tab && formData.name) {
+            tab.title = formData.name
+            const activeTabKey = tabsStore.activeTab?.key || null
+            const saveToStorage = (tabs, activeTabKey) => {
+              try {
+                localStorage.setItem('tabs-store', JSON.stringify({ tabs, activeTabKey }))
+              } catch (e) {
+                console.warn('Erro ao salvar tabs no storage:', e)
+              }
+            }
+            saveToStorage(tabsStore.tabs, activeTabKey)
+          }
         }
       } catch (error) {
-        console.error('Erro ao salvar modelo:', error)
-        const backendMsg = error?.response?.data?.message || 'Erro ao salvar modelo'
+        console.error('DocumentTemplates/Form.vue: Erro ao salvar modelo:', error)
+        console.error('DocumentTemplates/Form.vue: Detalhes do erro:', error.response)
+        const backendMsg = error?.response?.data?.message || error?.message || 'Erro ao salvar modelo'
         window?.alert?.(backendMsg)
-        // opcional: exibir notificação se houver sistema de toasts
-        // this.toast?.error?.(backendMsg)
+        this.toast?.error?.(backendMsg)
       }
     },
   }

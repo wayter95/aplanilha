@@ -43,10 +43,34 @@
                         <span v-if="item.is_default" class="px-2 py-1 text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 rounded">Padrão</span>
                       </td>
                       <td class="text-right space-x-2 bg-transparent dark:bg-transparent">
-                        <button class="ti-btn ti-btn-outline-primary !py-1 !px-2 !text-[0.75rem]" @click="openEditTab(item)">Editar</button>
-                        <button class="ti-btn ti-btn-outline-secondary !py-1 !px-2 !text-[0.75rem]" @click="duplicate(item)">Duplicar</button>
-                        <button class="ti-btn ti-btn-outline-warning !py-1 !px-2 !text-[0.75rem]" @click="setDefault(item)">Padrão</button>
-                        <button class="ti-btn ti-btn-outline-danger !py-1 !px-2 !text-[0.75rem]" @click="remove(item)">Remover</button>
+                        <button 
+                          class="ti-btn ti-btn-outline-primary !py-1 !px-2 !text-[0.75rem] hover:bg-primary hover:text-white transition-colors hs-tooltip" 
+                          @click="openEditTab(item)"
+                          data-hs-tooltip-content="Editar"
+                        >
+                          <i class="ri-edit-line"></i>
+                        </button>
+                        <button 
+                          class="ti-btn ti-btn-outline-secondary !py-1 !px-2 !text-[0.75rem] hover:bg-secondary hover:text-white transition-colors hs-tooltip" 
+                          @click="duplicate(item)"
+                          data-hs-tooltip-content="Duplicar"
+                        >
+                          <i class="ri-file-copy-line"></i>
+                        </button>
+                        <button 
+                          class="ti-btn ti-btn-outline-warning !py-1 !px-2 !text-[0.75rem] hover:bg-warning hover:text-white transition-colors hs-tooltip" 
+                          @click="setDefault(item)"
+                          data-hs-tooltip-content="Definir como padrão"
+                        >
+                          <i class="ri-star-line"></i>
+                        </button>
+                        <button 
+                          class="ti-btn ti-btn-outline-danger !py-1 !px-2 !text-[0.75rem] hover:bg-danger hover:text-white transition-colors hs-tooltip" 
+                          @click="remove(item)"
+                          data-hs-tooltip-content="Remover"
+                        >
+                          <i class="ri-delete-bin-line"></i>
+                        </button>
                       </td>
                     </tr>
                   </tbody>
@@ -118,7 +142,9 @@ export default {
         }
 
         await Promise.all(this.types.map(t => this.fetchByType(t)))
-        this.types.forEach(t => this.$set(this.openTypes, t, true))
+        this.types.forEach(t => {
+          this.openTypes[t] = true
+        })
       } catch (error) {
         console.error('Erro ao buscar tipos:', error)
         this.types = []
@@ -129,14 +155,14 @@ export default {
       try {
         const { data } = await window.axios.get('/api/document-templates', { params: { type, per_page: 100 } })
         const items = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])
-        this.$set(this.itemsByType, type, items)
+        this.itemsByType[type] = items
       } catch (error) {
         console.error(`Erro ao buscar templates do tipo ${type}:`, error)
-        this.$set(this.itemsByType, type, [])
+        this.itemsByType[type] = []
       }
     },
     isOpen(type) { return !!this.openTypes[type] },
-    toggle(type) { this.$set(this.openTypes, type, !this.openTypes[type]) },
+    toggle(type) { this.openTypes[type] = !this.openTypes[type] },
     allSelected(items) { return items.length && items.every(i => this.selectedIds.includes(i.id)) },
     toggleAll(items, checked) {
       const ids = items.map(i => i.id)
