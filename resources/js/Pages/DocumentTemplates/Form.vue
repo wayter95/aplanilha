@@ -1,5 +1,5 @@
 <template>
-  <AppLayout v-if="standalone" :title="computedTitle" :description="''" :user="user">
+  <AppLayout v-if="standalone" :title="computedTitle || 'Novo Modelo'" :description="''" :user="user">
   <Form @submit="save" :initial-values="form">
     <div class="overflow-hidden">
       <!-- Conteúdo do formulário -->
@@ -160,12 +160,14 @@ export default {
     standalone: { type: Boolean, default: true },
   },
   data() {
+    // Garante que o tipo seja inicializado ANTES de criar o form
+    const initialType = this.type || 'contract'
     return {
       user: this.$page?.props?.user || null,
       tabKey: null,
       isInitializing: true,
       form: {
-        type: this.type || 'contract',
+        type: initialType,
         name: '',
         language: '',
         country: '',
@@ -193,7 +195,9 @@ export default {
         return this.form.name
       }
       if (this.mode === 'create') {
-        const typeLabel = this.typeOptions.find(o => o.value === this.form.type)?.label || this.form.type
+        // Garante que sempre tenha um tipo válido
+        const type = this.form.type || this.type || 'contract'
+        const typeLabel = this.typeOptions.find(o => o.value === type)?.label || type
         // Converte para singular: Contratos -> Contrato, Faturas -> Fatura, Orçamentos -> Orçamento
         const singularLabel = typeLabel.endsWith('s') ? typeLabel.slice(0, -1) : typeLabel
         return `Novo ${singularLabel}`
@@ -315,18 +319,41 @@ export default {
     const exists = tabsStore.tabs.find(t => t.key === tabKey)
     if (!exists && tabKey) {
       const path = this.id ? `/document-templates/${this.id}/edit` : `/document-templates/new/${this.tempKey}`
+      // Calcula o título usando o tipo garantido
+      const type = this.form.type || this.type || 'contract'
+      const typeLabel = this.typeOptions.find(o => o.value === type)?.label || type
+      const singularLabel = typeLabel.endsWith('s') ? typeLabel.slice(0, -1) : typeLabel
+      const title = this.id ? 'Carregando…' : `Novo ${singularLabel}`
+      
       tabsStore.addTab({
         key: tabKey,
-        title: this.id ? 'Carregando…' : (() => {
-          const typeLabel = this.typeOptions.find(o => o.value === this.form.type)?.label || this.form.type
-          const singularLabel = typeLabel.endsWith('s') ? typeLabel.slice(0, -1) : typeLabel
-          return `Novo ${singularLabel}`
-        })(),
+        title,
         mode: this.id ? 'edit' : 'create',
         componentName: 'DocumentTemplatesForm',
         path,
         props: this.id ? { mode: 'edit', id: this.id } : { mode: 'create', tempKey: this.tempKey, type: this.type }
       })
+    } else if (exists) {
+      // Atualiza o título da tab existente se necessário
+      // Força atualização do título usando o tipo garantido
+      const type = this.form.type || this.type || 'contract'
+      const typeLabel = this.typeOptions.find(o => o.value === type)?.label || type
+      const singularLabel = typeLabel.endsWith('s') ? typeLabel.slice(0, -1) : typeLabel
+      const newTitle = this.mode === 'edit' && this.form.name ? this.form.name : (this.mode === 'create' ? `Novo ${singularLabel}` : exists.title)
+      
+      // Sempre atualiza o título para garantir que está correto
+      exists.title = newTitle
+      
+      // Salva no storage
+      const activeTabKey = tabsStore.activeTab?.key || null
+      const saveToStorage = (tabs, activeTabKey) => {
+        try {
+          localStorage.setItem('tabs-store', JSON.stringify({ tabs, activeTabKey }))
+        } catch (e) {
+          console.warn('Erro ao salvar tabs no storage:', e)
+        }
+      }
+      saveToStorage(tabsStore.tabs, activeTabKey)
     }
     
     // Modo edit: sempre carrega do servidor
@@ -377,6 +404,8 @@ export default {
     
     this.$nextTick(() => {
       this.isInitializing = false
+      // Atualiza o título da tab após inicialização
+      this.updateTabTitle()
     })
   },
   mounted() {
@@ -384,6 +413,30 @@ export default {
     // Este hook pode ser usado para ações que precisam do DOM
   },
   methods: {
+    updateTabTitle() {
+      const tabsStore = useTabsStore()
+      const tab = tabsStore.tabs.find(t => t.key === this.tabKey)
+      if (!tab) return
+      
+      const type = this.form.type || this.type || 'contract'
+      const typeLabel = this.typeOptions.find(o => o.value === type)?.label || type
+      const singularLabel = typeLabel.endsWith('s') ? typeLabel.slice(0, -1) : typeLabel
+      const newTitle = this.mode === 'edit' && this.form.name ? this.form.name : (this.mode === 'create' ? `Novo ${singularLabel}` : tab.title)
+      
+      if (tab.title !== newTitle) {
+        tab.title = newTitle
+        // Salva no storage
+        const activeTabKey = tabsStore.activeTab?.key || null
+        const saveToStorage = (tabs, activeTabKey) => {
+          try {
+            localStorage.setItem('tabs-store', JSON.stringify({ tabs, activeTabKey }))
+          } catch (e) {
+            console.warn('Erro ao salvar tabs no storage:', e)
+          }
+        }
+        saveToStorage(tabsStore.tabs, activeTabKey)
+      }
+    },
     loadFormDataIfNeeded(explicitTabKey) {
       if (this.isInitializing) {
         console.log('loadFormDataIfNeeded: Ignorado porque está inicializando')

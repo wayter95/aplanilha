@@ -64,13 +64,19 @@ export const useTabsStore = defineStore('tabs', {
             const index = this.tabs.indexOf(tab)
             if (index === -1) return
             
+            const wasActive = this.activeTab?.key === tab.key
             const formDataStore = useTabFormDataStore()
             formDataStore.clearFormData(tab.key)
             
             this.tabs.splice(index, 1)
-            if (this.activeTab === tab) {
-                this.activeTab = this.tabs[index - 1] || this.tabs[0] || null
+            
+            // Se a tab fechada era a ativa, tenta ativar outra ou limpa
+            if (wasActive) {
+                // Tenta ativar a tab anterior ou a primeira disponível
+                const newActiveIndex = index > 0 ? index - 1 : 0
+                this.activeTab = this.tabs[newActiveIndex] || this.tabs[0] || null
             }
+            
             saveToStorage(this.tabs, this.activeTab?.key || null)
         },
         convertToEdit(tempKey: string, newId: string, newTitle: string) {

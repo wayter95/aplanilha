@@ -36,9 +36,10 @@
     >
       <div class="main-content">
         <div class="container-fluid" :class="{ 'tab-active': shouldShowTabContent }">
-          <div v-if="!shouldShowTabContent" class="page-header">
+          <!-- Header sempre visível, mesmo com tab ativa -->
+          <div class="page-header">
             <div>
-              <h1 class="page-title">{{ title }}</h1>
+              <h1 class="page-title">{{ shouldShowTabContent && activeTab?.title ? activeTab.title : title }}</h1>
               <p class="page-description">{{ description }}</p>
             </div>
           </div>

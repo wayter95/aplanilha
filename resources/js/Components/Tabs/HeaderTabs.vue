@@ -54,10 +54,12 @@ const handleSelect = (tab) => {
 const handleClose = (tab) => {
   const wasActive = activeTab.value?.key === tab.key
   tabsStore.closeTab(tab)
-  // Se a aba fechada era a ativa, navega para a listagem de modelos
-  if (wasActive) {
+  
+  // Se a aba fechada era a ativa OU não há mais tabs ativas, navega para a listagem
+  if (wasActive || !tabsStore.activeTab) {
     router.visit('/document-templates')
   }
+  
   emit('close', tab)
 }
 </script>
