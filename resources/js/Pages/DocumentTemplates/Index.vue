@@ -6,13 +6,15 @@
           <div class="flex items-center justify-between mb-4">
             <h2 class="text-xl font-semibold text-default-900">Modelos de Documentos</h2>
             <div class="flex gap-2">
-              <button @click="openCreateTab(defaultType)" class="ti-btn btn-wave ti-btn-primary-full !py-2 !px-3">Novo Modelo</button>
-              <button :disabled="!selectedIds.length" @click="bulkDelete" class="ti-btn btn-wave ti-btn-danger-full disabled:opacity-50 !py-2 !px-3">Remover Selecionados</button>
+              <a href="/document-types" class="ti-btn btn-wave ti-btn-secondary-full !py-2 !px-3">
+                <i class="ri-settings-3-line mr-1"></i>Tipos de Documentos
+              </a>
+              <button @click="openCreateTab(defaultType)" :disabled="!defaultType" class="ti-btn btn-wave ti-btn-primary-full !py-2 !px-3 disabled:opacity-50">Novo Modelo</button>
             </div>
           </div>
 
           <div v-for="group in grouped" :key="group.type" class="mb-3">
-            <Accordion :title="labelOf(group.type)" :count="group.items.length" :open="isOpen(group.type)" @toggle="toggle(group.type)">
+            <Accordion :title="group.typeData.name" :count="group.items.length" :open="isOpen(group.type)" @toggle="toggle(group.type)">
               <div class="overflow-x-auto">
                 <table class="min-w-full text-sm table-auto bg-transparent dark:bg-bgdark">
                   <thead class="bg-transparent dark:bg-transparent">
@@ -59,10 +61,10 @@
 </template>
 
 <script>
-import AppLayout from '@/Layouts/AppLayout.vue'
 import Accordion from '@/Components/Accordion.vue'
-import { useTabsStore } from '@/stores/useTabsStore'
 import { useToast } from '@/composables/useToast'
+import AppLayout from '@/Layouts/AppLayout.vue'
+import { useTabsStore } from '@/stores/useTabsStore'
 
 export default {
   components: { AppLayout, Accordion },
@@ -75,15 +77,23 @@ export default {
     return {
       user: this.$page.props.user || null,
       types: [],
+      typesData: [],
       itemsByType: {},
       openTypes: {},
       selectedIds: [],
-      defaultType: { value: 'contract', name: 'Contratos' },
+      defaultType: null,
     }
   },
   computed: {
     grouped() {
-      return this.types.map(t => ({ type: t, items: this.itemsByType[t] || [] }))
+      return this.types.map(code => {
+        const typeData = this.typesData.find(t => t.code === code)
+        return {
+          type: code,
+          typeData: typeData || { name: code, code },
+          items: this.itemsByType[code] || []
+        }
+      })
     }
   },
   created() {
@@ -91,16 +101,29 @@ export default {
   },
   methods: {
     labelOf(t) {
-      if (t === 'contract') return 'Contratos'
-      if (t === 'invoice') return 'Faturas'
-      if (t === 'quote') return 'Orçamentos'
-      return t
+      const typeData = this.typesData.find(type => type.code === t)
+      return typeData ? typeData.name : t
     },
     async fetchTypes() {
-      const { data } = await window.axios.get('/api/document-templates/types')
-      this.types = data
-      await Promise.all(this.types.map(t => this.fetchByType(t)))
-      this.types.forEach(t => this.$set(this.openTypes, t, true))
+      try {
+        const { data: typesCodes } = await window.axios.get('/api/document-templates/types')
+        this.types = typesCodes
+
+        const { data: typesFull } = await window.axios.get('/api/document-types')
+        this.typesData = typesFull
+
+        if (this.types.length > 0 && !this.defaultType) {
+          const firstType = this.typesData.find(t => t.code === this.types[0]) || { code: this.types[0], name: this.types[0] }
+          this.defaultType = { value: firstType.code, name: firstType.name }
+        }
+
+        await Promise.all(this.types.map(t => this.fetchByType(t)))
+        this.types.forEach(t => this.$set(this.openTypes, t, true))
+      } catch (error) {
+        console.error('Erro ao buscar tipos:', error)
+        this.types = []
+        this.typesData = []
+      }
     },
     async fetchByType(type) {
       try {
@@ -120,6 +143,11 @@ export default {
       this.selectedIds = checked ? Array.from(new Set([...this.selectedIds, ...ids])) : this.selectedIds.filter(id => !ids.includes(id))
     },
     openCreateTab(type) {
+      if (!type) {
+        this.toast.error('Aguarde o carregamento dos tipos de documentos')
+        return
+      }
+      
       const tempKey = `new-${Date.now()}`
       const path = `/document-templates/new/${tempKey}`
       const ok = this.tabsStore.addTab({
@@ -129,6 +157,7 @@ export default {
         componentName: 'DocumentTemplatesForm',
         path,
         props: { mode: 'create', tempKey, type: type.value },
+        context: 'document-templates'
       })
       if (!ok) return this.toast.error('Limite de abas atingido')
       this.$inertia.visit(path)
@@ -143,6 +172,7 @@ export default {
         componentName: 'DocumentTemplatesForm',
         path: `/document-templates/${template.id}/edit`,
         props: { mode: 'edit', id: template.id },
+        context: 'document-templates'
       })
       if (!ok) return this.toast.error('Limite de abas atingido')
       this.$inertia.visit(`/document-templates/${template.id}/edit`)

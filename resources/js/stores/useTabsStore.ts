@@ -2,14 +2,17 @@ import { defineStore } from 'pinia'
 import { UI_CONFIG } from '@/config/ui'
 import { useTabFormDataStore } from './useTabFormDataStore'
 
-export type TemplateTab = {
+export type Tab = {
     key: string
     title: string
-    mode: 'create' | 'edit'
+    mode?: 'create' | 'edit'
     componentName: string
     path: string
-    props: Record<string, any>
+    props?: Record<string, any>
+    context?: string
 }
+
+export type TemplateTab = Tab
 
 const STORAGE_KEY = 'tabs-store'
 
@@ -79,7 +82,7 @@ export const useTabsStore = defineStore('tabs', {
             
             saveToStorage(this.tabs, this.activeTab?.key || null)
         },
-        convertToEdit(tempKey: string, newId: string, newTitle: string) {
+        convertToEdit(tempKey: string, newId: string, newTitle: string, context?: string) {
             const tab = this.tabs.find(t => t.key === tempKey)
             if (!tab) return
             
@@ -94,7 +97,12 @@ export const useTabsStore = defineStore('tabs', {
             tab.key = newId
             tab.title = newTitle
             tab.mode = 'edit'
-            tab.path = `/document-templates/${newId}/edit`
+            
+            const basePath = context === 'document-types' 
+                ? `/document-types/${newId}/edit`
+                : `/document-templates/${newId}/edit`
+            
+            tab.path = basePath
             tab.props = { ...(tab.props || {}), mode: 'edit', id: newId }
             this.activeTab = tab
             saveToStorage(this.tabs, newId)

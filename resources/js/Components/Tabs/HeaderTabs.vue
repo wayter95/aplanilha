@@ -41,9 +41,15 @@ const { tabs, activeTab } = storeToRefs(tabsStore)
 
 const showLimitWarning = computed(() => (tabs.value?.length || 0) >= UI_CONFIG.MAX_TABS)
 
+const getListRoute = (tab) => {
+  if (tab.context === 'document-types') {
+    return '/document-types'
+  }
+  return '/document-templates'
+}
+
 const handleSelect = (tab) => {
   tabsStore.setActive(tab)
-  // Navegar para a rota da aba, se existir
   const path = tab.path || (tab.mode === 'create' ? `/document-templates/new/${tab.key}` : `/document-templates/${tab.key}/edit`)
   if (path) {
     router.visit(path)
@@ -55,9 +61,9 @@ const handleClose = (tab) => {
   const wasActive = activeTab.value?.key === tab.key
   tabsStore.closeTab(tab)
   
-  // Se a aba fechada era a ativa OU não há mais tabs ativas, navega para a listagem
   if (wasActive || !tabsStore.activeTab) {
-    router.visit('/document-templates')
+    const listRoute = getListRoute(tab)
+    router.visit(listRoute)
   }
   
   emit('close', tab)

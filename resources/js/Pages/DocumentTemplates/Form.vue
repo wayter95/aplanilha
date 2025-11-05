@@ -178,11 +178,7 @@ export default {
         footer_html: '',
         watermark_image_key: '',
       },
-      typeOptions: [
-        { value: 'contract', label: 'Contratos' },
-        { value: 'invoice', label: 'Faturas' },
-        { value: 'quote', label: 'Orçamentos' },
-      ],
+      typeOptions: [],
       statusOptions: [
         { value: 'active', label: 'Ativo' },
         { value: 'inactive', label: 'Inativo' },
@@ -307,6 +303,8 @@ export default {
     const tabsStore = useTabsStore()
     const formDataStore = useTabFormDataStore()
     
+    await this.fetchTypeOptions()
+    
     this.tabKey = this.tempKey || this.id
     const tabKey = this.tabKey
     
@@ -413,6 +411,18 @@ export default {
     // Este hook pode ser usado para ações que precisam do DOM
   },
   methods: {
+    async fetchTypeOptions() {
+      try {
+        const { data } = await window.axios.get('/api/document-types')
+        this.typeOptions = data.map(t => ({
+          value: t.code,
+          label: t.name
+        }))
+      } catch (error) {
+        console.error('Erro ao buscar tipos de documentos:', error)
+        this.typeOptions = []
+      }
+    },
     updateTabTitle() {
       const tabsStore = useTabsStore()
       const tab = tabsStore.tabs.find(t => t.key === this.tabKey)
@@ -562,7 +572,7 @@ export default {
           }
           if (this.tempKey && data?.id) {
             formDataStore.clearFormData(this.tempKey)
-            tabsStore.convertToEdit(this.tempKey, data.id, formData.name)
+            tabsStore.convertToEdit(this.tempKey, data.id, formData.name, 'document-templates')
             this.tabKey = data.id
             this.$inertia.visit(`/document-templates/${data.id}/edit`)
           }

@@ -2,22 +2,25 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Enums\DocumentType;
 use App\Http\Controllers\Controller;
 use App\Services\Interfaces\DocumentTemplateServiceInterface;
+use App\Services\Interfaces\DocumentTypeServiceInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class DocumentTemplateController extends Controller
 {
-    public function __construct(private DocumentTemplateServiceInterface $service)
-    {
+    public function __construct(
+        private DocumentTemplateServiceInterface $service,
+        private DocumentTypeServiceInterface $typeService
+    ) {
     }
 
     public function index(Request $request): JsonResponse
     {
+        $validCodes = $this->typeService->getCodes();
         $validated = $request->validate([
-            'type' => 'required|string|in:' . implode(',', DocumentType::all()),
+            'type' => 'required|string|in:' . implode(',', $validCodes),
             'per_page' => 'sometimes|integer|min:1|max:100',
         ]);
 
@@ -28,8 +31,9 @@ class DocumentTemplateController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+        $validCodes = $this->typeService->getCodes();
         $validated = $request->validate([
-            'type' => 'required|string|in:' . implode(',', DocumentType::all()),
+            'type' => 'required|string|in:' . implode(',', $validCodes),
             'name' => 'required|string|max:255',
             'language' => 'nullable|string|max:10',
             'country' => 'nullable|string|max:5',
@@ -67,8 +71,9 @@ class DocumentTemplateController extends Controller
 
     public function update(Request $request, string $id): JsonResponse
     {
+        $validCodes = $this->typeService->getCodes();
         $validated = $request->validate([
-            'type' => 'sometimes|string|in:' . implode(',', DocumentType::all()),
+            'type' => 'sometimes|string|in:' . implode(',', $validCodes),
             'name' => 'sometimes|string|max:255',
             'language' => 'nullable|string|max:10',
             'country' => 'nullable|string|max:5',
@@ -117,8 +122,9 @@ class DocumentTemplateController extends Controller
 
     public function placeholders(Request $request): JsonResponse
     {
+        $validCodes = $this->typeService->getCodes();
         $validated = $request->validate([
-            'type' => 'required|string|in:' . implode(',', DocumentType::all()),
+            'type' => 'required|string|in:' . implode(',', $validCodes),
         ]);
 
         $placeholders = [
@@ -131,7 +137,8 @@ class DocumentTemplateController extends Controller
 
     public function types(): JsonResponse
     {
-        return response()->json(DocumentType::all());
+        $types = $this->typeService->findActive();
+        return response()->json($types->pluck('code')->toArray());
     }
 }
 

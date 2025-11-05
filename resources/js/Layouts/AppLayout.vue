@@ -79,15 +79,26 @@ const shouldShowTabContent = computed(() => {
 
 const resolvedComponent = shallowRef(null)
 
+const componentMap = {
+  'DocumentTemplatesForm': () => import('@/Pages/DocumentTemplates/Form.vue'),
+  'DocumentTypesForm': () => import('@/Pages/DocumentTypes/Form.vue'),
+}
+
 watch(activeTab, async (newTab) => {
   if (!newTab?.componentName) {
     resolvedComponent.value = null
     return
   }
   
-  if (newTab.componentName === 'DocumentTemplatesForm') {
-    const module = await import('@/Pages/DocumentTemplates/Form.vue')
-    resolvedComponent.value = module.default
+  const loader = componentMap[newTab.componentName]
+  if (loader) {
+    try {
+      const module = await loader()
+      resolvedComponent.value = module.default
+    } catch (error) {
+      console.error(`Erro ao carregar componente ${newTab.componentName}:`, error)
+      resolvedComponent.value = null
+    }
   } else {
     resolvedComponent.value = null
   }

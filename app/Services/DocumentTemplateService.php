@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Enums\DocumentType;
 use App\Repositories\Interfaces\DocumentTemplateRepositoryInterface;
 use App\Services\Interfaces\DocumentTemplateServiceInterface;
+use App\Services\Interfaces\DocumentTypeServiceInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -12,8 +12,10 @@ use Illuminate\Support\Str;
 
 class DocumentTemplateService implements DocumentTemplateServiceInterface
 {
-    public function __construct(private DocumentTemplateRepositoryInterface $repository)
-    {
+    public function __construct(
+        private DocumentTemplateRepositoryInterface $repository,
+        private DocumentTypeServiceInterface $typeService
+    ) {
     }
 
     public function create(array $data): Model
@@ -64,7 +66,7 @@ class DocumentTemplateService implements DocumentTemplateServiceInterface
 
     private function validateType(?string $type): void
     {
-        if (!$type || !in_array($type, DocumentType::all(), true)) {
+        if (!$type || !$this->typeService->validateType($type)) {
             abort(422, 'Invalid document type');
         }
     }

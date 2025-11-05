@@ -38,7 +38,6 @@ Route::middleware(['auth'])->group(function () {
         ]);
     })->name('document-templates');
     
-    // Rotas para criação/edição com IDs na URL (inclui tempId para novas abas)
     Route::get('document-templates/new/{tempId}', function ($tempId) {
         return Inertia::render('DocumentTemplates/Form', [
             'id' => null,
@@ -46,6 +45,7 @@ Route::middleware(['auth'])->group(function () {
             'user' => Auth::user(),
         ]);
     })->name('document-templates.new');
+    
     Route::get('document-templates/{id}/edit', function ($id) {
         return Inertia::render('DocumentTemplates/Form', [
             'id' => $id,
@@ -53,6 +53,28 @@ Route::middleware(['auth'])->group(function () {
             'user' => Auth::user(),
         ]);
     })->name('document-templates.edit');
+    
+    Route::get('document-types', function () {
+        return Inertia::render('DocumentTypes/Index', [
+            'user' => Auth::user(),
+        ]);
+    })->name('document-types');
+    
+    Route::get('document-types/new/{tempId}', function ($tempId) {
+        return Inertia::render('DocumentTypes/Form', [
+            'id' => null,
+            'tempKey' => $tempId,
+            'user' => Auth::user(),
+        ]);
+    })->name('document-types.new');
+    
+    Route::get('document-types/{id}/edit', function ($id) {
+        return Inertia::render('DocumentTypes/Form', [
+            'id' => $id,
+            'tempKey' => null,
+            'user' => Auth::user(),
+        ]);
+    })->name('document-types.edit');
     
     Route::prefix('api/users')->group(function () {
         Route::post('/', [UserController::class, 'store'])->name('users.store');
@@ -87,6 +109,15 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/delete', [FileUploadController::class, 'deleteFile'])->name('files.delete');
     });
     
+    Route::prefix('api/document-types')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\DocumentTypeController::class, 'index'])->name('document-types.index');
+        Route::get('/codes', [\App\Http\Controllers\Api\DocumentTypeController::class, 'codes'])->name('document-types.codes');
+        Route::post('/', [\App\Http\Controllers\Api\DocumentTypeController::class, 'store'])->name('document-types.store');
+        Route::get('/{id}', [\App\Http\Controllers\Api\DocumentTypeController::class, 'show'])->name('document-types.show');
+        Route::put('/{id}', [\App\Http\Controllers\Api\DocumentTypeController::class, 'update'])->name('document-types.update');
+        Route::delete('/{id}', [\App\Http\Controllers\Api\DocumentTypeController::class, 'destroy'])->name('document-types.destroy');
+    });
+
     Route::prefix('api/document-templates')->group(function () {
         Route::get('/types', [DocumentTemplateController::class, 'types'])->name('document-templates.types');
         Route::get('/', [DocumentTemplateController::class, 'index'])->name('document-templates.index');
