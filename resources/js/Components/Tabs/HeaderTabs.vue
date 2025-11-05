@@ -57,9 +57,12 @@ const handleSelect = (tab) => {
   emit('select', tab)
 }
 
-const handleClose = (tab) => {
+const handleClose = async (tab) => {
   const wasActive = activeTab.value?.key === tab.key
-  tabsStore.closeTab(tab)
+  const closed = await tabsStore.closeTab(tab)
+  
+  // Se foi cancelado pelo hook, não faz nada
+  if (!closed) return
   
   if (wasActive || !tabsStore.activeTab) {
     const listRoute = getListRoute(tab)

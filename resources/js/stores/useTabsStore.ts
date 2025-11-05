@@ -10,9 +10,27 @@ export type Tab = {
     path: string
     props?: Record<string, any>
     context?: string
+    metadata?: Record<string, any>
 }
 
 export type TemplateTab = Tab
+
+/**
+ * Hooks para eventos de tab
+ */
+export type TabHook = {
+    /** Chamado antes de fechar uma tab. Retorna false para cancelar. */
+    beforeClose?: (tab: Tab) => boolean | Promise<boolean>
+    
+    /** Chamado após criar uma tab */
+    afterCreate?: (tab: Tab) => void
+    
+    /** Chamado ao ativar uma tab */
+    onActivate?: (tab: Tab) => void
+    
+    /** Chamado ao desativar uma tab */
+    onDeactivate?: (tab: Tab) => void
+}
 
 const STORAGE_KEY = 'tabs-store'
 
@@ -42,30 +60,93 @@ const saveToStorage = (tabs: TemplateTab[], activeTabKey: string | null) => {
 
 const loaded = loadFromStorage()
 
+// Hooks são armazenados fora do state para evitar problemas de serialização
+const hooksRegistry = new Map<string, TabHook>()
+
 export const useTabsStore = defineStore('tabs', {
     state: () => ({
         tabs: loaded.tabs as TemplateTab[],
         activeTab: null as TemplateTab | null,
     }),
     actions: {
+        /**
+         * Registra hooks para um componente
+         * 
+         * @param componentName - Nome do componente
+         * @param hooks - Objeto com hooks
+         */
+        registerHooks(componentName: string, hooks: TabHook) {
+            hooksRegistry.set(componentName, hooks)
+        },
+        
+        /**
+         * Remove hooks de um componente
+         * 
+         * @param componentName - Nome do componente
+         */
+        unregisterHooks(componentName: string) {
+            hooksRegistry.delete(componentName)
+        },
+        
+        /**
+         * Obtém hooks de um componente
+         * 
+         * @param componentName - Nome do componente
+         * @returns Hooks ou undefined
+         */
+        getHooks(componentName: string): TabHook | undefined {
+            return hooksRegistry.get(componentName)
+        },
+        
         addTab(tab: TemplateTab) {
             if (this.tabs.length >= UI_CONFIG.MAX_TABS) return false
             this.tabs.push(tab)
             this.activeTab = tab
             saveToStorage(this.tabs, tab.key)
+            
+            // Chama hook afterCreate se existir
+            const hook = hooksRegistry.get(tab.componentName)
+            if (hook?.afterCreate) {
+                hook.afterCreate(tab)
+            }
+            
             return true
         },
+        
         setActive(tab: TemplateTab) {
+            // Chama hook onDeactivate se existir
+            if (this.activeTab) {
+                const oldHook = hooksRegistry.get(this.activeTab.componentName)
+                if (oldHook?.onDeactivate) {
+                    oldHook.onDeactivate(this.activeTab)
+                }
+            }
+            
             this.activeTab = tab
             saveToStorage(this.tabs, tab.key)
+            
+            // Chama hook onActivate se existir
+            const hook = hooksRegistry.get(tab.componentName)
+            if (hook?.onActivate) {
+                hook.onActivate(tab)
+            }
         },
         clearActive() {
             this.activeTab = null
             saveToStorage(this.tabs, null)
         },
-        closeTab(tab: TemplateTab) {
+        async closeTab(tab: TemplateTab) {
             const index = this.tabs.indexOf(tab)
-            if (index === -1) return
+            if (index === -1) return false
+            
+            // Chama hook beforeClose se existir
+            const hook = hooksRegistry.get(tab.componentName)
+            if (hook?.beforeClose) {
+                const canClose = await hook.beforeClose(tab)
+                if (!canClose) {
+                    return false // Cancela o fechamento
+                }
+            }
             
             const wasActive = this.activeTab?.key === tab.key
             const formDataStore = useTabFormDataStore()
@@ -77,10 +158,16 @@ export const useTabsStore = defineStore('tabs', {
             if (wasActive) {
                 // Tenta ativar a tab anterior ou a primeira disponível
                 const newActiveIndex = index > 0 ? index - 1 : 0
-                this.activeTab = this.tabs[newActiveIndex] || this.tabs[0] || null
+                const newActiveTab = this.tabs[newActiveIndex] || this.tabs[0] || null
+                if (newActiveTab) {
+                    this.setActive(newActiveTab)
+                } else {
+                    this.activeTab = null
+                }
             }
             
             saveToStorage(this.tabs, this.activeTab?.key || null)
+            return true
         },
         convertToEdit(tempKey: string, newId: string, newTitle: string, context?: string) {
             const tab = this.tabs.find(t => t.key === tempKey)

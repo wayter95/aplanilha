@@ -1,17 +1,10 @@
 import { defineStore } from 'pinia'
 
-export type FormData = {
-    type: string
-    name: string
-    language: string
-    country: string
-    status: string
-    is_default: boolean
-    header_html: string
-    content_html: string
-    footer_html: string
-    background_image_path: string
-}
+/**
+ * Tipo genérico para dados de formulário
+ * Permite qualquer estrutura de dados, não apenas DocumentTemplate
+ */
+export type FormData = Record<string, any>
 
 const STORAGE_KEY = 'tab-form-data-store'
 
@@ -45,53 +38,56 @@ export const useTabFormDataStore = defineStore('tabFormData', {
         },
     },
     actions: {
+        /**
+         * Define dados do formulário para uma tab
+         * Aceita qualquer estrutura de dados (genérico)
+         * 
+         * @param tabKey - Chave única da tab
+         * @param data - Dados do formulário (qualquer estrutura)
+         */
         setFormData(tabKey: string, data: Partial<FormData>) {
+            // Se não existe, inicializa com objeto vazio
             if (!this.forms[tabKey]) {
-                this.forms[tabKey] = {
-                    type: 'contract',
-                    name: '',
-                    language: '',
-                    country: '',
-                    status: 'active',
-                    is_default: false,
-                    header_html: '',
-                    content_html: '',
-                    footer_html: '',
-                    background_image_path: '',
-                }
+                this.forms[tabKey] = {}
             }
+            // Merge com dados existentes
             this.forms[tabKey] = { ...this.forms[tabKey], ...data }
-            console.log('useTabFormDataStore: Salvando dados no localStorage para tabKey:', tabKey, this.forms[tabKey])
             saveToStorage(this.forms)
-            // Verifica se salvou corretamente
-            const saved = loadFromStorage()
-            console.log('useTabFormDataStore: Dados salvos verificados:', saved[tabKey])
         },
+        
+        /**
+         * Limpa dados do formulário de uma tab
+         * 
+         * @param tabKey - Chave única da tab
+         */
         clearFormData(tabKey: string) {
             delete this.forms[tabKey]
             saveToStorage(this.forms)
         },
+        
+        /**
+         * Inicializa dados do formulário apenas se não existirem
+         * 
+         * @param tabKey - Chave única da tab
+         * @param initialData - Dados iniciais (opcional)
+         */
         initializeFormData(tabKey: string, initialData?: Partial<FormData>) {
-            // Só inicializa se realmente não existe dados salvos
-            // Verifica tanto na store quanto no localStorage para evitar sobrescrever
             const existingInStore = this.forms[tabKey]
             const existingInStorage = loadFromStorage()[tabKey]
             
+            // Só inicializa se não existir dados
             if (!existingInStore && !existingInStorage) {
-                this.forms[tabKey] = {
-                    type: initialData?.type || 'contract',
-                    name: initialData?.name || '',
-                    language: initialData?.language || '',
-                    country: initialData?.country || '',
-                    status: initialData?.status || 'active',
-                    is_default: initialData?.is_default || false,
-                    header_html: initialData?.header_html || '',
-                    content_html: initialData?.content_html || '',
-                    footer_html: initialData?.footer_html || '',
-                    background_image_path: initialData?.background_image_path || '',
-                }
+                this.forms[tabKey] = initialData ? { ...initialData } : {}
                 saveToStorage(this.forms)
             }
+        },
+        
+        /**
+         * Limpa todos os dados de formulário
+         */
+        clearAllFormData() {
+            this.forms = {}
+            saveToStorage(this.forms)
         },
     },
 })
