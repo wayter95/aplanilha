@@ -4,16 +4,16 @@ namespace App\Repositories;
 
 use App\Models\User;
 use App\Models\UserRole;
+use App\Repositories\Interfaces\UserRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class UserRepository
+class UserRepository extends BaseRepository implements UserRepositoryInterface
 {
-    protected User $model;
-
     public function __construct(User $model)
     {
-        $this->model = $model;
+        parent::__construct($model);
     }
 
     public function getAllPaginated(int $perPage = 10, array $filters = []): LengthAwarePaginator
@@ -94,12 +94,43 @@ class UserRepository
         return $this->model->with(['roles', 'client'])->find($id);
     }
 
-    public function findByEmail(string $email): ?User
+    public function findByEmail(string $email, ?string $clientId = null): ?User
     {
-        return $this->model->where('email', $email)->first();
+        $query = $this->model->where('email', $email);
+        
+        if ($clientId) {
+            $query->where('client_id', $clientId);
+        }
+        
+        return $query->first();
+    }
+    
+    public function getByClient(string $clientId): Collection
+    {
+        return $this->model->where('client_id', $clientId)->get();
+    }
+    
+    public function getMasterUsers(): Collection
+    {
+        return $this->model->where('is_master', true)->get();
+    }
+    
+    public function getTenantUsers(string $clientId): Collection
+    {
+        return $this->model->where('client_id', $clientId)->where('is_master', false)->get();
+    }
+    
+    public function hasRole(User $user, string $roleName): bool
+    {
+        return $user->roles()->where('name', $roleName)->exists();
+    }
+    
+    public function hasPermission(User $user, string $module, string $action): bool
+    {
+        return $user->hasPermission($module, $action);
     }
 
-    public function create(array $data): User
+    public function create(array $data): Model
     {
         return $this->model->create($data);
     }

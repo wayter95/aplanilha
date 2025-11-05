@@ -29,7 +29,9 @@ class UserRole extends Model
 
     protected static function booted(): void
     {
-        // static::addGlobalScope(new TenantScope);
+        // Aplica TenantScope para filtrar roles por tenant
+        // Roles globais (client_id = null) são visíveis para todos os tenants
+        static::addGlobalScope(new TenantScope);
     }
 
     public function users(): BelongsToMany

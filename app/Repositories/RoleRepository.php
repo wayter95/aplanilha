@@ -3,16 +3,16 @@
 namespace App\Repositories;
 
 use App\Models\UserRole;
+use App\Repositories\Interfaces\RoleRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class RoleRepository
+class RoleRepository extends BaseRepository implements RoleRepositoryInterface
 {
-    protected UserRole $model;
-
     public function __construct(UserRole $model)
     {
-        $this->model = $model;
+        parent::__construct($model);
     }
 
     public function getAllPaginated(int $perPage = 10, array $filters = []): LengthAwarePaginator
@@ -73,28 +73,47 @@ class RoleRepository
         return $query->get();
     }
 
+    public function find(string $id): ?Model
+    {
+        return $this->model->with(['permissions'])->find($id);
+    }
+
     public function findById(string $id): ?UserRole
     {
         return $this->model->with(['permissions'])->find($id);
     }
 
-    public function create(array $data): UserRole
+    public function create(array $data): Model
     {
         return $this->model->create($data);
     }
 
-    public function update(string $id, array $data): ?UserRole
+    // Método específico para compatibilidade com RoleRepositoryInterface
+    // O create() acima retorna Model, mas a interface espera UserRole
+    // Este método garante o tipo correto
+    public function createRole(array $data): UserRole
+    {
+        /** @var UserRole $role */
+        $role = $this->create($data);
+        return $role;
+    }
+
+    public function update(string $id, array $data): bool
     {
         $role = $this->model->find($id);
-        if ($role) {
-            $role->update($data);
+        if (!$role) {
+            return false;
         }
-        return $role;
+        return $role->update($data);
     }
 
     public function delete(string $id): bool
     {
-        return $this->model->destroy($id);
+        $role = $this->model->find($id);
+        if (!$role) {
+            return false;
+        }
+        return $role->delete();
     }
 
     public function countAll(): int

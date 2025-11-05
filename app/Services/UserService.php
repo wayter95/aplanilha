@@ -4,18 +4,19 @@ namespace App\Services;
 
 use App\Models\User;
 use App\Models\UserRole;
-use App\Repositories\UserRepository;
+use App\Repositories\Interfaces\UserRepositoryInterface;
+use App\Services\Interfaces\UserServiceInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\UploadedFile;
 
-class UserService
+class UserService implements UserServiceInterface
 {
-    protected UserRepository $userRepository;
+    protected UserRepositoryInterface $userRepository;
 
-    public function __construct(UserRepository $userRepository)
+    public function __construct(UserRepositoryInterface $userRepository)
     {
         $this->userRepository = $userRepository;
     }
@@ -23,11 +24,6 @@ class UserService
     public function getAllUsers(int $perPage = 10, array $filters = []): LengthAwarePaginator
     {
         return $this->userRepository->getAllPaginated($perPage, $filters);
-    }
-
-    public function getUsersByClient(string $clientId, int $perPage = 10, array $filters = []): LengthAwarePaginator
-    {
-        return $this->userRepository->getByClientPaginated($clientId, $perPage, $filters);
     }
 
     public function getUsersByClientPaginated(string $clientId, int $perPage = 10, array $filters = []): LengthAwarePaginator
@@ -223,5 +219,75 @@ class UserService
         }
 
         return $errors;
+    }
+    
+    // Métodos da interface para compatibilidade com API
+    public function getUser(string $id): ?User
+    {
+        return $this->getUserById($id);
+    }
+    
+    public function getUserByEmail(string $email, ?string $clientId = null): ?User
+    {
+        return $this->userRepository->findByEmail($email, $clientId);
+    }
+    
+    public function getUsersByClient(string $clientId): Collection
+    {
+        return $this->userRepository->getByClient($clientId);
+    }
+    
+    public function getMasterUsers(): Collection
+    {
+        return $this->userRepository->getMasterUsers();
+    }
+    
+    public function authenticateUser(string $email, string $password, ?string $clientId = null): ?User
+    {
+        $user = $this->getUserByEmail($email, $clientId);
+        
+        if (!$user || !Hash::check($password, $user->password)) {
+            return null;
+        }
+        
+        return $user;
+    }
+    
+    public function assignRoleToUser(string $userId, string $roleId): bool
+    {
+        return $this->assignRole($userId, $roleId);
+    }
+    
+    public function removeRoleFromUser(string $userId, string $roleId): bool
+    {
+        return $this->removeRole($userId, $roleId);
+    }
+    
+    public function userHasRole(string $userId, string $roleName): bool
+    {
+        $user = $this->getUserById($userId);
+        if (!$user) {
+            return false;
+        }
+        
+        return $user->roles()->where('name', $roleName)->exists();
+    }
+    
+    public function userHasPermission(string $userId, string $module, string $action): bool
+    {
+        $user = $this->getUserById($userId);
+        if (!$user) {
+            return false;
+        }
+        
+        return $user->hasPermission($module, $action);
+    }
+    
+    public function resetUserPassword(string $email, ?string $clientId = null): bool
+    {
+        // Este método deve delegar para PasswordResetTokenService
+        // Por enquanto retorna false indicando que precisa ser implementado
+        // ou integrado com PasswordResetTokenService
+        return false;
     }
 }

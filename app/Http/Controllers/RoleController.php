@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\RoleService;
+use App\Services\Interfaces\RoleServiceInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -13,9 +13,9 @@ use Exception;
 
 class RoleController extends Controller
 {
-    protected RoleService $roleService;
+    protected RoleServiceInterface $roleService;
 
-    public function __construct(RoleService $roleService)
+    public function __construct(RoleServiceInterface $roleService)
     {
         $this->roleService = $roleService;
     }

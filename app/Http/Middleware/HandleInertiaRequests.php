@@ -35,8 +35,15 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        try {
+            $shared = parent::share($request);
+        } catch (\Exception $e) {
+            \Log::warning('Erro no HandleInertiaRequests::share: ' . $e->getMessage());
+            $shared = [];
+        }
+        
         return [
-            ...parent::share($request),
+            ...$shared,
             'csrf_token' => csrf_token(),
         ];
     }

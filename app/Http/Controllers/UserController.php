@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\UserService;
+use App\Services\Interfaces\UserServiceInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -13,9 +13,9 @@ use Exception;
 
 class UserController extends Controller
 {
-    protected UserService $userService;
+    protected UserServiceInterface $userService;
 
-    public function __construct(UserService $userService)
+    public function __construct(UserServiceInterface $userService)
     {
         $this->userService = $userService;
     }
@@ -37,7 +37,7 @@ class UserController extends Controller
                 $clientId = Auth::user()?->client_id;
             }
 
-            $users = $this->userService->getUsersByClient($clientId, $perPage, $filters);
+            $users = $this->userService->getUsersByClientPaginated($clientId, $perPage, $filters);
             $availableRoles = $this->userService->getAvailableRoles();
 
             return Inertia::render('Users', [

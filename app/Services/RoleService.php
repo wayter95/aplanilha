@@ -3,16 +3,17 @@
 namespace App\Services;
 
 use App\Models\UserRole;
-use App\Repositories\RoleRepository;
+use App\Repositories\Interfaces\RoleRepositoryInterface;
+use App\Services\Interfaces\RoleServiceInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Exception;
 
-class RoleService
+class RoleService implements RoleServiceInterface
 {
-    protected RoleRepository $roleRepository;
+    protected RoleRepositoryInterface $roleRepository;
 
-    public function __construct(RoleRepository $roleRepository)
+    public function __construct(RoleRepositoryInterface $roleRepository)
     {
         $this->roleRepository = $roleRepository;
     }
@@ -54,6 +55,7 @@ class RoleService
 
         $data['is_active'] = $data['is_active'] ?? true;
 
+        /** @var \App\Models\UserRole $role */
         $role = $this->roleRepository->create($data);
 
         if (isset($data['permissions']) && is_array($data['permissions'])) {
@@ -69,7 +71,12 @@ class RoleService
             throw new Exception('Nome da função já está em uso.');
         }
 
-        $role = $this->roleRepository->update($id, $data);
+        $updated = $this->roleRepository->update($id, $data);
+        if (!$updated) {
+            return null;
+        }
+
+        $role = $this->roleRepository->findById($id);
 
         if ($role && isset($data['permissions']) && is_array($data['permissions'])) {
             $this->roleRepository->assignPermissions($role->id, $data['permissions']);

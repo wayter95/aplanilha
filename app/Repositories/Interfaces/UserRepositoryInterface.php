@@ -10,8 +10,8 @@ interface UserRepositoryInterface extends BaseRepositoryInterface
     public function getByClient(string $clientId);
     public function getMasterUsers();
     public function getTenantUsers(string $clientId);
-    public function assignRole(User $user, string $roleId): void;
-    public function removeRole(User $user, string $roleId): void;
+    public function assignRole(string $userId, string $roleId): bool;
+    public function removeRole(string $userId, string $roleId): bool;
     public function hasRole(User $user, string $roleName): bool;
     public function hasPermission(User $user, string $module, string $action): bool;
 }

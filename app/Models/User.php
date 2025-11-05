@@ -51,7 +51,11 @@ class User extends Authenticatable
      */
     protected static function booted(): void
     {
-        // static::addGlobalScope(new TenantScope);
+        // ⚠️ NÃO aplica TenantScope ao User model
+        // Isso causaria loop infinito: Auth::user() → TenantScope → Auth::user()
+        // O filtro de tenant será aplicado manualmente nas queries específicas
+        // que listam usuários (ex: UserController, UserService, etc.)
+        // static::addGlobalScope(new TenantScope); // REMOVIDO
     }
 
     protected function casts(): array
