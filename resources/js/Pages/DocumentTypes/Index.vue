@@ -38,8 +38,20 @@
                   </td>
                   <td class="bg-transparent dark:bg-transparent">{{ type.sort_order }}</td>
                   <td class="text-right space-x-2 bg-transparent dark:bg-transparent">
-                    <button class="ti-btn ti-btn-outline-primary !py-1 !px-2 !text-[0.75rem]" @click="openEditTab(type)">Editar</button>
-                    <button class="ti-btn ti-btn-outline-danger !py-1 !px-2 !text-[0.75rem]" @click="showDeleteModal = true; selectedType = type">Remover</button>
+                    <button 
+                      class="ti-btn ti-btn-outline-primary !py-1 !px-2 !text-[0.75rem] hover:bg-primary hover:text-white transition-colors hs-tooltip" 
+                      @click="openEditTab(type)"
+                      data-hs-tooltip-content="Editar"
+                    >
+                      <i class="ri-edit-line"></i>
+                    </button>
+                    <button 
+                      class="ti-btn ti-btn-outline-danger !py-1 !px-2 !text-[0.75rem] hover:bg-danger hover:text-white transition-colors hs-tooltip" 
+                      @click="showDeleteModal = true; selectedType = type"
+                      data-hs-tooltip-content="Remover"
+                    >
+                      <i class="ri-delete-bin-line"></i>
+                    </button>
                   </td>
                 </tr>
                 <tr v-if="types.length === 0">
