@@ -1,17 +1,19 @@
 <template>
-  <div class="rounded-md border border-default-200 bg-white dark:bg-gray-800 shadow-sm">
-    <button
-      type="button"
-      class="w-full flex items-center justify-between px-4 py-3 transition-colors bg-default-50 hover:bg-default-100 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-t-md"
-      @click="$emit('toggle')"
-    >
-      <div class="flex items-center gap-2">
-        <span class="font-medium text-default-800 dark:text-default-100">{{ title }}</span>
-        <span v-if="count !== undefined" class="text-xs text-default-500 dark:text-default-400">({{ count }})</span>
-      </div>
-      <i :class="['bx', open ? 'bx-chevron-up' : 'bx-chevron-down', 'text-default-500 dark:text-default-400']"></i>
-    </button>
-    <div v-show="open" class="px-4 pb-4 bg-transparent dark:bg-transparent rounded-b-md">
+  <div class="box custom-box mb-3">
+    <div class="box-header">
+      <button
+        type="button"
+        class="w-full flex items-center justify-between px-4 py-3 transition-colors hover:bg-light/50 dark:hover:bg-gray-700 rounded-t-md"
+        @click="$emit('toggle')"
+      >
+        <div class="flex items-center gap-2">
+          <span class="box-title font-medium">{{ title }}</span>
+          <span v-if="count !== undefined" class="badge bg-primary/10 text-primary text-xs">({{ count }})</span>
+        </div>
+        <i :class="['ri', open ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line', 'text-textmuted dark:text-textmuted text-lg']"></i>
+      </button>
+    </div>
+    <div v-show="open" class="box-body !p-0">
       <slot />
     </div>
   </div>
@@ -29,6 +31,24 @@ export default {
 </script>
 
 <style scoped>
+.box {
+  background-color: rgb(var(--default-background));
+  border-color: rgb(var(--bootstrap-card-border));
+}
+
+.custom-box {
+  background-color: rgb(var(--default-background));
+  border-color: rgb(var(--bootstrap-card-border));
+}
+
+.box-header {
+  background-color: rgb(var(--default-background));
+  border-color: rgb(var(--bootstrap-card-border));
+}
+
+.box-title {
+  color: rgb(var(--default-text-color));
+}
 </style>
 
 

@@ -2,81 +2,129 @@
   <AppLayout :title="'Modelos de Documentos'" :description="'Gerencie templates por tipo'" :user="user">
     <div class="grid grid-cols-12 gap-6">
       <div class="xl:col-span-12 col-span-12">
-        <div class="p-6 bg-default-50 dark:bg-bgdark rounded-md border border-default-200 dark:border-white/10">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xl font-semibold text-default-900">Modelos de Documentos</h2>
-            <div class="flex gap-2">
-              <a href="/document-types" class="ti-btn btn-wave ti-btn-secondary-full !py-2 !px-3">
-                <i class="ri-settings-3-line mr-1"></i>Tipos de Documentos
-              </a>
-              <button @click="openCreateTab(defaultType)" :disabled="!defaultType" class="ti-btn btn-wave ti-btn-primary-full !py-2 !px-3 disabled:opacity-50">Novo Modelo</button>
+        <div class="box custom-box">
+          <div class="box-header">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+              <div class="box-title">
+                Modelos de Documentos
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <a href="/document-types" class="ti-btn btn-wave ti-btn-secondary-full !py-1 !px-2 !text-[0.75rem]">
+                  <i class="ri-settings-3-line mr-1"></i>Tipos de Documentos
+                </a>
+                <button @click="openCreateTab(defaultType)" :disabled="!defaultType" class="ti-btn btn-wave ti-btn-primary-full !py-1 !px-2 !text-[0.75rem] disabled:opacity-50">
+                  <i class="ri-add-line mr-1"></i>Novo Modelo
+                </button>
+              </div>
             </div>
           </div>
+          
+          <div class="box-body">
 
-          <div v-for="group in grouped" :key="group.type" class="mb-3">
+          <div v-for="group in grouped" :key="group.type">
             <Accordion :title="group.typeData.name" :count="group.items.length" :open="isOpen(group.type)" @toggle="toggle(group.type)">
-              <div class="overflow-x-auto">
-                <table class="min-w-full text-sm table-auto bg-transparent dark:bg-bgdark">
-                  <thead class="bg-transparent dark:bg-transparent">
-                    <tr class="text-left text-default-600 dark:text-default-300 border-b border-default-200 dark:border-white/10">
-                      <th class="w-8"><input type="checkbox" :checked="allSelected(group.items)" @change="toggleAll(group.items, $event.target.checked)" /></th>
-                      <th class="bg-transparent dark:bg-transparent">Nome</th>
-                      <th class="bg-transparent dark:bg-transparent">Idioma</th>
-                      <th class="bg-transparent dark:bg-transparent">País</th>
-                      <th class="bg-transparent dark:bg-transparent">Status</th>
-                      <th class="bg-transparent dark:bg-transparent">Sistema</th>
-                      <th class="bg-transparent dark:bg-transparent">Padrão</th>
-                      <th class="text-right bg-transparent dark:bg-transparent">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody class="bg-transparent dark:bg-transparent">
-                    <tr v-for="item in group.items" :key="item.id" class="border-b border-default-200 dark:border-white/10 bg-transparent dark:bg-transparent">
-                      <td class="w-8 bg-transparent dark:bg-transparent"><input type="checkbox" :value="item.id" v-model="selectedIds" /></td>
-                      <td class="bg-transparent dark:bg-transparent">{{ item.name }}</td>
-                      <td class="bg-transparent dark:bg-transparent">{{ item.language || '-' }}</td>
-                      <td class="bg-transparent dark:bg-transparent">{{ item.country || '-' }}</td>
-                      <td class="bg-transparent dark:bg-transparent">
-                        <span :class="item.status === 'active' ? 'text-green-600' : 'text-gray-500'">{{ item.status }}</span>
-                      </td>
-                      <td class="bg-transparent dark:bg-transparent">{{ item.is_system ? 'Sim' : 'Não' }}</td>
-                      <td class="bg-transparent dark:bg-transparent">
-                        <span v-if="item.is_default" class="px-2 py-1 text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 rounded">Padrão</span>
-                      </td>
-                      <td class="text-right space-x-2 bg-transparent dark:bg-transparent">
-                        <button 
-                          class="ti-btn ti-btn-outline-primary !py-1 !px-2 !text-[0.75rem] hover:bg-primary hover:text-white transition-colors hs-tooltip" 
-                          @click="openEditTab(item)"
-                          data-hs-tooltip-content="Editar"
-                        >
-                          <i class="ri-edit-line"></i>
-                        </button>
-                        <button 
-                          class="ti-btn ti-btn-outline-secondary !py-1 !px-2 !text-[0.75rem] hover:bg-secondary hover:text-white transition-colors hs-tooltip" 
-                          @click="duplicate(item)"
-                          data-hs-tooltip-content="Duplicar"
-                        >
-                          <i class="ri-file-copy-line"></i>
-                        </button>
-                        <button 
-                          class="ti-btn ti-btn-outline-warning !py-1 !px-2 !text-[0.75rem] hover:bg-warning hover:text-white transition-colors hs-tooltip" 
-                          @click="setDefault(item)"
-                          data-hs-tooltip-content="Definir como padrão"
-                        >
-                          <i class="ri-star-line"></i>
-                        </button>
-                        <button 
-                          class="ti-btn ti-btn-outline-danger !py-1 !px-2 !text-[0.75rem] hover:bg-danger hover:text-white transition-colors hs-tooltip" 
-                          @click="remove(item)"
-                          data-hs-tooltip-content="Remover"
-                        >
-                          <i class="ri-delete-bin-line"></i>
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+              <div class="overflow-auto">
+                <div class="ti-custom-table ti-striped-table ti-custom-table-hover">
+                  <table class="table whitespace-nowrap min-w-full">
+                    <thead>
+                      <tr class="border-b border-defaultborder">
+                        <th scope="col" class="text-start w-8">
+                          <input
+                            type="checkbox"
+                            :checked="allSelected(group.items)"
+                            @change="toggleAll(group.items, $event.target.checked)"
+                            class="form-check-input"
+                          >
+                        </th>
+                        <th scope="col" class="text-start">Nome</th>
+                        <th scope="col" class="text-start">Idioma</th>
+                        <th scope="col" class="text-start">País</th>
+                        <th scope="col" class="text-start">Status</th>
+                        <th scope="col" class="text-start">Sistema</th>
+                        <th scope="col" class="text-start">Padrão</th>
+                        <th scope="col" class="text-start">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="item in group.items" :key="item.id" class="crm-contact">
+                        <td class="text-start w-8">
+                          <input
+                            type="checkbox"
+                            :value="item.id"
+                            v-model="selectedIds"
+                            class="form-check-input"
+                          >
+                        </td>
+                        <td class="text-start">{{ item.name }}</td>
+                        <td class="text-start text-textmuted dark:text-textmuted">{{ item.language || '-' }}</td>
+                        <td class="text-start text-textmuted dark:text-textmuted">{{ item.country || '-' }}</td>
+                        <td class="text-start">
+                          <span :class="[
+                            'badge',
+                            item.status === 'active' ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'
+                          ]">
+                            {{ item.status === 'active' ? 'Ativo' : 'Inativo' }}
+                          </span>
+                        </td>
+                        <td class="text-start">
+                          <span :class="[
+                            'badge',
+                            item.is_system ? 'bg-info/10 text-info' : 'bg-light text-defaulttextcolor'
+                          ]">
+                            {{ item.is_system ? 'Sim' : 'Não' }}
+                          </span>
+                        </td>
+                        <td class="text-start">
+                          <span v-if="item.is_default" class="badge bg-success/10 text-success">Padrão</span>
+                          <span v-else class="text-textmuted dark:text-textmuted">-</span>
+                        </td>
+                        <td class="text-start">
+                          <div class="flex items-center gap-2">
+                            <button 
+                              class="ti-btn btn-wave ti-btn-outline-primary !py-1 !px-2 !text-[0.75rem] !m-0 hs-tooltip" 
+                              @click="openEditTab(item)"
+                              data-hs-tooltip-content="Editar"
+                            >
+                              <i class="ri-edit-line"></i>
+                            </button>
+                            <button 
+                              class="ti-btn btn-wave ti-btn-outline-secondary !py-1 !px-2 !text-[0.75rem] !m-0 hs-tooltip" 
+                              @click="duplicate(item)"
+                              data-hs-tooltip-content="Duplicar"
+                            >
+                              <i class="ri-file-copy-line"></i>
+                            </button>
+                            <button 
+                              class="ti-btn btn-wave ti-btn-outline-warning !py-1 !px-2 !text-[0.75rem] !m-0 hs-tooltip" 
+                              @click="setDefault(item)"
+                              data-hs-tooltip-content="Definir como padrão"
+                            >
+                              <i class="ri-star-line"></i>
+                            </button>
+                            <button 
+                              class="ti-btn btn-wave ti-btn-outline-danger !py-1 !px-2 !text-[0.75rem] !m-0 hs-tooltip" 
+                              @click="remove(item)"
+                              data-hs-tooltip-content="Remover"
+                            >
+                              <i class="ri-delete-bin-line"></i>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr v-if="group.items.length === 0">
+                        <td colspan="8" class="text-center py-8">
+                          <div class="text-textmuted dark:text-textmuted">
+                            <i class="ri-search-line text-4xl mb-2"></i>
+                            <p>Nenhum modelo encontrado</p>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </Accordion>
+          </div>
           </div>
         </div>
       </div>
