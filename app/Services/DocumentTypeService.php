@@ -7,6 +7,7 @@ use App\Services\Interfaces\DocumentTypeServiceInterface;
 use App\Models\DocumentTemplate;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -82,6 +83,21 @@ class DocumentTypeService implements DocumentTypeServiceInterface
     {
         $type = $this->repository->findByCode($code);
         return $type !== null && $type->is_active;
+    }
+
+    public function getAllPaginated(int $perPage = 10, array $filters = []): LengthAwarePaginator
+    {
+        return $this->repository->getAllPaginated($perPage, $filters);
+    }
+
+    public function getByClientPaginated(string $clientId, int $perPage = 10, array $filters = []): LengthAwarePaginator
+    {
+        return $this->repository->getByClientPaginated($clientId, $perPage, $filters);
+    }
+
+    public function getAll(array $filters = []): Collection
+    {
+        return $this->repository->getAll($filters);
     }
 }
 

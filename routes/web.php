@@ -54,11 +54,7 @@ Route::middleware(['auth'])->group(function () {
         ]);
     })->name('document-templates.edit');
     
-    Route::get('document-types', function () {
-        return Inertia::render('DocumentTypes/Index', [
-            'user' => Auth::user(),
-        ]);
-    })->name('document-types');
+    Route::get('document-types', [\App\Http\Controllers\DocumentTypeController::class, 'index'])->name('document-types');
     
     Route::get('document-types/new/{tempId}', function ($tempId) {
         return Inertia::render('DocumentTypes/Form', [
