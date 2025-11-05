@@ -91,7 +91,6 @@ watch(activeTab, async (newTab) => {
     const component = await loadTabComponent(newTab.componentName)
     resolvedComponent.value = component
   } catch (error) {
-    console.error(`Erro ao carregar componente ${newTab.componentName}:`, error)
     resolvedComponent.value = null
   }
 }, { immediate: true })

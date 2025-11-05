@@ -194,7 +194,6 @@ export default {
           this.openTypes[t] = true
         })
       } catch (error) {
-        console.error('Erro ao buscar tipos:', error)
         this.types = []
         this.typesData = []
       }
@@ -205,7 +204,6 @@ export default {
         const items = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])
         this.itemsByType[type] = items
       } catch (error) {
-        console.error(`Erro ao buscar templates do tipo ${type}:`, error)
         this.itemsByType[type] = []
       }
     },

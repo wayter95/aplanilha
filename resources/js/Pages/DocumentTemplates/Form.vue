@@ -210,11 +210,7 @@ export default {
         const formDataStore = useTabFormDataStore()
         const tabKey = this.tabKey || this.tempKey || this.id
         if (tabKey) {
-          // Debug: verifica se está salvando
-          console.log('Salvando dados do formulário para tabKey:', tabKey, newVal)
           formDataStore.setFormData(tabKey, { ...newVal })
-        } else {
-          console.warn('Form.vue: tabKey não encontrado para salvar dados')
         }
       },
       deep: true,
@@ -252,17 +248,12 @@ export default {
       handler(newTab, oldTab) {
         if (!newTab) return
         
-        // Usa o tabKey da tab ativa, não os valores antigos das props
         const activeTabKey = newTab.key
         const currentTabKey = this.tabKey || this.tempKey || this.id
         
-        // Só processa se a tab ativa corresponde à tab atual deste componente
         if (activeTabKey === currentTabKey && (!oldTab || oldTab.key !== activeTabKey)) {
-          // Atualiza o tabKey do componente para garantir sincronização
           this.tabKey = activeTabKey
           
-          // Tab foi ativada, força carregar dados
-          console.log('activeTab watch: Tab foi ativada, carregando dados para tabKey:', activeTabKey)
           this.$nextTick(() => {
             this.loadFormDataIfNeeded(activeTabKey)
           })
@@ -276,18 +267,14 @@ export default {
       const tabsStore = useTabsStore()
       const currentPath = newUrl.split('?')[0]
       
-      // Encontra a tab que corresponde à URL atual
       const matchingTab = tabsStore.tabs.find(t => {
         const tabPath = t.path.split('?')[0]
         return tabPath === currentPath
       })
       
       if (matchingTab) {
-        // Atualiza o tabKey do componente para a tab encontrada
         this.tabKey = matchingTab.key
         
-        // Força o carregamento dos dados quando volta para a tab
-        console.log('page.url watch: URL corresponde à tab, carregando dados para tabKey:', matchingTab.key)
         this.$nextTick(() => {
           this.loadFormDataIfNeeded(matchingTab.key)
         })
@@ -316,11 +303,9 @@ export default {
       return
     }
     
-    // Registra a aba automaticamente ao entrar via URL direta
     const exists = tabsStore.tabs.find(t => t.key === tabKey)
     if (!exists && tabKey) {
       const path = this.id ? `/document-templates/${this.id}/edit` : `/document-templates/new/${this.tempKey}`
-      // Calcula o título usando o tipo garantido
       const type = this.form.type || this.type || 'contract'
       const typeLabel = this.typeOptions.find(o => o.value === type)?.label || type
       const singularLabel = typeLabel.endsWith('s') ? typeLabel.slice(0, -1) : typeLabel
@@ -335,68 +320,48 @@ export default {
         props: this.id ? { mode: 'edit', id: this.id } : { mode: 'create', tempKey: this.tempKey, type: this.type }
       })
     } else if (exists) {
-      // Atualiza o título da tab existente se necessário
-      // Força atualização do título usando o tipo garantido
       const type = this.form.type || this.type || 'contract'
       const typeLabel = this.typeOptions.find(o => o.value === type)?.label || type
       const singularLabel = typeLabel.endsWith('s') ? typeLabel.slice(0, -1) : typeLabel
       const newTitle = this.mode === 'edit' && this.form.name ? this.form.name : (this.mode === 'create' ? `Novo ${singularLabel}` : exists.title)
       
-      // Sempre atualiza o título para garantir que está correto
       exists.title = newTitle
       
-      // Salva no storage
       const activeTabKey = tabsStore.activeTab?.key || null
       const saveToStorage = (tabs, activeTabKey) => {
         try {
           localStorage.setItem('tabs-store', JSON.stringify({ tabs, activeTabKey }))
         } catch (e) {
-          console.warn('Erro ao salvar tabs no storage:', e)
+          // Silently fail
         }
       }
       saveToStorage(tabsStore.tabs, activeTabKey)
     }
     
-    // Modo edit: sempre carrega do servidor
     if (this.mode === 'edit' && this.id) {
       await this.load()
       this.isInitializing = false
       return
     }
     
-    // Modo create: carrega dados salvos ou inicializa
-    // Verifica diretamente no localStorage para evitar race conditions
     let stored = formDataStore.getFormData(tabKey)
     
-    // Se não encontrou na store, tenta carregar do localStorage diretamente (para evitar race condition)
     if (!stored) {
       try {
         const storageData = JSON.parse(localStorage.getItem('tab-form-data-store') || '{}')
         if (storageData[tabKey]) {
-          // Sincroniza a store com o localStorage
           formDataStore.setFormData(tabKey, storageData[tabKey])
           stored = formDataStore.getFormData(tabKey)
         }
       } catch (e) {
-        console.warn('Erro ao ler localStorage:', e)
+        // Silently fail
       }
     }
     
     if (stored) {
-      // Dados salvos encontrados - sempre carrega, mesmo se vazio
-      const hasStoredData = stored.name || stored.country || stored.language || stored.header_html || stored.content_html || stored.footer_html
-      
-      if (hasStoredData) {
-        console.log('Form.vue created: Carregando dados salvos com conteúdo:', stored)
-      } else {
-        console.log('Form.vue created: Carregando estrutura existente (vazia)')
-      }
       Object.assign(this.form, stored)
     } else {
-      // Não há dados salvos - inicializa estrutura vazia
-      console.log('Form.vue created: Não há dados salvos, inicializando estrutura vazia')
       formDataStore.initializeFormData(tabKey, { type: this.type || 'contract' })
-      // Carrega a estrutura inicializada
       const initialized = formDataStore.getFormData(tabKey)
       if (initialized) {
         Object.assign(this.form, initialized)
@@ -405,17 +370,13 @@ export default {
     
     this.$nextTick(() => {
       this.isInitializing = false
-      // Atualiza o título da tab após inicialização
       this.updateTabTitle()
     })
   },
   mounted() {
-    // Os dados já foram carregados no created()
-    // Este hook pode ser usado para ações que precisam do DOM
   },
   methods: {
     handleInvalid({ errors, values }) {
-      console.warn('DocumentTemplates/Form.vue: Validação falhou', { errors, values })
       const firstError = Object.values(errors)[0]
       if (firstError) {
         window?.alert?.(firstError)
@@ -429,7 +390,6 @@ export default {
           label: t.name
         }))
       } catch (error) {
-        console.error('Erro ao buscar tipos de documentos:', error)
         this.typeOptions = []
       }
     },
@@ -445,77 +405,58 @@ export default {
       
       if (tab.title !== newTitle) {
         tab.title = newTitle
-        // Salva no storage
         const activeTabKey = tabsStore.activeTab?.key || null
-        const saveToStorage = (tabs, activeTabKey) => {
-          try {
-            localStorage.setItem('tabs-store', JSON.stringify({ tabs, activeTabKey }))
-          } catch (e) {
-            console.warn('Erro ao salvar tabs no storage:', e)
-          }
+        try {
+          localStorage.setItem('tabs-store', JSON.stringify({ tabs: tabsStore.tabs, activeTabKey }))
+        } catch (e) {
+          // Silently fail
         }
-        saveToStorage(tabsStore.tabs, activeTabKey)
       }
     },
     loadFormDataIfNeeded(explicitTabKey) {
       if (this.isInitializing) {
-        console.log('loadFormDataIfNeeded: Ignorado porque está inicializando')
         return
       }
       
-      // Não recarrega se já está em modo edit e tem ID (dados vêm do servidor)
       if (this.mode === 'edit' && this.id) {
         return
       }
       
-      // Usa o tabKey explícito passado como parâmetro, ou tenta determinar do componente
       const tabKey = explicitTabKey || this.tabKey || this.tempKey || this.id
       if (!tabKey) {
-        console.log('loadFormDataIfNeeded: tabKey não encontrado')
         return
       }
       
-      // Atualiza o tabKey do componente se foi passado explicitamente
       if (explicitTabKey && explicitTabKey !== this.tabKey) {
         this.tabKey = explicitTabKey
       }
       
       const formDataStore = useTabFormDataStore()
-      
-      // Primeiro tenta na store
       let stored = formDataStore.getFormData(tabKey)
       
-      // Se não encontrou, tenta diretamente no localStorage
       if (!stored) {
         try {
           const storageData = JSON.parse(localStorage.getItem('tab-form-data-store') || '{}')
           if (storageData[tabKey]) {
-            // Sincroniza a store
             formDataStore.setFormData(tabKey, storageData[tabKey])
             stored = formDataStore.getFormData(tabKey)
           }
         } catch (e) {
-          console.warn('Erro ao ler localStorage:', e)
+          // Silently fail
         }
       }
       
       if (!stored) {
-        console.log('loadFormDataIfNeeded: Não há dados salvos para tabKey:', tabKey)
         return
       }
       
-      // Verifica se os dados têm conteúdo real antes de carregar
       const hasData = stored.name || stored.country || stored.language || stored.header_html || stored.content_html || stored.footer_html
       if (hasData) {
-        console.log('loadFormDataIfNeeded: Carregando dados salvos com conteúdo para tabKey:', tabKey, stored)
         this.isInitializing = true
         Object.assign(this.form, stored)
         this.$nextTick(() => {
           this.isInitializing = false
-          console.log('loadFormDataIfNeeded: Dados carregados para tabKey:', tabKey)
         })
-      } else {
-        console.log('loadFormDataIfNeeded: Dados salvos estão vazios para tabKey:', tabKey)
       }
     },
     getDefaultForm() {
@@ -564,28 +505,21 @@ export default {
       })
     },
     async save(values) {
-      console.log('DocumentTemplates/Form.vue: save() chamado', { values, mode: this.mode, id: this.id })
       const formDataStore = useTabFormDataStore()
       const tabsStore = useTabsStore()
       const formData = values || this.form
       
-      console.log('DocumentTemplates/Form.vue: Dados preparados para salvar', formData)
-      
       if (!formData.name) {
-        console.warn('Salvar: nome é obrigatório')
         window?.alert?.('Informe o nome do modelo')
         return
       }
       if (!formData.content_html) {
-        console.warn('Salvar: conteúdo é obrigatório (content_html)')
         window?.alert?.('O conteúdo do modelo é obrigatório')
         return
       }
       try {
         if (this.mode === 'create') {
-          console.log('DocumentTemplates/Form.vue: Criando novo modelo...')
           const { data } = await window.axios.post('/api/document-templates', formData)
-          console.log('DocumentTemplates/Form.vue: Modelo criado com sucesso', data)
           
           this.toast.success('Modelo criado com sucesso!')
           
@@ -594,20 +528,16 @@ export default {
           }
           
           if (this.tempKey && data?.id) {
-            // Limpa os dados da tab de criação
             formDataStore.clearFormData(this.tempKey)
             
-            // Encontra e remove a tab de criação
             const oldTab = tabsStore.tabs.find(t => t.key === this.tempKey)
             if (oldTab) {
-              // Remove a tab diretamente do array antes de criar a nova
               const tabIndex = tabsStore.tabs.indexOf(oldTab)
               if (tabIndex !== -1) {
                 tabsStore.tabs.splice(tabIndex, 1)
               }
             }
             
-            // Cria a nova tab de edição
             const newPath = `/document-templates/${data.id}/edit`
             const newTab = {
               key: data.id,
@@ -620,27 +550,18 @@ export default {
             }
             
             tabsStore.addTab(newTab)
-            
-            // Atualiza o tabKey do componente
             this.tabKey = data.id
             
-            // Salva no storage para garantir persistência
-            const saveToStorage = (tabs, activeTabKey) => {
-              try {
-                localStorage.setItem('tabs-store', JSON.stringify({ tabs, activeTabKey }))
-              } catch (e) {
-                console.warn('Erro ao salvar tabs no storage:', e)
-              }
+            try {
+              localStorage.setItem('tabs-store', JSON.stringify({ tabs: tabsStore.tabs, activeTabKey: data.id }))
+            } catch (e) {
+              // Silently fail
             }
-            saveToStorage(tabsStore.tabs, data.id)
             
-            // Navega para a nova tab
             this.$inertia.visit(newPath)
           }
         } else {
-          console.log('DocumentTemplates/Form.vue: Atualizando modelo existente...', this.id)
           await window.axios.put(`/api/document-templates/${this.id}`, formData)
-          console.log('DocumentTemplates/Form.vue: Modelo atualizado com sucesso')
           formDataStore.clearFormData(this.tabKey)
           
           this.toast.success('Modelo atualizado com sucesso!')
@@ -649,19 +570,14 @@ export default {
           if (tab && formData.name) {
             tab.title = formData.name
             const activeTabKey = tabsStore.activeTab?.key || null
-            const saveToStorage = (tabs, activeTabKey) => {
-              try {
-                localStorage.setItem('tabs-store', JSON.stringify({ tabs, activeTabKey }))
-              } catch (e) {
-                console.warn('Erro ao salvar tabs no storage:', e)
-              }
+            try {
+              localStorage.setItem('tabs-store', JSON.stringify({ tabs: tabsStore.tabs, activeTabKey }))
+            } catch (e) {
+              // Silently fail
             }
-            saveToStorage(tabsStore.tabs, activeTabKey)
           }
         }
       } catch (error) {
-        console.error('DocumentTemplates/Form.vue: Erro ao salvar modelo:', error)
-        console.error('DocumentTemplates/Form.vue: Detalhes do erro:', error.response)
         const backendMsg = error?.response?.data?.message || error?.message || 'Erro ao salvar modelo'
         window?.alert?.(backendMsg)
         this.toast?.error?.(backendMsg)

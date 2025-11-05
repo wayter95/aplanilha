@@ -309,7 +309,7 @@ export default {
           try {
             localStorage.setItem('tabs-store', JSON.stringify({ tabs, activeTabKey }))
           } catch (e) {
-            console.warn('Erro ao salvar tabs no storage:', e)
+            // Silently fail
           }
         }
         saveToStorage(tabsStore.tabs, activeTabKey)
@@ -326,7 +326,7 @@ export default {
           stored = formDataStore.getFormData(tabKey)
         }
       } catch (e) {
-        console.warn('Erro ao ler localStorage:', e)
+        // Silently fail
       }
     }
     
@@ -364,7 +364,6 @@ export default {
   },
   methods: {
     handleInvalid({ errors, values }) {
-      console.warn('DocumentTypes/Form.vue: Validação falhou', { errors, values })
       const firstError = Object.values(errors)[0]
       if (firstError) {
         window?.alert?.(firstError)
@@ -384,7 +383,7 @@ export default {
           try {
             localStorage.setItem('tabs-store', JSON.stringify({ tabs, activeTabKey }))
           } catch (e) {
-            console.warn('Erro ao salvar tabs no storage:', e)
+            // Silently fail
           }
         }
         saveToStorage(tabsStore.tabs, activeTabKey)
@@ -412,7 +411,7 @@ export default {
             stored = formDataStore.getFormData(tabKey)
           }
         } catch (e) {
-          console.warn('Erro ao ler localStorage:', e)
+          // Silently fail
         }
       }
       
@@ -462,7 +461,7 @@ export default {
             try {
               localStorage.setItem('tabs-store', JSON.stringify({ tabs, activeTabKey }))
             } catch (e) {
-              console.warn('Erro ao salvar tabs no storage:', e)
+              // Silently fail
             }
           }
           saveToStorage(tabsStore.tabs, activeTabKey)
@@ -473,12 +472,10 @@ export default {
         this.isInitializing = false
         this.updateTabTitle()
       } catch (error) {
-        console.error('Erro ao carregar tipo:', error)
         this.isInitializing = false
       }
     },
     async save(values) {
-      console.log('DocumentTypes/Form.vue: save() chamado', { values, mode: this.mode, id: this.id })
       const formDataStore = useTabFormDataStore()
       const tabsStore = useTabsStore()
       const rawData = values || this.form
@@ -491,8 +488,6 @@ export default {
         sort_order: rawData.sort_order ?? 0
       }
       
-      console.log('DocumentTypes/Form.vue: Dados preparados para salvar', formData)
-      
       if (!formData.name) {
         window?.alert?.('Informe o nome do tipo')
         return
@@ -500,9 +495,7 @@ export default {
       
       try {
         if (this.mode === 'create') {
-          console.log('DocumentTypes/Form.vue: Criando novo tipo...')
           const { data } = await window.axios.post('/api/document-types', formData)
-          console.log('DocumentTypes/Form.vue: Tipo criado com sucesso', data)
           this.toast.success('Tipo de documento criado com sucesso!')
           if (this.tempKey && data?.id) {
             formDataStore.clearFormData(this.tempKey)
@@ -527,9 +520,7 @@ export default {
             this.$inertia.visit(newPath)
           }
         } else {
-          console.log('DocumentTypes/Form.vue: Atualizando tipo existente...', this.id)
           await window.axios.put(`/api/document-types/${this.id}`, formData)
-          console.log('DocumentTypes/Form.vue: Tipo atualizado com sucesso')
           formDataStore.clearFormData(this.tabKey)
           this.toast.success('Tipo de documento atualizado com sucesso!')
           
@@ -537,19 +528,14 @@ export default {
           if (tab && formData.name) {
             tab.title = formData.name
             const activeTabKey = tabsStore.activeTab?.key || null
-            const saveToStorage = (tabs, activeTabKey) => {
-              try {
-                localStorage.setItem('tabs-store', JSON.stringify({ tabs, activeTabKey }))
-              } catch (e) {
-                console.warn('Erro ao salvar tabs no storage:', e)
-              }
+            try {
+              localStorage.setItem('tabs-store', JSON.stringify({ tabs: tabsStore.tabs, activeTabKey }))
+            } catch (e) {
+              // Silently fail
             }
-            saveToStorage(tabsStore.tabs, activeTabKey)
           }
         }
       } catch (error) {
-        console.error('DocumentTypes/Form.vue: Erro ao salvar tipo:', error)
-        console.error('DocumentTypes/Form.vue: Detalhes do erro:', error.response)
         const backendMsg = error?.response?.data?.message || error?.message || 'Erro ao salvar tipo'
         window?.alert?.(backendMsg)
       }

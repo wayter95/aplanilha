@@ -336,12 +336,9 @@ const loadUserPhotoUrl = async () => {
 
 // Função para atualizar a foto localmente
 const updateLocalPhoto = async (photoKey, photoUrl) => {
-  console.log('Settings: Atualizando foto localmente', { photoKey, photoUrl })
   userPhoto.value = photoKey
   currentPhotoUrl.value = photoUrl
   
-  // Emitir evento global para atualizar outros componentes
-  console.log('Settings: Emitindo evento global user-photo-updated')
   window.dispatchEvent(new CustomEvent('user-photo-updated', {
     detail: {
       userId: props.user.id,
@@ -362,12 +359,8 @@ const company = ref({
 
 // Funções para upload de foto
 const handlePhotoUploadSuccess = async (data) => {
-  console.log('Settings: Upload bem-sucedido', data)
   if (data) {
-    // Atualizar o usuário no backend usando fetch com CSRF token do Inertia
     try {
-      console.log('Settings: Enviando requisição para atualizar foto no backend')
-      
       const response = await fetch(`/api/users/${props.user.id}/photo`, {
         method: 'PATCH',
         headers: {
@@ -380,10 +373,8 @@ const handlePhotoUploadSuccess = async (data) => {
         })
       })
 
-      console.log('Settings: Resposta do backend', response.status)
       if (response.ok) {
         const result = await response.json()
-        console.log('Settings: Resultado do backend', result)
         if (result.success) {
           // Atualizar localmente usando a nova função
           updateLocalPhoto(data.key, data.url) // Mudança: usar data.url em vez de data.awsUrl
@@ -415,15 +406,8 @@ const handlePhotoUpdate = async (event) => {
 }
 
 onMounted(async () => {
-  console.log('Settings: Usuário carregado:', props.user)
-  console.log('Settings: Photo key:', props.user?.photo_key)
-  
-  // Carregar a URL da foto atual se existir
   if (userPhoto.value) {
-    console.log('Settings: Carregando foto existente:', userPhoto.value)
     currentPhotoUrl.value = await loadUserPhotoUrl()
-  } else {
-    console.log('Settings: Nenhuma foto encontrada')
   }
   
   // Escutar eventos globais de atualização da foto

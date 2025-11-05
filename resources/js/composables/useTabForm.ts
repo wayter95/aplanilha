@@ -159,7 +159,7 @@ export function useTabForm(config: UseTabFormConfig): UseTabFormReturn {
           activeTabKey 
         }))
       } catch (e) {
-        console.warn('Erro ao salvar tabs no storage:', e)
+        // Silently fail
       }
       
       if (config.onTabUpdated) {

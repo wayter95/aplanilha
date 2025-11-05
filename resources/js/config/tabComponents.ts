@@ -24,9 +24,7 @@ const componentRegistry = new Map<string, ComponentLoader>()
  * registerTabComponent('UsersForm', () => import('@/Pages/Users/Form.vue'))
  */
 export function registerTabComponent(name: string, loader: ComponentLoader): void {
-  if (componentRegistry.has(name)) {
-    console.warn(`Componente "${name}" já está registrado. Sobrescrevendo...`)
-  }
+  // Componente será sobrescrito se já existir
   componentRegistry.set(name, loader)
 }
 
@@ -93,7 +91,6 @@ export async function loadTabComponent(name: string): Promise<any> {
     const module = await loader()
     return module.default || module
   } catch (error) {
-    console.error(`Erro ao carregar componente "${name}":`, error)
     throw error
   }
 }
