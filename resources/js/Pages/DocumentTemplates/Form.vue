@@ -586,14 +586,56 @@ export default {
           console.log('DocumentTemplates/Form.vue: Criando novo modelo...')
           const { data } = await window.axios.post('/api/document-templates', formData)
           console.log('DocumentTemplates/Form.vue: Modelo criado com sucesso', data)
+          
+          this.toast.success('Modelo criado com sucesso!')
+          
           if (formData.is_default && data?.id) {
             await window.axios.post(`/api/document-templates/${data.id}/set-default`)
           }
+          
           if (this.tempKey && data?.id) {
+            // Limpa os dados da tab de criação
             formDataStore.clearFormData(this.tempKey)
-            tabsStore.convertToEdit(this.tempKey, data.id, formData.name, 'document-templates')
+            
+            // Encontra e remove a tab de criação
+            const oldTab = tabsStore.tabs.find(t => t.key === this.tempKey)
+            if (oldTab) {
+              // Remove a tab diretamente do array antes de criar a nova
+              const tabIndex = tabsStore.tabs.indexOf(oldTab)
+              if (tabIndex !== -1) {
+                tabsStore.tabs.splice(tabIndex, 1)
+              }
+            }
+            
+            // Cria a nova tab de edição
+            const newPath = `/document-templates/${data.id}/edit`
+            const newTab = {
+              key: data.id,
+              title: formData.name,
+              mode: 'edit',
+              componentName: 'DocumentTemplatesForm',
+              path: newPath,
+              props: { mode: 'edit', id: data.id },
+              context: 'document-templates'
+            }
+            
+            tabsStore.addTab(newTab)
+            
+            // Atualiza o tabKey do componente
             this.tabKey = data.id
-            this.$inertia.visit(`/document-templates/${data.id}/edit`)
+            
+            // Salva no storage para garantir persistência
+            const saveToStorage = (tabs, activeTabKey) => {
+              try {
+                localStorage.setItem('tabs-store', JSON.stringify({ tabs, activeTabKey }))
+              } catch (e) {
+                console.warn('Erro ao salvar tabs no storage:', e)
+              }
+            }
+            saveToStorage(tabsStore.tabs, data.id)
+            
+            // Navega para a nova tab
+            this.$inertia.visit(newPath)
           }
         } else {
           console.log('DocumentTemplates/Form.vue: Atualizando modelo existente...', this.id)
