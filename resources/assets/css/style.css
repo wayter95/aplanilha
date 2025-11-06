@@ -43116,6 +43116,7 @@ h6 {
 }
 @media (min-width: 992px) {
   .app-header {
+    padding-inline-start: 15rem;
   }
 }
 .header-icon-badge {
