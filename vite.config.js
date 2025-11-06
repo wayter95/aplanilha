@@ -13,7 +13,6 @@ export default defineConfig({
                 "resources/sass/app.scss",
                 "resources/css/app.css",
                 "resources/assets/css/style.css",
-                "resources/assets/css/icons.css",
                 "resources/js/app.js",
 
                 // Resources assets js file paths
@@ -147,6 +146,15 @@ export default defineConfig({
                     await fsExtra.copy(iconfontsSource, iconfontsDest, {
                         overwrite: true,
                         recursive: true,
+                    });
+                }
+                
+                // Copiar icons.css para iconfonts
+                const iconsSource = 'resources/assets/css/icons.css';
+                const iconsDest = join(destDir, 'iconfonts/icons.css');
+                if (await fsExtra.pathExists(iconsSource)) {
+                    await fsExtra.copy(iconsSource, iconsDest, {
+                        overwrite: true,
                     });
                 }
                 
