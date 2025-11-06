@@ -28,5 +28,8 @@
   </head>
   <body>
     @inertia
+    
+    <!-- Responsive overlay for mobile menu -->
+    <div id="responsive-overlay"></div>
   </body>
 </html>
