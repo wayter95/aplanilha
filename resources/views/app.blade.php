@@ -1,12 +1,32 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr" data-nav-layout="vertical" data-vertical-style="overlay" class="dark" data-header-styles="dark" data-menu-styles="dark" data-toggled="close">
+<html lang="en" dir="ltr" data-nav-layout="vertical" class="light" data-header-styles="light" data-menu-styles="dark">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    @vite('resources/js/app.js')
+    <!-- META DATA -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="Author" content="Spruko Technologies Private Limited">
+    <meta name="Description" content="Laravel Tailwind CSS Responsive Admin Web Dashboard Template">
+    <meta name="keywords" content="admin panel in laravel, tailwind, tailwind template admin, laravel admin panel, tailwind css dashboard, admin dashboard template, admin template, tailwind laravel, template dashboard, admin panel tailwind, tailwind css admin template, laravel tailwind template, laravel tailwind, tailwind admin dashboard">
+    
+    <!-- FAVICON -->
+    <link rel="icon" href="{{ asset('build/assets/images/brand-logos/favicon.ico') }}" type="image/x-icon">
+    
+    <!-- Vite Assets -->
+    @vite([
+      'resources/sass/app.scss',
+      'resources/assets/css/icons.css',
+      'resources/assets/css/style.css',
+      'resources/js/app.js',
+      'resources/assets/js/main.js',
+      'resources/assets/js/switch.js',
+      'resources/assets/js/defaultmenu.js',
+      'resources/assets/js/sticky.js',
+      'resources/assets/js/custom-switcher.js'
+    ])
+    
     @inertiaHead
   </head>
-  <body class="bg-bodybg text-defaulttextcolor">
+  <body>
     @inertia
   </body>
 </html>

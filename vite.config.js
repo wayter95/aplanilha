@@ -2,6 +2,9 @@ import tailwindcss from "@tailwindcss/vite";
 import vue from "@vitejs/plugin-vue";
 import laravel from "laravel-vite-plugin";
 import { defineConfig } from "vite";
+import path from "path";
+import fsExtra from 'fs-extra';
+import { join } from 'path';
 
 export default defineConfig({
     plugins: [
@@ -63,6 +66,9 @@ export default defineConfig({
                 "resources/assets/js/defaultmenu.js",
                 "resources/assets/js/draggable-cards",
                 "resources/assets/js/echarts.js",
+                "resources/assets/js/sticky.js",
+                "resources/assets/js/main.js",
+                "resources/assets/js/switch.js",
                 "resources/assets/js/ecommerce-dashboard.js",
                 "resources/assets/js/edit-products.js",
                 "resources/assets/js/error.js",
@@ -128,9 +134,42 @@ export default defineConfig({
             ],
             refresh: true,
         }),
+        {
+            // Plugin customizado para copiar assets estáticos
+            name: 'copy-static-assets',
+            writeBundle: async () => {
+                const destDir = 'public/build/assets';
+                
+                // Copiar iconfonts
+                const iconfontsSource = 'resources/assets/iconfonts';
+                const iconfontsDest = join(destDir, 'iconfonts');
+                if (await fsExtra.pathExists(iconfontsSource)) {
+                    await fsExtra.copy(iconfontsSource, iconfontsDest, {
+                        overwrite: true,
+                        recursive: true,
+                    });
+                }
+                
+                // Copiar imagens
+                const imagesSource = 'resources/assets/images';
+                const imagesDest = join(destDir, 'images');
+                if (await fsExtra.pathExists(imagesSource)) {
+                    await fsExtra.copy(imagesSource, imagesDest, {
+                        overwrite: true,
+                        recursive: true,
+                    });
+                }
+            },
+        },
         vue(),
         tailwindcss(),
     ],
+    resolve: {
+        alias: {
+            '@': path.resolve(__dirname, './resources/js'),
+        },
+    },
+    assetsInclude: ['**/*.woff', '**/*.woff2', '**/*.ttf', '**/*.eot', '**/*.svg'],
     server: {
         host: '0.0.0.0',
         port: 5173,

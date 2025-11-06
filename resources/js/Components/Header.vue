@@ -1,214 +1,193 @@
-// ...existing code...
 <template>
   <header class="app-header">
     <nav class="main-header !h-[3.75rem]" aria-label="Global">
-        <!-- Header side box that matches the sidebar width; contains clickable logo -->
-        <div class="header-sidebox" :style="{ width: boxWidth }">
-          <a href="/" class="header-sidebox-logo" aria-label="Home">
-            <img :src="currentLogo" alt="Aplanilha" class="header-sidebox-logo-img" />
-          </a>
-        </div>
-        <!-- Toggle button placed to the right of the header-sidebox -->
-        <button
-          class="header-sidebox-toggle"
-          @click="toggleSidebar"
-          :style="{ left: buttonLeft }"
-          :aria-label="(isSidebarCollapsed && !isSidebarHovered) ? 'Abrir sidebar' : 'Fechar sidebar'"
-        >
-          <i v-if="isSidebarCollapsed && !isSidebarHovered" class="bx bx-menu"></i>
-          <i v-else class="bx bx-x"></i>
-        </button>
-        <div class="header-content-left flex-shrink-0">
+      <div class="main-header-container ps-[0.725rem] pe-[1rem]">
+
+        <div class="header-content-left">
+          <!-- Start::header-element -->
           <div class="header-element">
             <div class="horizontal-logo">
-              <a href="/" class="header-logo">
-              </a>
+              <Link href="/" class="header-logo">
+                <img :src="desktopLogo" alt="logo" class="desktop-logo">
+                <img :src="toggleLogo" alt="logo" class="toggle-logo">
+                <img :src="desktopDark" alt="logo" class="desktop-dark">
+                <img :src="toggleDark" alt="logo" class="toggle-dark">
+                <img :src="desktopWhite" alt="logo" class="desktop-white">
+                <img :src="toggleWhite" alt="logo" class="toggle-white">
+              </Link>
             </div>
           </div>
+          <!-- End::header-element -->
+          
+          <!-- Start::header-element -->
+          <div class="header-element md:px-[0.325rem] !items-center">
+            <!-- Start::header-link -->
+            <a 
+              aria-label="Hide Sidebar"
+              class="sidemenu-toggle animated-arrow hor-toggle horizontal-navtoggle inline-flex items-center" 
+              href="javascript:void(0);"
+              @click="$emit('toggle-sidebar')"
+            >
+              <span></span>
+            </a>
+            <!-- End::header-link -->
+          </div>
+          <!-- End::header-element -->
         </div>
 
-        <!-- Tabs Container - Central area -->
-        <div 
-          v-if="showTabs" 
-          class="header-content-center flex items-center px-4 overflow-x-auto h-full transition-all duration-300"
-          :style="{ left: tabsLeft }"
-        >
-          <HeaderTabs @select="tabsStore.setActive" @close="tabsStore.closeTab" />
-        </div>
-
-        <!-- RIGHT: theme / fullscreen / user (horizontal, top-right) -->
         <div class="header-content-right">
-          <!-- Theme toggle -->
-          <div class="header-element header-theme-mode hidden sm:inline-flex !items-center !py-[1rem] md:!px-[0.65rem] px-2">
-            <button 
-              v-if="isLight"
-              @click="toggleTheme"
-              aria-label="Switch to dark theme"
-              class="header-link-icon p-2"
+          
+          <!-- Start::header-element -->
+          <div class="header-element header-theme-mode hidden !items-center sm:block !py-[1rem] md:!px-[0.65rem] px-2">
+            <a 
+              aria-label="Toggle theme to dark" 
+              class="hs-dark-mode-active:hidden flex hs-dark-mode group flex-shrink-0 justify-center items-center gap-2 rounded-full font-medium transition-all text-xs dark:bg-bgdark dark:hover:bg-black/20 dark:text-[#8c9097] dark:text-white/50 dark:hover:text-white dark:focus:ring-white/10 dark:focus:ring-offset-white/10" 
+              href="javascript:void(0);"
+              data-hs-theme-click-value="dark"
             >
-              <i class="bx bx-moon text-lg"></i>
-            </button>
-            <button 
-              v-if="isDark"
-              @click="toggleTheme"
-              aria-label="Switch to light theme"
-              class="header-link-icon p-2"
+              <i class="bx bx-moon header-link-icon"></i>
+            </a>
+            <a 
+              aria-label="Toggle theme to light" 
+              class="hs-dark-mode-active:flex hidden hs-dark-mode group flex-shrink-0 justify-center items-center gap-2 rounded-full font-medium text-defaulttextcolor transition-all text-xs dark:bg-bodybg dark:bg-bgdark dark:hover:bg-black/20 dark:text-[#8c9097] dark:text-white/50 dark:hover:text-white dark:focus:ring-white/10 dark:focus:ring-offset-white/10" 
+              href="javascript:void(0);"
+              data-hs-theme-click-value="light"
             >
-              <i class="bx bx-sun text-lg"></i>
-            </button>
+              <i class="bx bx-sun header-link-icon"></i>
+            </a>
           </div>
+          <!-- End::header-element -->
 
-          <!-- Fullscreen -->
+          <!-- Start::header-element -->
           <div class="header-element header-fullscreen py-[1rem] md:px-[0.65rem] px-2">
-            <button 
+            <a 
+              aria-label="Toggle full screen" 
+              class="inline-flex flex-shrink-0 justify-center items-center gap-2 !rounded-full font-medium dark:hover:bg-black/20 dark:text-[#8c9097] dark:text-white/50 dark:hover:text-white dark:focus:ring-white/10 dark:focus:ring-offset-white/10"
+              href="javascript:void(0);"
               @click="toggleFullscreen"
-              aria-label="Toggle fullscreen" 
-              class="header-link-icon p-2"
             >
-              <i v-if="!isFullscreen" class="bx bx-fullscreen text-lg"></i>
-              <i v-else class="bx bx-exit-fullscreen text-lg"></i>
-            </button>
+              <i class="bx bx-fullscreen full-screen-open header-link-icon"></i>
+              <i class="bx bx-exit-fullscreen full-screen-close header-link-icon hidden"></i>
+            </a>
           </div>
+          <!-- End::header-element -->
 
-          <!-- User Menu -->
-          <div class="header-element md:!px-[0.65rem] px-2 !items-center relative user-dropdown">
+          <!-- Start::header-element -->
+          <div class="header-element md:!px-[0.65rem] px-2 hs-dropdown !items-center ti-dropdown [--placement:bottom-left]">
             <button 
-              @click="toggleUserMenu"
+              id="dropdown-profile" 
               type="button"
-              class="header-link-icon inline-flex flex-shrink-0 justify-center items-center gap-3 !rounded-full font-medium p-2"
+              class="hs-dropdown-toggle ti-dropdown-toggle !gap-2 !p-0 flex-shrink-0 sm:me-2 me-0 !rounded-full !shadow-none text-xs align-middle !border-0 !shadow-transparent"
             >
-              <div class="user-avatar">
-                <img 
-                  v-if="userPhotoUrl" 
-                  :src="userPhotoUrl" 
-                  :alt="user?.name"
-                  class="w-full h-full object-cover"
-                  style="border-radius: 50%;"
-                />
-                <span v-else class="text-white font-semibold">
-                  {{ user?.name?.charAt(0)?.toUpperCase() || 'U' }}
+              <img 
+                v-if="userPhotoUrl"
+                class="inline-block rounded-full" 
+                :src="userPhotoUrl" 
+                width="32" 
+                height="32" 
+                :alt="user?.name"
+              >
+              <span 
+                v-else
+                class="inline-flex rounded-full items-center justify-center bg-primary text-white w-8 h-8"
+              >
+                {{ user?.name?.charAt(0)?.toUpperCase() || 'U' }}
+              </span>
+              <div class="md:block hidden dropdown-profile">
+                <p class="font-semibold mb-0 leading-none text-[#536485] dark:text-white text-[0.813rem]">
+                  {{ displayName }}
+                </p>
+                <span class="opacity-[0.7] font-normal text-[#536485] dark:text-white/70 block text-[0.6875rem]">
+                  {{ user?.email }}
                 </span>
               </div>
             </button>
-            
-            <div class="md:block hidden dropdown-profile">
-              <p class="font-semibold mb-0 leading-none text-[#536485] dark:text-white text-[0.813rem]">{{ getDisplayName(user?.name) }}</p>
-              <span class="opacity-[0.7] font-normal text-[#536485] dark:text-white/70 block text-[0.6875rem]">{{ user?.email || 'email@exemplo.com' }}</span>
-            </div>
-            
             <div 
-              v-show="showUserMenu"
-              class="absolute header-profile-dropdown !p-0 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-50 pt-0 overflow-hidden"
+              class="hs-dropdown-menu ti-dropdown-menu !-mt-3 border-0 !w-[11rem] !p-0 border-defaultborder hidden main-header-dropdown pt-0 overflow-hidden header-profile-dropdown dropdown-menu-end"
+              aria-labelledby="dropdown-profile"
             >
-              <ul class="text-defaulttextcolor font-medium dark:text-white/50">
+              <ul class="text-defaulttextcolor font-medium dark:text-[#8c9097] dark:text-white/50">
                 <li>
-                  <a class="w-full ti-dropdown-item !text-[0.8125rem] !gap-x-0 !p-[0.65rem] !inline-flex" href="/settings">
-                    <i class="bx bx-cog text-[1.125rem] me-2 opacity-[0.7]"></i>Configurações
-                  </a>
+                  <Link class="w-full ti-dropdown-item !text-[0.8125rem] !gap-x-0  !p-[0.65rem] !inline-flex" href="/settings">
+                    <i class="ti ti-user-circle text-[1.125rem] me-2 opacity-[0.7]"></i>Profile
+                  </Link>
                 </li>
                 <li>
-                  <button @click="logout" class="w-full ti-dropdown-item !text-[0.8125rem] !p-[0.65rem] !gap-x-0 !inline-flex text-left">
-                    <i class="bx bx-log-out text-[1.125rem] me-2 opacity-[0.7]"></i>Sair
-                  </button>
+                  <a class="w-full ti-dropdown-item !text-[0.8125rem] !p-[0.65rem] !gap-x-0 !inline-flex" href="javascript:void(0);" @click="logout">
+                    <i class="ti ti-logout text-[1.125rem] me-2 opacity-[0.7]"></i>Log Out
+                  </a>
                 </li>
               </ul>
             </div>
           </div>
+          <!-- End::header-element -->
 
         </div>
+
+      </div>
     </nav>
   </header>
 </template>
 
 <script setup>
-import HeaderTabs from '@/Components/Tabs/HeaderTabs.vue'
 import { usePhotoUrl } from '@/composables/usePhotoUrl'
-import { useTabsStore } from '@/stores/useTabsStore'
-import { router } from '@inertiajs/vue3'
-
-import { onMounted, onUnmounted, ref, watch, computed } from 'vue'
-import { storeToRefs } from 'pinia'
-import logoFull from '../../assets/images/brand-logos/logo-full.png'
-import logoIcon from '../../assets/images/brand-logos/logo-icon.png'
-
-const tabsStore = useTabsStore()
-const { tabs, activeTab } = storeToRefs(tabsStore)
-const showTabs = computed(() => tabs.value.length > 0)
+import { router, Link } from '@inertiajs/vue3'
+import { onMounted, ref, watch, computed } from 'vue'
+import desktopLogo from '../../assets/images/brand-logos/desktop-logo.png'
+import toggleLogo from '../../assets/images/brand-logos/toggle-logo.png'
+import desktopDark from '../../assets/images/brand-logos/desktop-dark.png'
+import toggleDark from '../../assets/images/brand-logos/toggle-dark.png'
+import desktopWhite from '../../assets/images/brand-logos/desktop-white.png'
+import toggleWhite from '../../assets/images/brand-logos/toggle-white.png'
 
 const props = defineProps({
-  user: {
-    type: Object,
-    default: () => ({})
-  },
-  isSidebarCollapsed: { type: Boolean, default: true },
-  isSidebarHovered: { type: Boolean, default: false }
+  user: { type: Object, default: () => ({}) }
 })
 
-const emit = defineEmits(['toggle-sidebar'])
+defineEmits(['toggle-sidebar'])
 
 const { getPhotoUrl } = usePhotoUrl()
-
-const showUserMenu = ref(false)
-const isFullscreen = ref(false)
 const userPhotoUrl = ref(null)
-const isDark = ref(false)
-const isLight = ref(false)
 
-// compute header box width to match sidebar (collapsed:72px, expanded:250px)
-const boxWidth = computed(() => {
-  const collapsedAndNotHovered = props.isSidebarCollapsed && !props.isSidebarHovered
-  return collapsedAndNotHovered ? '72px' : '250px'
+const displayName = computed(() => {
+  if (!props.user?.name) return 'Usuário'
+  const parts = props.user.name.trim().split(' ')
+  return parts.length <= 2 ? props.user.name : `${parts[0]} ${parts[1]}`
 })
-
-// choose logo image depending on sidebar state
-const currentLogo = computed(() => {
-  const collapsedAndNotHovered = props.isSidebarCollapsed && !props.isSidebarHovered
-  return collapsedAndNotHovered ? logoIcon : logoFull
-})
-
-// position for toggle button (8px gap to the right of box)
-const buttonLeft = computed(() => `calc(${boxWidth.value} + 8px)`)
-
-// position for tabs container (1rem to the right of toggle button)
-// toggle button width is 36px, so: buttonLeft + 36px + 1rem
-const tabsLeft = computed(() => {
-  const collapsedAndNotHovered = props.isSidebarCollapsed && !props.isSidebarHovered
-  const boxWidthPx = collapsedAndNotHovered ? 72 : 250
-  const buttonLeftPx = boxWidthPx + 8
-  const buttonWidthPx = 36
-  const gapPx = 16 // 1rem
-  return `${buttonLeftPx + buttonWidthPx + gapPx}px`
-})
-
-const toggleUserMenu = () => {
-  showUserMenu.value = !showUserMenu.value
-}
-
-const toggleSidebar = () => {
-  emit('toggle-sidebar')
-}
 
 const toggleFullscreen = () => {
+  const elem = document.documentElement
+  const open = document.querySelector(".full-screen-open")
+  const close = document.querySelector(".full-screen-close")
+  
   if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen?.()
+    // Enter fullscreen
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen()
+    } else if (elem.webkitRequestFullscreen) {
+      elem.webkitRequestFullscreen()
+    } else if (elem.msRequestFullscreen) {
+      elem.msRequestFullscreen()
+    }
+    // Update icons
+    close?.classList.add("block")
+    close?.classList.remove("hidden")
+    open?.classList.add("hidden")
   } else {
-    document.exitFullscreen?.()
+    // Exit fullscreen
+    if (document.exitFullscreen) {
+      document.exitFullscreen()
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen()
+    } else if (document.msExitFullscreen) {
+      document.msExitFullscreen()
+    }
+    // Update icons
+    close?.classList.remove("block")
+    close?.classList.add("hidden")
+    open?.classList.remove("hidden")
+    open?.classList.add("block")
   }
-  isFullscreen.value = !isFullscreen.value
-}
-
-const toggleTheme = () => {
-  const html = document.documentElement
-  isDark.value = !isDark.value
-  isLight.value = !isDark.value
-  
-  if (isDark.value) {
-    html.classList.add('dark')
-  } else {
-    html.classList.remove('dark')
-  }
-  
-  localStorage.setItem('app-theme', isDark.value ? 'dark' : 'light')
 }
 
 const logout = () => {
@@ -219,184 +198,17 @@ const loadUserPhoto = async () => {
   if (props.user?.photo_key) {
     const url = await getPhotoUrl(props.user.photo_key)
     if (url) userPhotoUrl.value = url
-  } else {
-    userPhotoUrl.value = null
   }
 }
 
-watch(() => props.user, () => {
-  loadUserPhoto()
-}, { immediate: true })
+watch(() => props.user, loadUserPhoto, { immediate: true })
 
 onMounted(() => {
-  const savedTheme = localStorage.getItem('app-theme')
-  if (savedTheme === 'dark') {
-    isDark.value = true
-    isLight.value = false
-    document.documentElement.classList.add('dark')
-  } else {
-    isDark.value = false
-    isLight.value = true
-  }
-
   loadUserPhoto()
-  document.addEventListener('click', handleClickOutside)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
-})
-
-const getDisplayName = (fullName) => {
-  if (!fullName) return 'Usuário'
-  const parts = fullName.trim().split(' ')
-  return parts.length <= 2 ? fullName : `${parts[0]} ${parts[1]}`
-}
-
-const handleClickOutside = (event) => {
-  if (!event.target.closest('.header-profile-dropdown') && !event.target.closest('.header-link-icon')) {
-    showUserMenu.value = false
+  
+  // Inicializar Preline após o componente montar
+  if (window.HSStaticMethods) {
+    window.HSStaticMethods.autoInit()
   }
-}
+})
 </script>
-
-<style scoped>
-/* Estilos do Header */
-.header-link-icon {
-  transition: all 0.15s ease-in-out;
-}
-
-.header-link-icon:hover {
-  transform: translateY(-1px);
-}
-
-/* Avatar do usuário */
-.user-avatar {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 50%;
-  background-color: var(--primary-color, #3b82f6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: 600;
-  font-size: 0.875rem;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.dropdown-profile {
-  margin-left: 0.75rem;
-}
-
-.user-dropdown {
-  display: flex;
-  align-items: center;
-}
-
-/* Header sidebox that mirrors the sidebar width */
-.header-sidebox {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  height: 3.75rem; /* same as header */
-  /* match Sidebar.vue background */
-  background: #111C43;
-  border-right: 1px solid rgba(255,255,255,0.05);
-  transition: width 0.25s ease;
-  z-index: 1001; /* below header content but above page background */
-}
-
-/* ensure same appearance in dark mode (when html has class 'dark') */
-.dark .header-sidebox {
-  background: #1A1C1E;
-  border-right-color: rgba(255,255,255,0.05);
-}
-
-.header-sidebox-logo { display: flex; align-items: center; justify-content: center; height: 100%; }
-.header-sidebox-logo-img { max-height: 36px; object-fit: contain; transition: opacity 0.15s ease, transform 0.15s ease; margin: 0 auto; }
-
-.main-header-container {
-  transition: padding-left 0.25s ease;
-}
-
-/* Toggle button placed right of the header-sidebox (absolute) */
-.header-sidebox-toggle{
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 36px;
-  height: 36px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  background: transparent;
-  border: none;
-  color: #9aa0a6;
-  z-index: 1004; /* above header-sidebox */
-  transition: left 0.25s ease, background 0.15s ease, color 0.15s ease;
-}
-.header-sidebox-toggle:hover{ background: rgba(255,255,255,0.04); color: #fff }
-
-/* Make the toggle icon match sidebar icons */
-.header-sidebox-toggle i {
-  /* Match collapsed sidebar icon size */
-  font-size: 1.5rem;
-  color: #d1d5db;
-}
-.header-sidebox-toggle:hover i {
-  color: #fff;
-}
-
-/* NEW: align right-side elements horizontally */
-.header-content-right {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-shrink: 0;
-  padding-right: 0.5rem;
-  position: absolute;
-  right: 0.75rem;
-  top: 0;
-  height: 3.75rem;
-  z-index: 1005;
-}
-
-/* ensure header elements share inline layout */
-.header-element {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* profile dropdown placement */
-.header-profile-dropdown {
-  right: 0;
-  top: calc(100% + 0.25rem);
-  min-width: 11rem;
-}
-
-/* keep dropdown visible above other elements */
-.header-profile-dropdown[style] {
-  z-index: 1006;
-}
-
-/* Ensure nav has relative positioning for absolute children */
-.main-header {
-  position: relative;
-}
-
-/* Tabs container positioning */
-.header-content-center {
-  position: absolute;
-  top: 0;
-  height: 3.75rem;
-  right: 12rem; /* Reserve space for right-side elements (theme, fullscreen, user menu) */
-  z-index: 1003;
-  align-items: center;
-}
-</style>
-// ...existing code...

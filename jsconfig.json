@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./resources/js/*"]
+    },
+    "jsx": "preserve",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "types": ["vite/client"],
+    "allowJs": true,
+    "checkJs": false
+  },
+  "include": [
+    "resources/js/**/*",
+    "resources/views/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "vendor",
+    "public"
+  ],
+  "vueCompilerOptions": {
+    "target": 3
+  }
+}

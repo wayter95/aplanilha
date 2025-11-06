@@ -1,10 +1,11 @@
 <template>
   <div class="page">
-    <!-- Header Superior -->
+    <!-- Loader -->
+    <Loader />
+    
+    <!-- Header -->
     <Header 
       :user="user" 
-      :is-sidebar-collapsed="isSidebarCollapsed"
-      :is-sidebar-hovered="isSidebarHovered"
       @toggle-sidebar="toggleSidebar"
     />
 
@@ -12,28 +13,10 @@
     <ToastContainer position="top-right" />
 
     <!-- Sidebar -->
-    <Sidebar
-      :is-collapsed="isSidebarCollapsed"
-      :is-hovered="isSidebarHovered"
-      :menu-items="menuItems"
-      @mouseenter="handleMouseEnter"
-      @mouseleave="handleMouseLeave"
-      @link-click="keepSidebarOpenOnNavigate"
-    />
-
-    <!-- toggle moved into Header to align with logo -->
+    <Sidebar :menu-items="menuItems" />
 
     <!-- Conteúdo principal -->
-    <div 
-      :class="[
-        'content', 
-        { 
-          'content-expanded': !isSidebarCollapsed || isSidebarHovered,
-          'content-collapsed': isSidebarCollapsed && !isSidebarHovered,
-          'content-with-tabs': hasTabs
-        }
-      ]"
-    >
+    <div class="content">
       <div class="main-content">
         <div class="container-fluid" :class="{ 'tab-active': shouldShowTabContent }">
           <!-- Header sempre visível, mesmo com tab ativa -->
@@ -58,6 +41,7 @@
 <script setup>
 import Header from '@/Components/Header.vue'
 import Sidebar from '@/Components/Sidebar.vue'
+import Loader from '@/Components/Loader.vue'
 import ToastContainer from '@/Components/ToastContainer.vue'
 import { ref, onMounted, watch, computed, shallowRef } from 'vue'
 import { useTabsStore } from '@/stores/useTabsStore'
@@ -101,116 +85,61 @@ const props = defineProps({
   user: Object
 })
 
-const isSidebarCollapsed = ref(true)
-const isSidebarHovered = ref(false)
-const isMobile = ref(false)
+const toggleSidebar = () => {
+  document.querySelector('html')?.classList.toggle('toggle-sidebar')
+}
 
 const menuItems = [
-  { label: 'Home', icon: 'bx bx-home', route: '/' },
+  { category: 'PRINCIPAL' },
+  { label: 'Dashboard', icon: 'bx bx-home', route: '/' },
+  { label: 'Analytics', icon: 'bx bx-line-chart', route: '/analytics' },
+  
+  { category: 'ADMINISTRAÇÃO' },
   {
-    label: 'Administração',
-    icon: 'bx bx-cog',
+    label: 'Usuários',
+    icon: 'bx bx-user',
     children: [
-      { label: 'Usuários', icon: 'bx bx-user', route: '/users' },
-      { label: 'Funções', icon: 'bx bx-shield', route: '/roles' },
-      { label: 'Modelos de Documentos', icon: 'bx bx-file', route: '/document-templates' }
+      { label: 'Lista de Usuários', route: '/users' },
+      { label: 'Novo Usuário', route: '/users/create' },
+      { label: 'Funções e Permissões', route: '/roles' }
     ]
   },
+  {
+    label: 'Configurações',
+    icon: 'bx bx-cog',
+    children: [
+      { label: 'Geral', route: '/settings/general' },
+      { label: 'Email', route: '/settings/email' },
+      { label: 'Integrações', route: '/settings/integrations' }
+    ]
+  },
+  
+  { category: 'DOCUMENTOS' },
+  { label: 'Meus Documentos', icon: 'bx bx-file', route: '/documents' },
+  {
+    label: 'Templates',
+    icon: 'bx bx-folder',
+    children: [
+      { label: 'Modelos de Documentos', route: '/document-templates' },
+      { label: 'Criar Template', route: '/document-templates/create' }
+    ]
+  },
+  
+  { category: 'RELATÓRIOS' },
   {
     label: 'Relatórios',
     icon: 'bx bx-bar-chart',
     children: [
-      { label: 'Financeiro', icon: 'bx bx-wallet', route: '/reports/financial' },
-      { label: 'Projetos', icon: 'bx bx-folder', route: '/reports/projects' }
+      { label: 'Dashboard Financeiro', route: '/reports/financial' },
+      { label: 'Projetos', route: '/reports/projects' },
+      { label: 'Vendas', route: '/reports/sales' },
+      { label: 'Usuários', route: '/reports/users' }
     ]
-  }
+  },
+  { label: 'Logs do Sistema', icon: 'bx bx-history', route: '/logs' }
 ]
-
-const toggleSidebar = () => {
-  isSidebarCollapsed.value = !isSidebarCollapsed.value
-  if (isSidebarCollapsed.value) isSidebarHovered.value = false
-}
-
-const handleMouseEnter = () => {
-  if (isSidebarCollapsed.value) isSidebarHovered.value = true
-}
-
-const handleMouseLeave = () => {
-  if (isSidebarCollapsed.value) isSidebarHovered.value = false
-}
-
-const collapseSidebar = () => {
-  isSidebarCollapsed.value = true
-}
-
-const keepSidebarOpenOnNavigate = () => {
-  if (isSidebarCollapsed.value) {
-    isSidebarCollapsed.value = false
-    isSidebarHovered.value = false
-    localStorage.setItem('sidebar-fixed-open', 'true')
-  }
-}
-
-onMounted(() => {
-    const checkMobile = () => {
-        isMobile.value = window.innerWidth <= 992
-    }
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-})
-
-
-watch(isSidebarCollapsed, (val) => {
-  localStorage.setItem('sidebar-fixed-open', (!val).toString())
-})
 </script>
+
 <style scoped>
-
-/* Layout da página */
-.page {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
-
-/* Conteúdo ajustável */
-.content {
-  transition: margin-left 0.3s ease;
-  padding-top: 4rem;
-}
-
-/* Conteúdo com tabs */
-.content-with-tabs {
-  padding-top: calc(4rem + 3rem);
-}
-
-/* Quando há tab ativa, ocultar padding e mostrar formulário em tela cheia */
-.tab-active {
-  padding: 0;
-}
-
-.tab-content-full {
-  height: calc(100vh - 4rem);
-  overflow-y: auto;
-  padding: 1.5rem;
-}
-
-/* Sidebar expandida */
-.content-expanded {
-  margin-left: 250px;
-}
-
-/* Sidebar colapsada */
-.content-collapsed {
-  margin-left: 72px;
-}
-
-/* Keep content shifted to make the sidebar visible even on small screens */
-/* Do not zero margin-left on mobile: the collapsed sidebar (72px) should remain visible */
-@media (max-width: 767px) {
-  .content-expanded { margin-left: 250px; }
-  .content-collapsed { margin-left: 72px; }
-}
-
-/* toggle button moved into Header.vue */
+/* Layout usando CSS do template Ynex */
 </style>
