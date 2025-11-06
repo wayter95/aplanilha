@@ -131,3 +131,41 @@
     background-color: rgb(43 46 49) !important;
   }
 }
+
+/* Mobile Layout Utilities - Only apply to actual mobile layout component */
+.mobile-layout {
+  box-sizing: border-box;
+}
+
+.mobile-layout * {
+  box-sizing: border-box;
+}
+
+/* Mobile specific adjustments - only for small screens */
+@media (max-width: 768px) {
+  /* Ensure mobile layout takes precedence when it's active */
+  .mobile-layout {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 9999 !important;
+  }
+}
+
+/* Extra small mobile adjustments */
+@media (max-width: 480px) {
+  .mobile-layout .mobile-logo-img {
+    height: 1.5rem !important;
+    width: 1.5rem !important;
+  }
+  
+  .mobile-layout .mobile-page-title {
+    font-size: 1.25rem !important;
+  }
+  
+  .mobile-layout .mobile-container {
+    padding: 0.75rem !important;
+  }
+}

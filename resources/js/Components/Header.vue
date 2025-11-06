@@ -262,12 +262,38 @@ const handleClickOutside = (event) => {
 
 <style scoped>
 /* Estilos do Header */
+/* Os botões do header (theme, fullscreen, etc.) usam as cores do tema do site
+   e têm comportamento responsivo ao modo claro/escuro. Variáveis CSS em
+   :root fornecem os valores (ex: --primary). */
 .header-link-icon {
   transition: all 0.15s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  padding: 0.5rem;
+  /* Default (light mode): use a cor primária do site */
+  color: rgb(var(--primary));
+  background: transparent;
 }
 
 .header-link-icon:hover {
   transform: translateY(-1px);
+  /* Leve destaque com versão translúcida da cor primária */
+  background: rgba(var(--primary), 0.08);
+  color: rgb(var(--primary));
+}
+
+/* Dark mode adjustments: quando o html possui a classe 'dark' */
+.dark .header-link-icon {
+  /* Em dark mode, usar tom claro para maior contraste */
+  color: rgba(255, 255, 255, 0.92);
+  background: transparent;
+}
+
+.dark .header-link-icon:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.98);
 }
 
 /* Avatar do usuário */
