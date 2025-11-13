@@ -15,7 +15,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->enum('type', ['customer', 'supplier', 'location'])->comment('customer, supplier, location')->default('customer');
             $table->uuid('responsible_user_id');
-            $table->uuid('subscribed_client_id');
+            $table->uuid('client_id');
             $table->string('name');
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
@@ -55,7 +55,7 @@ return new class extends Migration
             $table->softDeletes();
             $table->timestamps();
 
-            $table->foreign('subscribed_client_id', 'fk_subscribed_client_contacts')
+            $table->foreign('client_id', 'fk_client_contacts')
                 ->references('id')
                 ->on('subscribed_clients')
                 ->onDelete('restrict')
