@@ -55,9 +55,9 @@ return new class extends Migration
             $table->softDeletes();
             $table->timestamps();
 
-            $table->foreign('client_id', 'fk_client_contacts')
+            $table->foreign('client_id', 'fk_client_subscribe_contacts')
                 ->references('id')
-                ->on('subscribed_clients')
+                ->on('client_subscribes')
                 ->onDelete('restrict')
                 ->onUpdate('cascade');
 
