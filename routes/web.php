@@ -5,6 +5,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectTypeController;
 use App\Http\Controllers\DocumentTypeController;
 use App\Http\Controllers\DocumentTemplateController;
 use App\Http\Controllers\SettingsController;
@@ -73,6 +74,13 @@ Route::prefix('roles')->group(function () {
 */
 Route::prefix('projects')->group(function () {
     Route::get('/', [ProjectController::class, 'index'])->name('projects');
+    
+    // Project Types (sub-rotas dentro de projects)
+    Route::prefix('types')->group(function () {
+        Route::get('/', [ProjectTypeController::class, 'index'])->name('projects.types');
+        Route::get('/new/{tempId}', [ProjectTypeController::class, 'create'])->name('projects.types.new');
+        Route::get('/{id}/edit', [ProjectTypeController::class, 'edit'])->name('projects.types.edit');
+    });
 });
 
 /*

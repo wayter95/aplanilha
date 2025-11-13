@@ -102,6 +102,7 @@ export async function loadTabComponent(name: string): Promise<any> {
 // Registra componentes existentes automaticamente
 registerTabComponent('DocumentTemplatesForm', () => import('@/Pages/DocumentTemplates/Form.vue'))
 registerTabComponent('DocumentTypesForm', () => import('@/Pages/DocumentTypes/Form.vue'))
+registerTabComponent('ProjectTypes/Form', () => import('@/Pages/ProjectTypes/Form.vue'))
 
 // Para adicionar novos componentes, use:
 // registerTabComponent('UsersForm', () => import('@/Pages/Users/Form.vue'))

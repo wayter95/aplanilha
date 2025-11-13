@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\UserSettingsController;
 use App\Http\Controllers\Api\CompanySettingsController;
 use App\Http\Controllers\Api\DocumentGenerationController;
 use App\Http\Controllers\Api\DocumentTypeController;
+use App\Http\Controllers\Api\ProjectTypeController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -108,6 +109,21 @@ Route::prefix('api')->group(function () {
     Route::prefix('document-generation')->group(function () {
         Route::post('/{id}/preview-html', [DocumentGenerationController::class, 'previewHtml'])->name('api.document-generation.preview-html');
         Route::get('/{id}/export-pdf', [DocumentGenerationController::class, 'exportPdf'])->name('api.document-generation.export-pdf');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Project Types API Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('project-types')->group(function () {
+        Route::get('/', [ProjectTypeController::class, 'index'])->name('api.project-types.index');
+        Route::post('/', [ProjectTypeController::class, 'store'])->name('api.project-types.store');
+        Route::get('/{id}', [ProjectTypeController::class, 'show'])->name('api.project-types.show');
+        Route::put('/{id}', [ProjectTypeController::class, 'update'])->name('api.project-types.update');
+        Route::delete('/{id}', [ProjectTypeController::class, 'destroy'])->name('api.project-types.destroy');
+        Route::patch('/{id}/activate', [ProjectTypeController::class, 'activate'])->name('api.project-types.activate');
+        Route::patch('/{id}/block', [ProjectTypeController::class, 'block'])->name('api.project-types.block');
     });
 
     /*

@@ -66,6 +66,15 @@ export const useTabFormDataStore = defineStore('tabFormData', {
         },
         
         /**
+         * Remove dados do formulário de uma tab (alias para clearFormData)
+         * 
+         * @param tabKey - Chave única da tab
+         */
+        removeFormData(tabKey: string) {
+            this.clearFormData(tabKey)
+        },
+        
+        /**
          * Inicializa dados do formulário apenas se não existirem
          * 
          * @param tabKey - Chave única da tab

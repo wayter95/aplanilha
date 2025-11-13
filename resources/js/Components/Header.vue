@@ -34,7 +34,12 @@
           <!-- End::header-element -->
         </div>
 
-        <div class="header-content-right">
+        <!-- Tab Bar - Center -->
+        <div class="header-tabs hidden lg:flex items-center overflow-hidden px-2">
+          <TabBar :inline="true" />
+        </div>
+
+        <div class="header-content-right" style="margin-left: auto;">
           
           <!-- Start::header-element -->
           <div class="header-element header-theme-mode hidden !items-center sm:block !py-[1rem] md:!px-[0.65rem] px-2">
@@ -144,6 +149,7 @@
 </template>
 
 <script setup>
+import TabBar from '@/Components/TabBar.vue'
 import { usePhotoUrl } from '@/composables/usePhotoUrl'
 import { useSidebarToggle } from '@/composables/useSidebarToggle'
 import { useFullscreen } from '@/composables/useFullscreen'
@@ -198,3 +204,16 @@ onMounted(() => {
   initOverlayTriggers()
 })
 </script>
+
+<style scoped>
+.header-tabs {
+  max-width: 40%;
+  flex-shrink: 1;
+}
+
+@media (max-width: 1024px) {
+  .header-tabs {
+    display: none !important;
+  }
+}
+</style>

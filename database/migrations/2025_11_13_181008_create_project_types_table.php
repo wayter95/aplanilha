@@ -14,13 +14,13 @@ return new class extends Migration
         Schema::create('project_types', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('title');
-            $table->uuid('subscribed_client_id');
+            $table->uuid('client_id');
             $table->string('color')->default('#000000');
             $table->enum('status', ['a', 'b'])->comment('a = active, b = blocked')->default('b');
 
-            $table->foreign('subscribed_client_id', 'fk_subscribed_client_projects')
+            $table->foreign('client_id', 'fk_client_subscribed_projects')
                 ->references('id')
-                ->on('subscribed_clients')
+                ->on('client_subscribes')
                 ->onDelete('restrict')
                 ->onUpdate('cascade');
 

@@ -23,26 +23,26 @@
     </div>
 
     <div v-if="showFilters || showSearch" class="box-body !p-0 border-b border-defaultborder">
-      <div class="p-4">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div v-if="showSearch" class="md:col-span-2">
+      <div class="p-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <div v-if="showSearch" class="flex-1 min-w-[200px]">
             <div class="search-input-container">
               <input
                 v-model="searchQuery"
                 type="text"
                 :placeholder="searchPlaceholder"
-                class="ti-form-input pr-4"
+                class="ti-form-input !py-1.5 !text-sm"
                 @input="handleSearch"
               />
               <i class="ri-search-line search-icon text-textmuted dark:text-textmuted text-sm"></i>
             </div>
           </div>
           
-          <div v-for="filter in filters" :key="filter.key">
+          <div v-for="filter in filters" :key="filter.key" class="min-w-[160px]">
             <select
               v-model="filterValues[filter.key]"
               @change="handleFilter"
-              class="ti-form-select"
+              class="ti-form-select !py-1.5 !text-sm"
             >
               <option value="">{{ getFilterPlaceholder(filter) }}</option>
               <option v-for="option in filter.options" :key="option.value" :value="option.value">
@@ -204,10 +204,43 @@
               </tr>
               
               <tr v-if="filteredData.length === 0">
-                <td :colspan="columns.length + (hasActions ? 1 : 0) + (showSelectAll ? 1 : 0)" class="text-center py-8">
-                  <div class="text-textmuted dark:text-textmuted">
-                    <i class="ri-search-line text-4xl mb-2"></i>
-                    <p>Nenhum resultado encontrado</p>
+                <td :colspan="columns.length + (hasActions ? 1 : 0) + (showSelectAll ? 1 : 0)" class="text-center">
+                  <div class="py-16">
+                    <div class="flex flex-col items-center justify-center">
+                      <!-- Ícone -->
+                      <div class="mb-6">
+                        <div class="w-24 h-24 bg-light dark:bg-bodybg rounded-full flex items-center justify-center">
+                          <i class="ri-search-line text-5xl text-textmuted dark:text-textmuted opacity-50"></i>
+                        </div>
+                      </div>
+                      
+                      <!-- Título -->
+                      <h3 class="text-xl font-semibold text-defaulttextcolor dark:text-white mb-2">
+                        Nenhum resultado encontrado
+                      </h3>
+                      
+                      <!-- Descrição -->
+                      <p class="text-sm text-textmuted dark:text-textmuted max-w-md text-center mb-6">
+                        <span v-if="searchQuery || Object.values(filterValues).some(v => v)">
+                          Não encontramos registros que correspondam aos seus critérios de busca. Tente ajustar os filtros ou fazer uma nova busca.
+                        </span>
+                        <span v-else>
+                          Ainda não há registros cadastrados. Clique no botão acima para adicionar o primeiro item.
+                        </span>
+                      </p>
+                      
+                      <!-- Ações -->
+                      <div class="flex gap-2">
+                        <button 
+                          v-if="searchQuery || Object.values(filterValues).some(v => v)"
+                          @click="clearFilters"
+                          class="ti-btn ti-btn-outline-primary !py-2 !px-4"
+                        >
+                          <i class="ri-refresh-line mr-2"></i>
+                          Limpar filtros
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </td>
               </tr>
@@ -587,6 +620,16 @@ const toggleRowSelection = (rowId) => {
   
   selectAll.value = selectedItems.value.length === paginatedData.value.length
   emit('selection-change', selectedItems.value)
+}
+
+const clearFilters = () => {
+  searchQuery.value = ''
+  Object.keys(filterValues.value).forEach(key => {
+    filterValues.value[key] = ''
+  })
+  currentPage.value = 1
+  emit('search-change', '')
+  emit('filter-change', {})
 }
 
 const getStatusBadgeClass = (status) => {

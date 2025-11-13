@@ -108,7 +108,7 @@ onNavigate(() => {
 
 // Tab system
 const shouldShowTabContent = computed(() => {
-  if (!activeTab.value) return false
+  if (!activeTab.value || !activeTab.value.path) return false
   const currentPath = page.url.split('?')[0]
   const tabPath = activeTab.value.path.split('?')[0]
   return tabPath === currentPath
@@ -136,7 +136,14 @@ const menuItems = [
   { category: 'PRINCIPAL' },
   { label: 'Dashboard', icon: 'bx bx-home', route: '/' },
   { label: 'Analytics', icon: 'bx bx-line-chart', route: '/analytics' },
-  { label: 'Projetos', icon: 'bx bx-briefcase', route: '/projects' },
+  {
+    label: 'Projetos',
+    icon: 'bx bx-briefcase',
+    children: [
+      { label: 'Projetos', route: '/projects' },
+      { label: 'Tipos de Projetos', route: '/projects/types' }
+    ]
+  },
   
   { category: 'ADMINISTRAÇÃO' },
   {
