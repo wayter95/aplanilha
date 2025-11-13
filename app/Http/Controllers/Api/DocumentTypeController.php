@@ -12,6 +12,7 @@ class DocumentTypeController extends Controller
 {
     public function __construct(private DocumentTypeServiceInterface $service)
     {
+        $this->middleware('auth');
     }
 
     public function index(Request $request): JsonResponse

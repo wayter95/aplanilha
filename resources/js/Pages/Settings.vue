@@ -102,7 +102,7 @@
                   </div>
                   <div>
                     <p class="text-sm text-gray-500 dark:text-gray-400">Nome</p>
-                    <p class="font-medium text-gray-900 dark:text-white">{{ props.user?.name || 'Não informado' }}</p>
+                    <p class="font-medium text-gray-900 dark:text-white">{{ user?.name || 'Não informado' }}</p>
                   </div>
                 </div>
 
@@ -112,7 +112,7 @@
                   </div>
                   <div>
                     <p class="text-sm text-gray-500 dark:text-gray-400">Usuário</p>
-                    <p class="font-medium text-gray-900 dark:text-white">{{ props.user?.username || 'Não informado' }}</p>
+                    <p class="font-medium text-gray-900 dark:text-white">{{ user?.username || 'Não informado' }}</p>
                   </div>
                 </div>
 
@@ -122,7 +122,7 @@
                   </div>
                   <div>
                     <p class="text-sm text-gray-500 dark:text-gray-400">E-mail</p>
-                    <p class="font-medium text-gray-900 dark:text-white">{{ props.user?.email || 'Não informado' }}</p>
+                    <p class="font-medium text-gray-900 dark:text-white">{{ user?.email || 'Não informado' }}</p>
                   </div>
                 </div>
 
@@ -132,7 +132,7 @@
                   </div>
                   <div>
                     <p class="text-sm text-gray-500 dark:text-gray-400">Telefone</p>
-                    <p class="font-medium text-gray-900 dark:text-white">{{ props.user?.phone || 'Não informado' }}</p>
+                    <p class="font-medium text-gray-900 dark:text-white">{{ user?.phone || 'Não informado' }}</p>
                   </div>
                 </div>
               </div>
@@ -164,7 +164,7 @@
                   </div>
                   <div>
                     <p class="text-sm text-gray-500 dark:text-gray-400">E-mail</p>
-                    <p class="font-medium text-gray-900 dark:text-white">{{ props.user?.email || 'Não informado' }}</p>
+                    <p class="font-medium text-gray-900 dark:text-white">{{ user?.email || 'Não informado' }}</p>
                   </div>
                 </div>
 
@@ -174,7 +174,7 @@
                   </div>
                   <div>
                     <p class="text-sm text-gray-500 dark:text-gray-400">Usuário</p>
-                    <p class="font-medium text-gray-900 dark:text-white">{{ props.user?.username || 'Não informado' }}</p>
+                    <p class="font-medium text-gray-900 dark:text-white">{{ user?.username || 'Não informado' }}</p>
                   </div>
                 </div>
 
@@ -273,7 +273,7 @@
   <!-- Modais -->
   <UpdatePersonalDataModal 
     :show="showPersonalDataModal" 
-    :user="props.user"
+    :user="user"
     @close="showPersonalDataModal = false"
     @personal-data-updated="handlePersonalDataUpdated"
   />
@@ -308,18 +308,15 @@ const { getPhotoUrl } = usePhotoUrl()
 const page = usePage()
 
 const props = defineProps({
-  user: {
-    type: Object,
-    default: () => ({})
-  },
   company: {
     type: Object,
     default: () => ({})
   }
 })
 
+const user = computed(() => page.props.auth.user)
 const activeSection = ref('personal')
-const userPhoto = ref(props.user?.photo_key || null)
+const userPhoto = ref(user.value?.photo_key || null)
 const currentPhotoUrl = ref(null)
 
 // Estados dos modais
@@ -360,7 +357,7 @@ const company = ref({
 const handlePhotoUploadSuccess = async (data) => {
   if (data) {
     try {
-      const response = await fetch(`/api/users/${props.user.id}/photo`, {
+      const response = await fetch(`/api/users/${user.value.id}/photo`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

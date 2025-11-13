@@ -17,6 +17,7 @@ class RoleController extends Controller
 
     public function __construct(RoleServiceInterface $roleService)
     {
+        $this->middleware('auth');
         $this->roleService = $roleService;
     }
     public function index(Request $request): Response|RedirectResponse
@@ -41,14 +42,12 @@ class RoleController extends Controller
             return Inertia::render('Roles', [
                 'roles' => $roles,
                 'filters' => $filters,
-                'user' => Auth::user(),
                 'availablePermissions' => $availablePermissions,
             ]);
         } catch (Exception $e) {
             return Inertia::render('Roles', [
                 'roles' => [],
                 'filters' => [],
-                'user' => Auth::user(),
                 'availablePermissions' => [],
                 'error' => 'Erro ao carregar funções: ' . $e->getMessage(),
             ]);

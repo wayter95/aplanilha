@@ -17,6 +17,7 @@ class UserController extends Controller
 
     public function __construct(UserServiceInterface $userService)
     {
+        $this->middleware('auth');
         $this->userService = $userService;
     }
 
@@ -43,14 +44,12 @@ class UserController extends Controller
             return Inertia::render('Users', [
                 'users' => $users,
                 'filters' => $filters,
-                'user' => Auth::user(),
                 'availableRoles' => $availableRoles,
             ]);
         } catch (Exception $e) {
             return Inertia::render('Users', [
-                'users' => [],
+                'users' => ['data' => [], 'current_page' => 1, 'total' => 0],
                 'filters' => [],
-                'user' => Auth::user(),
                 'availableRoles' => [],
                 'error' => 'Erro ao carregar usuários: ' . $e->getMessage(),
             ]);

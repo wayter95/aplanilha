@@ -14,6 +14,7 @@ class DocumentTemplateController extends Controller
         private DocumentTemplateServiceInterface $service,
         private DocumentTypeServiceInterface $typeService
     ) {
+        $this->middleware('auth');
     }
 
     public function index(Request $request): JsonResponse

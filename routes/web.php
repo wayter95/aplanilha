@@ -1,157 +1,114 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\Api\DocumentTemplateController;
-use App\Http\Controllers\Api\UserSettingsController;
-use App\Http\Controllers\Api\CompanySettingsController;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\DocumentTypeController;
+use App\Http\Controllers\DocumentTemplateController;
+use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
-Route::middleware(['auth'])->group(function () {
-    Route::get('/', [HomeController::class, 'index'])->name('home');
-    
-    Route::get('users', [UserController::class, 'index'])->name('users');
-    
-    Route::get('roles', [RoleController::class, 'index'])->name('roles');
-    
-    Route::get('settings', function () {
-        $user = Auth::user();
-        $company = null;
-        
-        if ($user && $user->client_id) {
-            $company = \App\Models\ClientSubscribe::find($user->client_id);
-        }
-        
-        return Inertia::render('Settings', [
-            'user' => $user,
-            'company' => $company
-        ]);
-    })->name('settings');
-    Route::get('document-templates', function () {
-        return Inertia::render('DocumentTemplates/Index', [
-            'user' => Auth::user(),
-        ]);
-    })->name('document-templates');
-    
-    Route::get('document-templates/new/{tempId}', function ($tempId) {
-        return Inertia::render('DocumentTemplates/Form', [
-            'id' => null,
-            'tempKey' => $tempId,
-            'user' => Auth::user(),
-        ]);
-    })->name('document-templates.new');
-    
-    Route::get('document-templates/{id}/edit', function ($id) {
-        return Inertia::render('DocumentTemplates/Form', [
-            'id' => $id,
-            'tempKey' => null,
-            'user' => Auth::user(),
-        ]);
-    })->name('document-templates.edit');
-    
-    Route::get('document-types', [\App\Http\Controllers\DocumentTypeController::class, 'index'])->name('document-types');
-    
-    Route::get('document-types/new/{tempId}', function ($tempId) {
-        return Inertia::render('DocumentTypes/Form', [
-            'id' => null,
-            'tempKey' => $tempId,
-            'user' => Auth::user(),
-        ]);
-    })->name('document-types.new');
-    
-    Route::get('document-types/{id}/edit', function ($id) {
-        return Inertia::render('DocumentTypes/Form', [
-            'id' => $id,
-            'tempKey' => null,
-            'user' => Auth::user(),
-        ]);
-    })->name('document-types.edit');
-    
-    Route::prefix('api/users')->group(function () {
-        Route::post('/', [UserController::class, 'store'])->name('users.store');
-        Route::get('/{id}', [UserController::class, 'show'])->name('users.show');
-        Route::put('/{id}', [UserController::class, 'update'])->name('users.update');
-        Route::delete('/{id}', [UserController::class, 'destroy'])->name('users.destroy');
-        Route::patch('/{id}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
-        Route::get('/statistics', [UserController::class, 'statistics'])->name('users.statistics');
-        Route::get('/roles', [UserController::class, 'roles'])->name('users.roles');
-        Route::get('/export/csv', [UserController::class, 'exportCsv'])->name('users.export.csv');
-    });
-    
-    Route::prefix('api/users')->group(function () {
-        Route::patch('/{id}/photo', [UserController::class, 'updatePhoto'])->name('users.update-photo');
-    });
-    
-    Route::prefix('api/roles')->group(function () {
-        Route::post('/', [RoleController::class, 'store'])->name('roles.store');
-        Route::get('/{id}', [RoleController::class, 'show'])->name('roles.show');
-        Route::put('/{id}', [RoleController::class, 'update'])->name('roles.update');
-        Route::delete('/{id}', [RoleController::class, 'destroy'])->name('roles.destroy');
-        Route::patch('/{id}/toggle-status', [RoleController::class, 'toggleStatus'])->name('roles.toggle-status');
-        Route::get('/statistics', [RoleController::class, 'statistics'])->name('roles.statistics');
-        Route::get('/permissions', [RoleController::class, 'permissions'])->name('roles.permissions');
-        Route::get('/export/csv', [RoleController::class, 'exportCsv'])->name('roles.export.csv');
-    });
-    
-    Route::prefix('api/files')->group(function () {
-        Route::post('/presigned-url', [FileUploadController::class, 'generatePresignedUrl'])->name('files.presigned-url');
-        Route::post('/temporary-url', [FileUploadController::class, 'generateTemporaryUrl'])->name('files.temporary-url');
-        Route::get('/signed-url', [FileUploadController::class, 'getSignedUrl'])->name('uploads.signed-url');
-        Route::delete('/delete', [FileUploadController::class, 'deleteFile'])->name('files.delete');
-    });
-    
-    Route::prefix('api/document-types')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\DocumentTypeController::class, 'index'])->name('document-types.index');
-        Route::get('/codes', [\App\Http\Controllers\Api\DocumentTypeController::class, 'codes'])->name('document-types.codes');
-        Route::post('/', [\App\Http\Controllers\Api\DocumentTypeController::class, 'store'])->name('document-types.store');
-        Route::get('/{id}', [\App\Http\Controllers\Api\DocumentTypeController::class, 'show'])->name('document-types.show');
-        Route::put('/{id}', [\App\Http\Controllers\Api\DocumentTypeController::class, 'update'])->name('document-types.update');
-        Route::delete('/{id}', [\App\Http\Controllers\Api\DocumentTypeController::class, 'destroy'])->name('document-types.destroy');
-    });
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| contains the "web" middleware group.
+|
+*/
 
-    Route::prefix('api/document-templates')->group(function () {
-        Route::get('/types', [DocumentTemplateController::class, 'types'])->name('document-templates.types');
-        Route::get('/', [DocumentTemplateController::class, 'index'])->name('document-templates.index');
-        Route::post('/', [DocumentTemplateController::class, 'store'])->name('document-templates.store');
-        Route::get('/placeholders', [DocumentTemplateController::class, 'placeholders'])->name('document-templates.placeholders');
-        Route::get('/{id}', [DocumentTemplateController::class, 'show'])->name('document-templates.show');
-        Route::put('/{id}', [DocumentTemplateController::class, 'update'])->name('document-templates.update');
-        Route::delete('/{id}', [DocumentTemplateController::class, 'destroy'])->name('document-templates.destroy');
-        Route::post('/{id}/set-default', [DocumentTemplateController::class, 'setDefault'])->name('document-templates.set-default');
-    });
-
-    Route::prefix('api/document-generation')->group(function () {
-        Route::post('/{id}/preview-html', [\App\Http\Controllers\Api\DocumentGenerationController::class, 'previewHtml'])->name('document-generation.preview-html');
-        Route::get('/{id}/export-pdf', [\App\Http\Controllers\Api\DocumentGenerationController::class, 'exportPdf'])->name('document-generation.export-pdf');
-    });
-    
-    // Rotas para configurações do usuário
-    Route::prefix('api/user')->group(function () {
-        Route::put('/personal-data', [UserSettingsController::class, 'updatePersonalData'])->name('user.personal-data');
-        Route::put('/password', [UserSettingsController::class, 'updatePassword'])->name('user.password');
-    });
-    
-    // Rotas para dados da empresa
-    Route::prefix('api/company')->group(function () {
-        Route::put('/data', [CompanySettingsController::class, 'updateData'])->name('company.data');
-    });
-    
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-});
-
+/*
+|--------------------------------------------------------------------------
+| Guest Routes (Authentication)
+|--------------------------------------------------------------------------
+*/
 Route::middleware('guest')->group(function () {
+    // Login Routes
     Route::get('/sign-in', [AuthController::class, 'showLogin'])->name('signin');
     Route::get('/login', fn() => redirect()->route('signin'))->name('login');
     Route::post('/login', [AuthController::class, 'login']);
     
+    // Password Reset Routes
     Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
     Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
-    
     Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Authenticated Routes - Dashboard
+|--------------------------------------------------------------------------
+*/
+Route::group([], function () {
+    Route::get('/', [HomeController::class, 'index'])->name('home');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Authenticated Routes - User Management
+|--------------------------------------------------------------------------
+*/
+Route::prefix('users')->group(function () {
+    Route::get('/', [UserController::class, 'index'])->name('users');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Authenticated Routes - Role Management
+|--------------------------------------------------------------------------
+*/
+Route::prefix('roles')->group(function () {
+    Route::get('/', [RoleController::class, 'index'])->name('roles');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Authenticated Routes - Projects
+|--------------------------------------------------------------------------
+*/
+Route::prefix('projects')->group(function () {
+    Route::get('/', [ProjectController::class, 'index'])->name('projects');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Authenticated Routes - Settings
+|--------------------------------------------------------------------------
+*/
+Route::prefix('settings')->group(function () {
+    Route::get('/', [SettingsController::class, 'index'])->name('settings');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Authenticated Routes - Document Templates
+|--------------------------------------------------------------------------
+*/
+Route::prefix('document-templates')->group(function () {
+    Route::get('/', [DocumentTemplateController::class, 'index'])->name('document-templates');
+    Route::get('/new/{tempId}', [DocumentTemplateController::class, 'create'])->name('document-templates.new');
+    Route::get('/{id}/edit', [DocumentTemplateController::class, 'edit'])->name('document-templates.edit');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Authenticated Routes - Document Types
+|--------------------------------------------------------------------------
+*/
+Route::prefix('document-types')->group(function () {
+    Route::get('/', [DocumentTypeController::class, 'index'])->name('document-types');
+    Route::get('/new/{tempId}', [DocumentTypeController::class, 'create'])->name('document-types.new');
+    Route::get('/{id}/edit', [DocumentTypeController::class, 'edit'])->name('document-types.edit');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Logout Route
+|--------------------------------------------------------------------------
+*/
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

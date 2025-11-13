@@ -5,7 +5,6 @@
     
     <!-- Header -->
     <Header 
-      :user="user" 
       @toggle-sidebar="toggleSidebar"
     />
 
@@ -61,10 +60,9 @@ const { activeTab, tabs } = storeToRefs(tabsStore)
 const hasTabs = computed(() => tabs.value.length > 0)
 
 // Props
-const props = defineProps({
+defineProps({
   title: String,
   description: String,
-  user: Object
 })
 
 // Sidebar

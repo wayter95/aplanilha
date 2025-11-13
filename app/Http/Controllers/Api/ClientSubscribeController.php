@@ -11,7 +11,9 @@ class ClientSubscribeController extends Controller
 {
     public function __construct(
         private ClientSubscribeServiceInterface $clientService
-    ) {}
+    ) {
+        $this->middleware('auth');
+    }
 
     public function index(): JsonResponse
     {

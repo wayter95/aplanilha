@@ -11,7 +11,9 @@ class UserController extends Controller
 {
     public function __construct(
         private UserServiceInterface $userService
-    ) {}
+    ) {
+        $this->middleware('auth');
+    }
 
     public function index(Request $request): JsonResponse
     {

@@ -15,12 +15,11 @@ class ProjectController extends Controller
 {
     public function __construct(private DocumentTypeServiceInterface $service)
     {
+        $this->middleware('auth');
     }
 
     public function index(Request $request)
     {
-        return Inertia::render('Projects/Index', [
-            'user' => Auth::user(),
-        ]);
+        return Inertia::render('Projects/Index');
     }
 }

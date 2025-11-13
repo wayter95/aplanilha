@@ -13,6 +13,7 @@ class DocumentGenerationController extends Controller
 {
     public function __construct(private DocumentRenderServiceInterface $renderer, private DocumentPdfServiceInterface $pdf)
     {
+        $this->middleware('auth');
     }
 
     public function previewHtml(Request $request, string $id): JsonResponse

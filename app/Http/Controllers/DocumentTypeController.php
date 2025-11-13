@@ -15,6 +15,7 @@ class DocumentTypeController extends Controller
 {
     public function __construct(private DocumentTypeServiceInterface $service)
     {
+        $this->middleware('auth');
     }
 
     public function index(Request $request): Response|RedirectResponse
@@ -38,13 +39,11 @@ class DocumentTypeController extends Controller
             return Inertia::render('DocumentTypes/Index', [
                 'types' => $types,
                 'filters' => $filters,
-                'user' => Auth::user(),
             ]);
         } catch (Exception $e) {
             return Inertia::render('DocumentTypes/Index', [
                 'types' => ['data' => [], 'current_page' => 1, 'total' => 0],
                 'filters' => [],
-                'user' => Auth::user(),
                 'error' => 'Erro ao carregar tipos: ' . $e->getMessage(),
             ]);
         }
@@ -88,6 +87,22 @@ class DocumentTypeController extends Controller
                 'message' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function create(string $tempId): Response
+    {
+        return Inertia::render('DocumentTypes/Form', [
+            'id' => null,
+            'tempKey' => $tempId,
+        ]);
+    }
+
+    public function edit(string $id): Response
+    {
+        return Inertia::render('DocumentTypes/Form', [
+            'id' => $id,
+            'tempKey' => null,
+        ]);
     }
 }
 
