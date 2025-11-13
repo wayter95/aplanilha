@@ -11,6 +11,8 @@ export type Tab = {
     props?: Record<string, any>
     context?: string
     metadata?: Record<string, any>
+    isModified?: boolean  // Indica se a tab possui alterações não salvas
+    color?: string        // Cor do template (para a bolinha)
 }
 
 export type TemplateTab = Tab
@@ -109,6 +111,42 @@ export const useTabsMemoryStore = defineStore('tabsMemory', {
             }
             
             return true
+        },
+        
+        /**
+         * Marca uma tab como modificada
+         * 
+         * @param tabKey - Chave da tab
+         */
+        markAsModified(tabKey: string) {
+            const tab = this.tabs.find(t => t.key === tabKey)
+            if (tab) {
+                tab.isModified = true
+            }
+        },
+        
+        /**
+         * Marca uma tab como não modificada (limpa)
+         * Usado após salvar com sucesso
+         * 
+         * @param tabKey - Chave da tab
+         */
+        markAsClean(tabKey: string) {
+            const tab = this.tabs.find(t => t.key === tabKey)
+            if (tab) {
+                tab.isModified = false
+            }
+        },
+        
+        /**
+         * Verifica se uma tab possui modificações
+         * 
+         * @param tabKey - Chave da tab
+         * @returns true se modificada
+         */
+        isTabModified(tabKey: string): boolean {
+            const tab = this.tabs.find(t => t.key === tabKey)
+            return tab?.isModified || false
         },
         
         /**

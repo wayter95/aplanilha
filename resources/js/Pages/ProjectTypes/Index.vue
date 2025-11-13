@@ -64,6 +64,7 @@ import { useTabsMemoryStore } from '@/stores/useTabsMemoryStore'
 import { useToast } from '@/composables/useToast'
 import { router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
+import projectTypesService from '@/api/projectTypesService'
 
 const props = defineProps({
   types: {
@@ -167,38 +168,31 @@ const openCreateTab = () => {
     componentName: 'ProjectTypes/Form',
     path: `/projects/types/new/${tempId}`,
     mode: 'create',
-    props: { tempKey: tempId }
+    props: { tempKey: tempId },
+    color: '#6366f1', // Cor padrão azul
+    isModified: false
   })
   router.visit(`/projects/types/new/${tempId}`)
 }
 
 const openEditTab = (id) => {
+  const type = props.types.data.find(t => t.id === id)
   tabsStore.addTab({
     key: id,
-    title: 'Editar Tipo de Projeto',
+    title: type?.title || 'Editar Tipo de Projeto',
     componentName: 'ProjectTypes/Form',
     path: `/projects/types/${id}/edit`,
     mode: 'edit',
-    props: { id }
+    props: { id },
+    color: type?.color || '#6366f1',
+    isModified: false
   })
   router.visit(`/projects/types/${id}/edit`)
 }
 
 const toggleStatus = async (type) => {
   try {
-    const endpoint = type.status === 'a' 
-      ? `/api/project-types/${type.id}/block` 
-      : `/api/project-types/${type.id}/activate`
-    
-    const response = await fetch(endpoint, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-      }
-    })
-
-    const data = await response.json()
+    const data = await projectTypesService.toggleStatus(type.id, type.status)
     
     if (data.success) {
       toast.success(data.message)

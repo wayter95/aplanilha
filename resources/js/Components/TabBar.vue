@@ -13,11 +13,26 @@
       >
         <span class="tab-title">{{ tab.title }}</span>
         <button
-          @click.stop="closeTab(tab)"
+          @click.stop="handleCloseTab(tab)"
           class="tab-close"
           :title="`Fechar ${tab.title}`"
+          @mouseenter="hoveredTabKey = tab.key"
+          @mouseleave="hoveredTabKey = null"
         >
-          <i class="ri-close-line"></i>
+          <!-- Se tem modificações: mostra bolinha (vira X no hover) -->
+          <template v-if="tab.isModified">
+            <i 
+              v-if="hoveredTabKey === tab.key" 
+              class="ri-close-line"
+            ></i>
+            <span 
+              v-else 
+              class="tab-dot"
+              :style="{ backgroundColor: tab.color || '#6366f1' }"
+            ></span>
+          </template>
+          <!-- Sem modificações: mostra X direto -->
+          <i v-else class="ri-close-line"></i>
         </button>
       </div>
     </div>
@@ -64,12 +79,22 @@
       </a>
     </div>
   </div>
+  
+  <!-- Modal de confirmação -->
+  <ConfirmCloseTabModal
+    :show="showConfirmModal"
+    :tab-title="tabToClose?.title"
+    @confirm="confirmCloseTab"
+    @cancel="cancelCloseTab"
+  />
 </template>
 
 <script setup>
 import { useTabsMemoryStore } from '@/stores/useTabsMemoryStore'
 import { storeToRefs } from 'pinia'
 import { router } from '@inertiajs/vue3'
+import { ref } from 'vue'
+import ConfirmCloseTabModal from '@/Components/ConfirmCloseTabModal.vue'
 
 defineProps({
   inline: {
@@ -85,6 +110,10 @@ defineProps({
 const tabsStore = useTabsMemoryStore()
 const { tabs, activeTab } = storeToRefs(tabsStore)
 
+const hoveredTabKey = ref(null)
+const showConfirmModal = ref(false)
+const tabToClose = ref(null)
+
 const isActive = (tab) => {
   return activeTab.value?.key === tab.key
 }
@@ -92,6 +121,30 @@ const isActive = (tab) => {
 const activateTab = (tab) => {
   tabsStore.setActive(tab)
   router.visit(tab.path)
+}
+
+const handleCloseTab = (tab) => {
+  // Se a tab está modificada, mostra o modal de confirmação
+  if (tab.isModified) {
+    tabToClose.value = tab
+    showConfirmModal.value = true
+  } else {
+    // Fecha diretamente se não houver modificações
+    closeTab(tab)
+  }
+}
+
+const confirmCloseTab = () => {
+  if (tabToClose.value) {
+    closeTab(tabToClose.value)
+  }
+  showConfirmModal.value = false
+  tabToClose.value = null
+}
+
+const cancelCloseTab = () => {
+  showConfirmModal.value = false
+  tabToClose.value = null
 }
 
 const closeTab = async (tab) => {
@@ -235,32 +288,54 @@ const closeTab = async (tab) => {
   align-items: center;
   justify-content: center;
   border-radius: 0.25rem;
-  color: rgba(var(--text-muted), 0.6);
   transition: all 0.2s ease;
-  opacity: 0;
+  opacity: 1;
   flex-shrink: 0;
   font-size: 0.875rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: rgba(var(--text-muted), 0.6);
 }
 
 .tab-item:hover .tab-close {
   opacity: 1;
-  color: rgba(var(--default-text-color), 0.7);
 }
 
 .tab-active .tab-close {
-  opacity: 0.8;
-  color: rgb(var(--primary-rgb));
+  opacity: 1;
 }
 
 .tab-close:hover {
-  background: rgba(220, 38, 38, 0.15);
-  opacity: 1 !important;
+  background: rgba(220, 38, 38, 0.12);
   color: rgb(220, 38, 38);
-  transform: scale(1.1);
+  transform: scale(1.15);
 }
 
 :root[data-theme-mode="dark"] .tab-close:hover {
-  background: rgba(239, 68, 68, 0.2);
+  background: rgba(239, 68, 68, 0.18);
   color: rgb(239, 68, 68);
+}
+
+/* Bolinha colorida */
+.tab-dot {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.tab-item:hover .tab-dot {
+  transform: scale(1.2);
+}
+
+.tab-active .tab-dot {
+  transform: scale(1.1);
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
+}
+
+:root[data-theme-mode="dark"] .tab-active .tab-dot {
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
 }
 </style>

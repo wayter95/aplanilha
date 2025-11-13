@@ -125,6 +125,7 @@ import { useTabFormMemoryStore } from '@/stores/useTabFormMemoryStore'
 import { useTabsMemoryStore } from '@/stores/useTabsMemoryStore'
 import { Form as VeeForm } from 'vee-validate'
 import { useToast } from '@/composables/useToast'
+import projectTypesService from '@/api/projectTypesService'
 
 export default {
   components: { AppLayout, Form: VeeForm, Input, Switch },
@@ -176,6 +177,8 @@ export default {
     form: {
       handler(newVal) {
         if (this.isInitializing) return
+        
+        // Salva dados em memória
         const formDataStore = useTabFormMemoryStore()
         const tabKey = this.tabKey || this.tempKey || this.id
         if (tabKey) {
@@ -186,6 +189,10 @@ export default {
           }
           console.log('[Form] Salvando dados em memória:', tabKey, validFields)
           formDataStore.setFormData(tabKey, validFields)
+          
+          // Marca a tab como modificada
+          const tabsStore = useTabsMemoryStore()
+          tabsStore.markAsModified(tabKey)
         }
       },
       deep: true,
@@ -207,8 +214,7 @@ export default {
   methods: {
     async loadData() {
       try {
-        const response = await fetch(`/api/project-types/${this.id}`)
-        const data = await response.json()
+        const data = await projectTypesService.get(this.id)
         
         if (data.success && data.data) {
           this.form.title = data.data.title
@@ -231,25 +237,16 @@ export default {
       const tabsStore = useTabsMemoryStore()
       
       try {
-        const url = this.mode === 'edit' 
-          ? `/api/project-types/${this.id}`
-          : '/api/project-types'
-        
-        const method = this.mode === 'edit' ? 'PUT' : 'POST'
-        
-        const response = await fetch(url, {
-          method,
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-          },
-          body: JSON.stringify(this.form)
-        })
-
-        const data = await response.json()
+        // Usa o service ao invés de fetch direto
+        const data = this.mode === 'edit'
+          ? await projectTypesService.update(this.id, this.form)
+          : await projectTypesService.create(this.form)
         
         if (data.success) {
           toast.success(data.message)
+          
+          // Marca a tab como limpa (não modificada)
+          tabsStore.markAsClean(this.tabKey)
           
           // Limpa os dados do formulário
           const formDataStore = useTabFormMemoryStore()
