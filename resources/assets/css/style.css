@@ -59791,6 +59791,7 @@ code[class*=language-] {
   color: rgb(255 255 255 / 0.7);
 }
 .ti-dropdown-menu {
+  position: absolute;
   z-index: 13;
   margin-top: 0.5rem;
   min-width: 10rem;

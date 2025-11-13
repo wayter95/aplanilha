@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr" data-nav-layout="vertical" class="light" data-header-styles="light" data-menu-styles="dark">
+<html lang="en" dir="ltr" data-nav-layout="vertical" data-vertical-style="overlay" data-toggled="icon-overlay-close" class="light" data-header-styles="light" data-menu-styles="dark">
   <head>
     <!-- META DATA -->
     <meta charset="UTF-8">
@@ -18,12 +18,7 @@
     @vite([
       'resources/sass/app.scss',
       'resources/assets/css/style.css',
-      'resources/js/app.js',
-      'resources/assets/js/main.js',
-      'resources/assets/js/switch.js',
-      'resources/assets/js/defaultmenu.js',
-      'resources/assets/js/sticky.js',
-      'resources/assets/js/custom-switcher.js'
+      'resources/js/app.js'
     ])
     
     @inertiaHead

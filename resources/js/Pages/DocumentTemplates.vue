@@ -66,26 +66,46 @@ import AppLayout from '@/Layouts/AppLayout.vue'
 import Accordion from '@/Components/Accordion.vue'
 import ToastContainer from '@/Components/ToastContainer.vue'
 import { useToast } from '@/composables/useToast'
+import { useDocumentTemplates } from '@/composables/useDocumentTemplates'
 
 export default {
     components: { AppLayout, ToastContainer, Accordion },
+    setup() {
+        const toast = useToast()
+        const {
+            loading,
+            types,
+            itemsByType,
+            grouped,
+            fetchAll,
+            setDefault: apiSetDefault,
+            remove: apiRemove,
+            duplicate: apiDuplicate,
+            bulkDelete: apiBulkDelete
+        } = useDocumentTemplates()
+
+        return {
+            toast,
+            loading,
+            types,
+            itemsByType,
+            grouped,
+            fetchAll,
+            apiSetDefault,
+            apiRemove,
+            apiDuplicate,
+            apiBulkDelete
+        }
+    },
     data() {
         return {
             user: this.$page.props.user || null,
-            types: [],
-            itemsByType: {},
             openTypes: {},
-            selectedIds: [],
-            toast: useToast(),
-        }
-    },
-    computed: {
-        grouped() {
-            return this.types.map(t => ({ type: t, items: this.itemsByType[t] || [] }))
+            selectedIds: []
         }
     },
     created() {
-        this.fetchTypes()
+        this.loadData()
     },
     methods: {
         labelOf(t) {
@@ -94,16 +114,15 @@ export default {
             if (t === 'quote') return 'Orçamentos'
             return t
         },
-        async fetchTypes() {
-            const { data } = await window.axios.get('/api/document-templates/types')
-            this.types = data
-            await Promise.all(this.types.map(t => this.fetchByType(t)))
-            this.types.forEach(t => this.$set(this.openTypes, t, true))
-        },
-        async fetchByType(type) {
-            const { data } = await window.axios.get('/api/document-templates', { params: { type, per_page: 100 } })
-            const items = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])
-            this.$set(this.itemsByType, type, items)
+        async loadData() {
+            try {
+                await this.fetchAll()
+                // Abrir todos os accordions após carregar
+                this.types.forEach(t => this.$set(this.openTypes, t, true))
+            } catch (e) {
+                this.toast.error('Erro ao carregar templates')
+                console.error(e)
+            }
         },
         isOpen(type) {
             return !!this.openTypes[type]
@@ -131,37 +150,45 @@ export default {
         },
         
         async setDefault(item) {
-            await window.axios.post(`/api/document-templates/${item.id}/set-default`)
-            await this.fetchByType(item.type)
-            this.toast.success('Modelo definido como padrão')
+            try {
+                await this.apiSetDefault(item.id, item.type)
+                this.toast.success('Modelo definido como padrão')
+            } catch (e) {
+                this.toast.error('Erro ao definir modelo como padrão')
+                console.error(e)
+            }
         },
         async remove(item) {
-            await window.axios.delete(`/api/document-templates/${item.id}`)
-            await this.fetchByType(item.type)
-            this.selectedIds = this.selectedIds.filter(id => id !== item.id)
-            this.toast.success('Modelo removido')
+            try {
+                await this.apiRemove(item.id, item.type)
+                this.selectedIds = this.selectedIds.filter(id => id !== item.id)
+                this.toast.success('Modelo removido')
+            } catch (e) {
+                this.toast.error('Erro ao remover modelo')
+                console.error(e)
+            }
         },
         async duplicate(item) {
-            const payload = { ...item }
-            delete payload.id
-            payload.name = `${item.name} (Cópia)`
-            payload.is_default = false
-            await window.axios.post('/api/document-templates', payload)
-            await this.fetchByType(item.type)
-            this.toast.success('Modelo duplicado')
+            try {
+                await this.apiDuplicate(item)
+                this.toast.success('Modelo duplicado')
+            } catch (e) {
+                this.toast.error('Erro ao duplicar modelo')
+                console.error(e)
+            }
         },
         async bulkDelete() {
-            const ids = [...this.selectedIds]
-            for (const id of ids) {
-                const item = this.grouped.flatMap(g => g.items).find(i => i.id === id)
-                if (item) {
-                    await window.axios.delete(`/api/document-templates/${id}`)
-                }
+            if (!this.selectedIds.length) return
+            
+            try {
+                await this.apiBulkDelete(this.selectedIds)
+                this.selectedIds = []
+                this.toast.success('Modelos removidos')
+            } catch (e) {
+                this.toast.error('Erro ao remover modelos')
+                console.error(e)
             }
-            this.selectedIds = []
-            await Promise.all(this.types.map(t => this.fetchByType(t)))
-            this.toast.success('Modelos removidos')
-        },
+        }
     }
 }
 </script>

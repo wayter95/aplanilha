@@ -198,52 +198,6 @@ defaultOpenMenus.forEach((element) => {
 });
 
 /**
- * handle top level submenu click
- */
-firstLevelItems.forEach((element) => {
-  element.addEventListener("click", () => {
-    let html = document.querySelector("html");
-    if ((html.getAttribute("data-nav-style") != "menu-hover" && html.getAttribute("data-nav-style") != "icon-hover") || window.innerWidth < 992 || ( !html.getAttribute("data-toggled") && html.getAttribute("data-nav-layout") != "horizontal")) {
-      const parentMenu = element.closest(".nav.sub-open");
-      if (parentMenu)
-        parentMenu
-          .querySelectorAll(":scope > ul > .slide.has-sub > a")
-          .forEach((el) => {
-            if (
-              el.nextElementSibling.style.display === "block" ||
-              window.getComputedStyle(el.nextElementSibling).display === "block"
-            ) {
-              slideUp(el.nextElementSibling);
-            }
-          });
-      slideToggle(element.nextElementSibling);
-    }
-  });
-});
-
-/**
- * handle inner submenu click
- */
-innerLevelItems.forEach((element) => {
-  let html = document.querySelector("html");
-  element.addEventListener("click", () => {
-    if ((html.getAttribute("data-nav-style") != "menu-hover" && html.getAttribute("data-nav-style") != "icon-hover") || window.innerWidth < 992 || ( !html.getAttribute("data-toggled") && html.getAttribute("data-nav-layout") != "horizontal")) {
-      const innerMenu = element.closest(".slide-menu");
-      if (innerMenu)
-        innerMenu.querySelectorAll(":scope .slide.has-sub > a").forEach((el) => {
-          if (
-            el.nextElementSibling &&
-            el.nextElementSibling?.style.display === "block"
-          ) {
-            slideUp(el.nextElementSibling);
-          }
-        });
-      slideToggle(element.nextElementSibling);
-    }
-  });
-});
-
-/**
  * menu styles
  */
 
@@ -261,7 +215,6 @@ let headerToggleBtn, WindowPreSize;
 (() => {
   let html = document.querySelector("html");
   headerToggleBtn = document.querySelector(".sidemenu-toggle");
-  headerToggleBtn.addEventListener("click", toggleSidemenu);
   let mainContent = document.querySelector(".main-content");
   if (window.innerWidth <= 992) {
     mainContent.addEventListener("click", menuClose);

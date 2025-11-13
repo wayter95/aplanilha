@@ -15,6 +15,9 @@
     <!-- Sidebar -->
     <Sidebar :menu-items="menuItems" />
 
+    <!-- Theme Switcher -->
+    <ThemeSwitcher />
+
     <!-- Conteúdo principal -->
     <div class="content">
       <div class="main-content">
@@ -43,22 +46,74 @@ import Header from '@/Components/Header.vue'
 import Sidebar from '@/Components/Sidebar.vue'
 import Loader from '@/Components/Loader.vue'
 import ToastContainer from '@/Components/ToastContainer.vue'
+import ThemeSwitcher from '@/Components/ThemeSwitcher.vue'
 import { ref, onMounted, watch, computed, shallowRef } from 'vue'
 import { useTabsStore } from '@/stores/useTabsStore'
 import { storeToRefs } from 'pinia'
 import { usePage } from '@inertiajs/vue3'
+import { useSidebarToggle } from '@/composables/useSidebarToggle'
+import { useRouterEvents } from '@/composables/useRouterEvents'
+import { getHtml, getElement, removeAttr, setAttr, removeClass } from '@/utils/dom'
 
 const page = usePage()
 const tabsStore = useTabsStore()
 const { activeTab, tabs } = storeToRefs(tabsStore)
 const hasTabs = computed(() => tabs.value.length > 0)
 
-// Verifica se a URL atual corresponde ao path da tab ativa
+// Props
+const props = defineProps({
+  title: String,
+  description: String,
+  user: Object
+})
+
+// Sidebar
+const { initializeSidebar, restoreSidebarState } = useSidebarToggle()
+
+onMounted(() => {
+  initializeSidebar()
+})
+
+// Router events
+const { onStart, onNavigate } = useRouterEvents()
+
+onStart(() => {
+  console.log('[AppLayout] Navigation START - Removendo overlay temporario')
+  const html = getHtml()
+  removeAttr(html, 'data-icon-overlay')
+  console.log('[AppLayout] data-icon-overlay removido:', html.getAttribute('data-icon-overlay'))
+})
+
+onNavigate(() => {
+  console.log('[AppLayout] Navigation NAVIGATE')
+  const html = getHtml()
+  
+  // Fechar overlay mobile
+  const responsiveOverlay = getElement('#responsive-overlay')
+  if (responsiveOverlay) {
+    removeClass(responsiveOverlay, 'active')
+    console.log('[AppLayout] Responsive overlay fechado')
+  }
+  
+  // Fechar sidebar mobile
+  if (html && window.innerWidth < 992) {
+    setAttr(html, 'data-toggled', 'close')
+    console.log('[AppLayout] Sidebar mobile fechada')
+  }
+  
+  // Restaurar estado da sidebar no desktop
+  if (window.innerWidth >= 992) {
+    console.log('[AppLayout] Desktop - Restaurando estado da sidebar')
+    restoreSidebarState()
+  }
+})
+
+// Tab system
 const shouldShowTabContent = computed(() => {
-    if (!activeTab.value) return false
-    const currentPath = page.url.split('?')[0]
-    const tabPath = activeTab.value.path.split('?')[0]
-    return tabPath === currentPath
+  if (!activeTab.value) return false
+  const currentPath = page.url.split('?')[0]
+  const tabPath = activeTab.value.path.split('?')[0]
+  return tabPath === currentPath
 })
 
 const resolvedComponent = shallowRef(null)
@@ -70,7 +125,6 @@ watch(activeTab, async (newTab) => {
   }
   
   try {
-    // Usa o sistema de registro dinâmico
     const { loadTabComponent } = await import('@/config/tabComponents')
     const component = await loadTabComponent(newTab.componentName)
     resolvedComponent.value = component
@@ -79,16 +133,7 @@ watch(activeTab, async (newTab) => {
   }
 }, { immediate: true })
 
-const props = defineProps({
-  title: String,
-  description: String,
-  user: Object
-})
-
-const toggleSidebar = () => {
-  document.querySelector('html')?.classList.toggle('toggle-sidebar')
-}
-
+// Menu items
 const menuItems = [
   { category: 'PRINCIPAL' },
   { label: 'Dashboard', icon: 'bx bx-home', route: '/' },

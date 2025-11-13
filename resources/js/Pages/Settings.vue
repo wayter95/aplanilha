@@ -334,18 +334,17 @@ const loadUserPhotoUrl = async () => {
   return null
 }
 
+// Importar composable de eventos
+import { useUserEvents } from '@/composables/useEvents'
+
 // Função para atualizar a foto localmente
 const updateLocalPhoto = async (photoKey, photoUrl) => {
   userPhoto.value = photoKey
   currentPhotoUrl.value = photoUrl
   
-  window.dispatchEvent(new CustomEvent('user-photo-updated', {
-    detail: {
-      userId: props.user.id,
-      photoKey: photoKey, // Mudança: enviar photoKey em vez de avatarPath
-      photoUrl: photoUrl
-    }
-  }))
+  // Usar composable em vez de window.dispatchEvent direto
+  const { emitPhotoUpdated } = useUserEvents()
+  emitPhotoUpdated(photoUrl)
 }
 
 // Dados da empresa (mockados por enquanto)
@@ -398,24 +397,21 @@ const handlePhotoUploadError = (error) => {
   console.error('Erro no upload:', error)
 }
 
-// Escutar eventos de atualização da foto para sincronizar com outros componentes
-const handlePhotoUpdate = async (event) => {
-  if (event.detail.userId === props.user?.id) {
-    await updateLocalPhoto(event.detail.avatarPath, event.detail.photoUrl)
+// Escutar eventos de atualização da foto usando composable
+const { onPhotoUpdated } = useUserEvents()
+
+// Handler automático com cleanup (composable gerencia o removeEventListener)
+onPhotoUpdated((event) => {
+  if (event.detail.url) {
+    currentPhotoUrl.value = event.detail.url
   }
-}
+})
 
 onMounted(async () => {
   if (userPhoto.value) {
     currentPhotoUrl.value = await loadUserPhotoUrl()
   }
-  
-  // Escutar eventos globais de atualização da foto
-  window.addEventListener('user-photo-updated', handlePhotoUpdate)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('user-photo-updated', handlePhotoUpdate)
+  // Listener registrado acima com onPhotoUpdated (cleanup automático)
 })
 
 // Funções de callback para os modais

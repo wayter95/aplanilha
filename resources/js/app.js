@@ -5,20 +5,27 @@ import { router } from '@inertiajs/vue3'
 import "./bootstrap.js";
 import "./plugins/validation.js";
 
+// Aplicar configurações de tema ANTES de tudo (inclui sidebar state)
+import { applyThemeConfigSync } from '@/composables/useThemeConfig'
+applyThemeConfigSync()
+
+// Inicializar e configurar loader
+import { useLoader } from '@/composables/useLoader'
+const { initLoader, setupInertiaListeners } = useLoader()
+initLoader()
+setupInertiaListeners()
+
 // Import Popper.js globally for template scripts
 import * as Popper from '@popperjs/core';
 window.Popper = Popper;
 
-// Import Preline for dropdowns and UI components
-import('preline/preline').then(() => {
-    // Reinicializar Preline após cada navegação do Inertia
-    router.on('navigate', () => {
-        setTimeout(() => {
-            if (window.HSStaticMethods) {
-                window.HSStaticMethods.autoInit();
-            }
-        }, 100);
-    });
+// Inicializar Preline UI
+import { initPreline, reinitPreline } from '@/plugins/preline'
+initPreline()
+
+// Reinicializar Preline após navegação Inertia
+router.on('navigate', () => {
+  reinitPreline()
 });
 
 const pinia = createPinia()
@@ -35,3 +42,5 @@ createInertiaApp({
         app.mount(el);
     },
 });
+
+

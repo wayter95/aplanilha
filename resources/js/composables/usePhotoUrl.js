@@ -1,11 +1,10 @@
-import { usePage } from "@inertiajs/vue3";
 import { reactive, ref } from "vue";
+import { get } from '@/api/client';
 
 const photoUrlCache = reactive(new Map());
 
 export function usePhotoUrl() {
     const loading = ref(false);
-    const page = usePage();
 
     const getPhotoUrl = async (photoKey) => {
         if (!photoKey) return null;
@@ -26,26 +25,17 @@ export function usePhotoUrl() {
 
         loading.value = true;
         try {
-            const response = await fetch(
-                `/api/files/signed-url?key=${photoKey}`,
-                {
-                    method: "GET",
-                    headers: {
-                        "X-CSRF-TOKEN": page.props.csrf_token,
-                        "X-Requested-With": "XMLHttpRequest",
-                    },
-                }
-            );
+            // Usar api/client em vez de fetch direto
+            const { data } = await get('/files/signed-url', {
+                params: { key: photoKey }
+            });
 
-            if (response.ok) {
-                const data = await response.json();
-                if (data.success) {
-                    photoUrlCache.set(photoKey, {
-                        url: data.url,
-                        timestamp: Date.now(),
-                    });
-                    return data.url;
-                }
+            if (data.success) {
+                photoUrlCache.set(photoKey, {
+                    url: data.url,
+                    timestamp: Date.now(),
+                });
+                return data.url;
             }
         } catch (error) {
             console.error("Erro ao buscar URL temporária:", error);

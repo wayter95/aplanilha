@@ -35,26 +35,41 @@
             </li>
             
             <!-- Single Item -->
-            <li v-else-if="!item.children" class="slide">
-              <Link :href="item.route" class="side-menu__item">
+            <li v-else-if="!item.children" class="slide" :class="{ active: isActiveRoute(item.route) }">
+              <Link 
+                :href="item.route" 
+                class="side-menu__item"
+              >
                 <i :class="['side-menu__icon', item.icon]"></i>
                 <span class="side-menu__label">{{ item.label }}</span>
               </Link>
             </li>
             
             <!-- Item with Children -->
-            <li v-else class="slide has-sub">
-              <a href="javascript:void(0);" class="side-menu__item">
+            <li v-else class="slide has-sub" :class="{ open: hasActiveChild(item.children), active: hasActiveChild(item.children) }">
+              <a 
+                href="javascript:void(0);" 
+                class="side-menu__item"
+                @click="handleMenuClick"
+              >
                 <i :class="['side-menu__icon', item.icon]"></i>
                 <span class="side-menu__label">{{ item.label }}</span>
                 <i class="fe fe-chevron-right side-menu__angle"></i>
               </a>
-              <ul class="slide-menu child1">
+              <ul class="slide-menu child1" :style="hasActiveChild(item.children) ? 'display: block;' : ''">
                 <li class="slide side-menu__label1">
                   <a href="javascript:void(0)">{{ item.label }}</a>
                 </li>
-                <li v-for="(child, childIndex) in item.children" :key="childIndex" class="slide">
-                  <Link :href="child.route" class="side-menu__item">
+                <li 
+                  v-for="(child, childIndex) in item.children" 
+                  :key="childIndex" 
+                  class="slide"
+                  :class="{ active: isActiveRoute(child.route) }"
+                >
+                  <Link 
+                    :href="child.route" 
+                    class="side-menu__item"
+                  >
                     {{ child.label }}
                   </Link>
                 </li>
@@ -80,7 +95,9 @@
 </template>
 
 <script setup>
-import { Link } from '@inertiajs/vue3'
+import { Link, usePage } from '@inertiajs/vue3'
+import { computed } from 'vue'
+import { useSidebarMenu } from '@/composables/useSidebarMenu'
 import desktopLogo from '../../assets/images/brand-logos/desktop-logo.png'
 import toggleLogo from '../../assets/images/brand-logos/toggle-logo.png'
 import desktopDark from '../../assets/images/brand-logos/desktop-dark.png'
@@ -91,5 +108,24 @@ import toggleWhite from '../../assets/images/brand-logos/toggle-white.png'
 defineProps({
   menuItems: { type: Array, default: () => [] }
 })
+
+const { handleMenuClick } = useSidebarMenu()
+const page = usePage()
+
+// Verificar se rota está ativa
+const isActiveRoute = (route) => {
+  if (!route) return false
+  const currentRoute = page.url
+  // Remover query params e hash para comparação
+  const cleanCurrentRoute = currentRoute.split('?')[0].split('#')[0]
+  const cleanRoute = route.split('?')[0].split('#')[0]
+  return cleanCurrentRoute === cleanRoute || cleanCurrentRoute.startsWith(cleanRoute + '/')
+}
+
+// Verificar se item tem filho ativo
+const hasActiveChild = (children) => {
+  if (!children) return false
+  return children.some(child => isActiveRoute(child.route))
+}
 </script>
 

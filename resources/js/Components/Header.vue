@@ -23,8 +23,9 @@
             <!-- Start::header-link -->
             <a 
               aria-label="Hide Sidebar"
-              class="sidemenu-toggle animated-arrow hor-toggle horizontal-navtoggle inline-flex items-center" 
+              class="sidemenu-toggle animated-arrow hor-toggle horizontal-navtoggle inline-flex items-centers" 
               href="javascript:void(0);"
+              @click="toggleSidebar"
             >
               <span></span>
             </a>
@@ -38,18 +39,20 @@
           <!-- Start::header-element -->
           <div class="header-element header-theme-mode hidden !items-center sm:block !py-[1rem] md:!px-[0.65rem] px-2">
             <a 
+              v-if="!isDark"
               aria-label="Toggle theme to dark" 
-              class="hs-dark-mode-active:hidden flex hs-dark-mode group flex-shrink-0 justify-center items-center gap-2 rounded-full font-medium transition-all text-xs dark:bg-bgdark dark:hover:bg-black/20 dark:text-[#8c9097] dark:text-white/50 dark:hover:text-white dark:focus:ring-white/10 dark:focus:ring-offset-white/10" 
+              class="flex hs-dark-mode group flex-shrink-0 justify-center items-center gap-2 rounded-full font-medium transition-all text-xs dark:bg-bgdark dark:hover:bg-black/20 dark:text-[#8c9097] dark:text-white/50 dark:hover:text-white dark:focus:ring-white/10 dark:focus:ring-offset-white/10" 
               href="javascript:void(0);"
-              data-hs-theme-click-value="dark"
+              @click="toggleTheme"
             >
               <i class="bx bx-moon header-link-icon"></i>
             </a>
             <a 
+              v-else
               aria-label="Toggle theme to light" 
-              class="hs-dark-mode-active:flex hidden hs-dark-mode group flex-shrink-0 justify-center items-center gap-2 rounded-full font-medium text-defaulttextcolor transition-all text-xs dark:bg-bodybg dark:bg-bgdark dark:hover:bg-black/20 dark:text-[#8c9097] dark:text-white/50 dark:hover:text-white dark:focus:ring-white/10 dark:focus:ring-offset-white/10" 
+              class="flex hs-dark-mode group flex-shrink-0 justify-center items-center gap-2 rounded-full font-medium text-defaulttextcolor transition-all text-xs dark:bg-bodybg dark:bg-bgdark dark:hover:bg-black/20 dark:text-[#8c9097] dark:text-white/50 dark:hover:text-white dark:focus:ring-white/10 dark:focus:ring-offset-white/10" 
               href="javascript:void(0);"
-              data-hs-theme-click-value="light"
+              @click="toggleTheme"
             >
               <i class="bx bx-sun header-link-icon"></i>
             </a>
@@ -67,6 +70,19 @@
               <i class="bx bx-fullscreen full-screen-open header-link-icon"></i>
               <i class="bx bx-exit-fullscreen full-screen-close header-link-icon hidden"></i>
             </a>
+          </div>
+          <!-- End::header-element -->
+
+          <!-- Start::header-element - Theme Switcher -->
+          <div class="header-element md:!px-[0.65rem] px-2">
+            <button
+              type="button"
+              aria-label="Theme Switcher"
+              class="inline-flex flex-shrink-0 justify-center items-center gap-2 !rounded-full font-medium dark:hover:bg-black/20 dark:text-[#8c9097] dark:text-white/50 dark:hover:text-white dark:focus:ring-white/10 dark:focus:ring-offset-white/10"
+              data-hs-overlay="#hs-overlay-switcher"
+            >
+              <i class="bx bx-cog header-link-icon animate-spin-slow"></i>
+            </button>
           </div>
           <!-- End::header-element -->
 
@@ -129,6 +145,10 @@
 
 <script setup>
 import { usePhotoUrl } from '@/composables/usePhotoUrl'
+import { useSidebarToggle } from '@/composables/useSidebarToggle'
+import { useFullscreen } from '@/composables/useFullscreen'
+import { useTheme } from '@/composables/useTheme'
+import { initOverlayTriggers } from '@/composables/useOverlay'
 import { router, Link } from '@inertiajs/vue3'
 import { onMounted, ref, watch, computed } from 'vue'
 import desktopLogo from '../../assets/images/brand-logos/desktop-logo.png'
@@ -144,6 +164,12 @@ const props = defineProps({
 
 defineEmits(['toggle-sidebar'])
 
+// Composables
+const { toggleSidebar } = useSidebarToggle()
+const { toggleFullscreen } = useFullscreen()
+const { isDark, toggleTheme } = useTheme()
+
+// User photo
 const { getPhotoUrl } = usePhotoUrl()
 const userPhotoUrl = ref(null)
 
@@ -152,45 +178,6 @@ const displayName = computed(() => {
   const parts = props.user.name.trim().split(' ')
   return parts.length <= 2 ? props.user.name : `${parts[0]} ${parts[1]}`
 })
-
-const toggleFullscreen = () => {
-  const elem = document.documentElement
-  const open = document.querySelector(".full-screen-open")
-  const close = document.querySelector(".full-screen-close")
-  
-  if (!document.fullscreenElement) {
-    // Enter fullscreen
-    if (elem.requestFullscreen) {
-      elem.requestFullscreen()
-    } else if (elem.webkitRequestFullscreen) {
-      elem.webkitRequestFullscreen()
-    } else if (elem.msRequestFullscreen) {
-      elem.msRequestFullscreen()
-    }
-    // Update icons
-    close?.classList.add("block")
-    close?.classList.remove("hidden")
-    open?.classList.add("hidden")
-  } else {
-    // Exit fullscreen
-    if (document.exitFullscreen) {
-      document.exitFullscreen()
-    } else if (document.webkitExitFullscreen) {
-      document.webkitExitFullscreen()
-    } else if (document.msExitFullscreen) {
-      document.msExitFullscreen()
-    }
-    // Update icons
-    close?.classList.remove("block")
-    close?.classList.add("hidden")
-    open?.classList.remove("hidden")
-    open?.classList.add("block")
-  }
-}
-
-const logout = () => {
-  router.post('/logout')
-}
 
 const loadUserPhoto = async () => {
   if (props.user?.photo_key) {
@@ -201,12 +188,13 @@ const loadUserPhoto = async () => {
 
 watch(() => props.user, loadUserPhoto, { immediate: true })
 
+// Logout
+const logout = () => {
+  router.post('/logout')
+}
+
 onMounted(() => {
   loadUserPhoto()
-  
-  // Inicializar Preline após o componente montar
-  if (window.HSStaticMethods) {
-    window.HSStaticMethods.autoInit()
-  }
+  initOverlayTriggers()
 })
 </script>

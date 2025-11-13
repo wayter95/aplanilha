@@ -135,6 +135,7 @@
 <script>
 import Accordion from '@/Components/Accordion.vue'
 import { useToast } from '@/composables/useToast'
+import { useTooltip } from '@/composables/useTooltip'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import { useTabsStore } from '@/stores/useTabsStore'
 
@@ -143,6 +144,8 @@ export default {
   setup() {
     const tabsStore = useTabsStore()
     const toast = useToast()
+    // Inicializar tooltips automaticamente
+    useTooltip()
     return { tabsStore, toast }
   },
   data() {
