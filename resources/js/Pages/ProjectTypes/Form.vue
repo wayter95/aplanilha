@@ -121,8 +121,8 @@
 import AppLayout from '@/Layouts/AppLayout.vue'
 import Input from '@/Components/Input.vue'
 import Switch from '@/Components/Switch.vue'
-import { useTabFormDataStore } from '@/stores/useTabFormDataStore'
-import { useTabsStore } from '@/stores/useTabsStore'
+import { useTabFormMemoryStore } from '@/stores/useTabFormMemoryStore'
+import { useTabsMemoryStore } from '@/stores/useTabsMemoryStore'
 import { Form as VeeForm } from 'vee-validate'
 import { useToast } from '@/composables/useToast'
 
@@ -143,12 +143,12 @@ export default {
       status: 'a',
     }
     
-    // Se tem tempKey/id, tenta recuperar do localStorage
+    // Se tem tempKey/id, tenta recuperar do store em memória
     if (tempKey) {
-      const formDataStore = useTabFormDataStore()
+      const formDataStore = useTabFormMemoryStore()
       const stored = formDataStore.getFormData(tempKey)
       if (stored) {
-        console.log('[Form] Data() - Recuperando dados:', stored)
+        console.log('[Form] Data() - Recuperando dados (memória):', stored)
         initialForm = { ...initialForm, ...stored }
       }
     }
@@ -176,7 +176,7 @@ export default {
     form: {
       handler(newVal) {
         if (this.isInitializing) return
-        const formDataStore = useTabFormDataStore()
+        const formDataStore = useTabFormMemoryStore()
         const tabKey = this.tabKey || this.tempKey || this.id
         if (tabKey) {
           const validFields = {
@@ -184,7 +184,7 @@ export default {
             color: newVal.color || '#000000',
             status: newVal.status || 'a',
           }
-          console.log('[Form] Salvando dados no localStorage:', tabKey, validFields)
+          console.log('[Form] Salvando dados em memória:', tabKey, validFields)
           formDataStore.setFormData(tabKey, validFields)
         }
       },
@@ -216,7 +216,7 @@ export default {
           this.form.status = data.data.status
           this.isActive = data.data.status === 'a'
           
-          const formDataStore = useTabFormDataStore()
+          const formDataStore = useTabFormMemoryStore()
           formDataStore.setFormData(this.tabKey, this.form)
         }
       } catch (error) {
@@ -228,7 +228,7 @@ export default {
     },
     async save() {
       const toast = useToast()
-      const tabsStore = useTabsStore()
+      const tabsStore = useTabsMemoryStore()
       
       try {
         const url = this.mode === 'edit' 
@@ -252,7 +252,7 @@ export default {
           toast.success(data.message)
           
           // Limpa os dados do formulário
-          const formDataStore = useTabFormDataStore()
+          const formDataStore = useTabFormMemoryStore()
           formDataStore.clearFormData(this.tabKey)
           
           // Fecha a tab se existir

@@ -122,8 +122,8 @@ import AppLayout from '@/Layouts/AppLayout.vue'
 import Input from '@/Components/Input.vue'
 import Textarea from '@/Components/Textarea.vue'
 import Switch from '@/Components/Switch.vue'
-import { useTabFormDataStore } from '@/stores/useTabFormDataStore'
-import { useTabsStore } from '@/stores/useTabsStore'
+import { useTabFormMemoryStore } from '@/stores/useTabFormMemoryStore'
+import { useTabsMemoryStore } from '@/stores/useTabsMemoryStore'
 import { usePage } from '@inertiajs/vue3'
 import { storeToRefs } from 'pinia'
 import { Form as VeeForm } from 'vee-validate'
@@ -164,7 +164,7 @@ export default {
     form: {
       handler(newVal) {
         if (this.isInitializing) return
-        const formDataStore = useTabFormDataStore()
+        const formDataStore = useTabFormMemoryStore()
         const tabKey = this.tabKey || this.tempKey || this.id
         if (tabKey) {
           const validFields = {
@@ -182,7 +182,7 @@ export default {
     },
     tabKey(newKey, oldKey) {
       if (newKey && newKey !== oldKey) {
-        const formDataStore = useTabFormDataStore()
+        const formDataStore = useTabFormMemoryStore()
         const stored = formDataStore.getFormData(newKey)
         if (stored) {
           this.form.name = stored.name || ''
@@ -196,7 +196,7 @@ export default {
     tempKey(newKey) {
       if (newKey) {
         this.tabKey = newKey
-        const formDataStore = useTabFormDataStore()
+        const formDataStore = useTabFormMemoryStore()
         const stored = formDataStore.getFormData(newKey)
         if (stored) {
           this.form.name = stored.name || ''
@@ -231,7 +231,7 @@ export default {
       immediate: false
     },
     'page.url'(newUrl) {
-      const tabsStore = useTabsStore()
+      const tabsStore = useTabsMemoryStore()
       const currentPath = newUrl.split('?')[0]
       const matchingTab = tabsStore.tabs.find(t => {
         const tabPath = t.path.split('?')[0]
@@ -246,7 +246,7 @@ export default {
     }
   },
   setup() {
-    const tabsStore = useTabsStore()
+    const tabsStore = useTabsMemoryStore()
     const page = usePage()
     const toast = useToast()
     const { activeTab } = storeToRefs(tabsStore)
@@ -254,8 +254,8 @@ export default {
   },
   async created() {
     this.isInitializing = true
-    const tabsStore = useTabsStore()
-    const formDataStore = useTabFormDataStore()
+    const tabsStore = useTabsMemoryStore()
+    const formDataStore = useTabFormMemoryStore()
     
     this.tabKey = this.tempKey || this.id
     const tabKey = this.tabKey
@@ -370,7 +370,7 @@ export default {
       }
     },
     updateTabTitle() {
-      const tabsStore = useTabsStore()
+      const tabsStore = useTabsMemoryStore()
       const tab = tabsStore.tabs.find(t => t.key === this.tabKey)
       if (!tab) return
       
@@ -400,7 +400,7 @@ export default {
         this.tabKey = explicitTabKey
       }
       
-      const formDataStore = useTabFormDataStore()
+      const formDataStore = useTabFormMemoryStore()
       let stored = formDataStore.getFormData(tabKey)
       
       if (!stored) {
@@ -433,8 +433,8 @@ export default {
     async load() {
       try {
         this.isInitializing = true
-        const formDataStore = useTabFormDataStore()
-        const tabsStore = useTabsStore()
+        const formDataStore = useTabFormMemoryStore()
+        const tabsStore = useTabsMemoryStore()
         const { data } = await window.axios.get(`/api/document-types/${this.id}`)
         
         this.form.name = data.name || ''
@@ -476,8 +476,8 @@ export default {
       }
     },
     async save(values) {
-      const formDataStore = useTabFormDataStore()
-      const tabsStore = useTabsStore()
+      const formDataStore = useTabFormMemoryStore()
+      const tabsStore = useTabsMemoryStore()
       const rawData = values || this.form
       
       const formData = {

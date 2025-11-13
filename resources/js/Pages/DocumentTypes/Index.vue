@@ -51,7 +51,7 @@
 import DataTable from '@/Components/DataTable.vue'
 import DeleteDocumentTypeModal from '@/Components/DocumentTypesModals/DeleteDocumentTypeModal.vue'
 import AppLayout from '@/Layouts/AppLayout.vue'
-import { useTabsStore } from '@/stores/useTabsStore'
+import { useTabsMemoryStore } from '@/stores/useTabsMemoryStore'
 import { useToast } from '@/composables/useToast'
 import { router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
@@ -71,7 +71,7 @@ const props = defineProps({
   }
 })
 
-const tabsStore = useTabsStore()
+const tabsStore = useTabsMemoryStore()
 const toast = useToast()
 const showDeleteModal = ref(false)
 const selectedType = ref(null)

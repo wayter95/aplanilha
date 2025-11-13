@@ -137,12 +137,12 @@ import Accordion from '@/Components/Accordion.vue'
 import { useToast } from '@/composables/useToast'
 import { useTooltip } from '@/composables/useTooltip'
 import AppLayout from '@/Layouts/AppLayout.vue'
-import { useTabsStore } from '@/stores/useTabsStore'
+import { useTabsMemoryStore } from '@/stores/useTabsMemoryStore'
 
 export default {
   components: { AppLayout, Accordion },
   setup() {
-    const tabsStore = useTabsStore()
+    const tabsStore = useTabsMemoryStore()
     const toast = useToast()
     // Inicializar tooltips automaticamente
     useTooltip()

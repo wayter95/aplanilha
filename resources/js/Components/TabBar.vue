@@ -67,7 +67,7 @@
 </template>
 
 <script setup>
-import { useTabsStore } from '@/stores/useTabsStore'
+import { useTabsMemoryStore } from '@/stores/useTabsMemoryStore'
 import { storeToRefs } from 'pinia'
 import { router } from '@inertiajs/vue3'
 
@@ -82,7 +82,7 @@ defineProps({
   }
 })
 
-const tabsStore = useTabsStore()
+const tabsStore = useTabsMemoryStore()
 const { tabs, activeTab } = storeToRefs(tabsStore)
 
 const isActive = (tab) => {
@@ -153,14 +153,16 @@ const closeTab = async (tab) => {
   position: relative;
   min-width: 90px;
   max-width: 160px;
-  background: transparent;
+  background: rgba(var(--primary-rgb), 0.03);
   height: 100%;
   border-right: 1px solid rgba(var(--default-border), 0.2);
+  border-bottom: 2px solid transparent;
   flex-shrink: 0;
 }
 
 .tab-item:hover {
-  background: rgba(var(--primary-rgb), 0.05);
+  background: rgba(var(--primary-rgb), 0.08);
+  border-bottom-color: rgba(var(--primary-rgb), 0.4);
 }
 
 .tab-item.tab-active {
@@ -185,11 +187,38 @@ const closeTab = async (tab) => {
   text-overflow: ellipsis;
   flex: 1;
   line-height: 1.2;
-  font-weight: 400;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.tab-item:hover .tab-title {
+  color: rgb(var(--primary-rgb));
 }
 
 .tab-active .tab-title {
   font-weight: 600;
+  color: rgb(var(--primary-rgb));
+}
+
+/* Modo escuro - tabs inativas mais visíveis */
+:root[data-theme-mode="dark"] .tab-item {
+  background: rgba(255, 255, 255, 0.06);
+  border-right-color: rgba(255, 255, 255, 0.12);
+}
+
+:root[data-theme-mode="dark"] .tab-item:hover {
+  background: rgba(var(--primary-rgb), 0.18);
+}
+
+:root[data-theme-mode="dark"] .tab-item.tab-active {
+  background: rgba(var(--primary-rgb), 0.15);
+}
+
+:root[data-theme-mode="dark"] .tab-title {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+:root[data-theme-mode="dark"] .tab-item:hover .tab-title {
   color: rgb(var(--primary-rgb));
 }
 
@@ -200,13 +229,13 @@ const closeTab = async (tab) => {
 }
 
 .tab-close {
-  width: 1rem;
-  height: 1rem;
+  width: 1.125rem;
+  height: 1.125rem;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 0.25rem;
-  color: rgb(var(--text-muted));
+  color: rgba(var(--text-muted), 0.6);
   transition: all 0.2s ease;
   opacity: 0;
   flex-shrink: 0;
@@ -214,20 +243,24 @@ const closeTab = async (tab) => {
 }
 
 .tab-item:hover .tab-close {
-  opacity: 0.6;
+  opacity: 1;
+  color: rgba(var(--default-text-color), 0.7);
 }
 
 .tab-active .tab-close {
-  opacity: 0.6;
+  opacity: 0.8;
+  color: rgb(var(--primary-rgb));
 }
 
 .tab-close:hover {
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(220, 38, 38, 0.15);
   opacity: 1 !important;
-  color: rgb(var(--default-text-color));
+  color: rgb(220, 38, 38);
+  transform: scale(1.1);
 }
 
 :root[data-theme-mode="dark"] .tab-close:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(239, 68, 68, 0.2);
+  color: rgb(239, 68, 68);
 }
 </style>

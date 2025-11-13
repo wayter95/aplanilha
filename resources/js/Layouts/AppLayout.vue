@@ -47,7 +47,7 @@ import Loader from '@/Components/Loader.vue'
 import ToastContainer from '@/Components/ToastContainer.vue'
 import ThemeSwitcher from '@/Components/ThemeSwitcher.vue'
 import { ref, onMounted, watch, computed, shallowRef } from 'vue'
-import { useTabsStore } from '@/stores/useTabsStore'
+import { useTabsMemoryStore } from '@/stores/useTabsMemoryStore'
 import { storeToRefs } from 'pinia'
 import { usePage } from '@inertiajs/vue3'
 import { useSidebarToggle } from '@/composables/useSidebarToggle'
@@ -55,7 +55,7 @@ import { useRouterEvents } from '@/composables/useRouterEvents'
 import { getHtml, getElement, removeAttr, setAttr, removeClass } from '@/utils/dom'
 
 const page = usePage()
-const tabsStore = useTabsStore()
+const tabsStore = useTabsMemoryStore()
 const { activeTab, tabs } = storeToRefs(tabsStore)
 const hasTabs = computed(() => tabs.value.length > 0)
 
