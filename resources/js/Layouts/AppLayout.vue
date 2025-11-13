@@ -138,6 +138,7 @@ const menuItems = [
   { category: 'PRINCIPAL' },
   { label: 'Dashboard', icon: 'bx bx-home', route: '/' },
   { label: 'Analytics', icon: 'bx bx-line-chart', route: '/analytics' },
+  { label: 'Projetos', icon: 'bx bx-briefcase', route: '/projects' },
   
   { category: 'ADMINISTRAÇÃO' },
   {

@@ -149,15 +149,6 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', fn() => redirect()->route('signin'))->name('login');
     Route::post('/login', [AuthController::class, 'login']);
     
-    Route::get('/test-login', function () {
-        $user = \App\Models\User::where('email', 'joao.silva@empresademo.com')->first();
-        if ($user) {
-            Auth::guard('web')->login($user);
-            return redirect()->route('home');
-        }
-        return redirect()->route('signin');
-    });
-    
     Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
     Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
     
