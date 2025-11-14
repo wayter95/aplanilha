@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RoleController;
@@ -18,6 +19,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('users', [UserController::class, 'index'])->name('users');
     
     Route::get('roles', [RoleController::class, 'index'])->name('roles');
+    
+    Route::get('contacts', [ContactController::class, 'index'])->name('contacts.index');
+    Route::get('contacts/create/{tempKey?}', [ContactController::class, 'create'])->name('contacts.create');
+    Route::get('contacts/{id}/edit', [ContactController::class, 'edit'])->name('contacts.edit');
     
     Route::get('settings', function () {
         $user = Auth::user();
@@ -96,6 +101,26 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/statistics', [RoleController::class, 'statistics'])->name('roles.statistics');
         Route::get('/permissions', [RoleController::class, 'permissions'])->name('roles.permissions');
         Route::get('/export/csv', [RoleController::class, 'exportCsv'])->name('roles.export.csv');
+    });
+    
+    Route::prefix('api/contacts')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\ContactController::class, 'index'])->name('api.contacts.index');
+        Route::post('/', [\App\Http\Controllers\Api\ContactController::class, 'store'])->name('api.contacts.store');
+        Route::get('/cities', [\App\Http\Controllers\Api\ContactController::class, 'cities'])->name('api.contacts.cities');
+        Route::get('/countries', [\App\Http\Controllers\Api\ContactController::class, 'countries'])->name('api.contacts.countries');
+        Route::get('/{id}', [\App\Http\Controllers\Api\ContactController::class, 'show'])->name('api.contacts.show');
+        Route::put('/{id}', [\App\Http\Controllers\Api\ContactController::class, 'update'])->name('api.contacts.update');
+        Route::delete('/{id}', [\App\Http\Controllers\Api\ContactController::class, 'destroy'])->name('api.contacts.destroy');
+    });
+    
+    Route::prefix('api/files')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\ContactController::class, 'index'])->name('api.contacts.index');
+        Route::post('/', [\App\Http\Controllers\Api\ContactController::class, 'store'])->name('api.contacts.store');
+        Route::get('/cities', [\App\Http\Controllers\Api\ContactController::class, 'cities'])->name('api.contacts.cities');
+        Route::get('/countries', [\App\Http\Controllers\Api\ContactController::class, 'countries'])->name('api.contacts.countries');
+        Route::get('/{id}', [\App\Http\Controllers\Api\ContactController::class, 'show'])->name('api.contacts.show');
+        Route::put('/{id}', [\App\Http\Controllers\Api\ContactController::class, 'update'])->name('api.contacts.update');
+        Route::delete('/{id}', [\App\Http\Controllers\Api\ContactController::class, 'destroy'])->name('api.contacts.destroy');
     });
     
     Route::prefix('api/files')->group(function () {

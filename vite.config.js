@@ -66,10 +66,23 @@ export default defineConfig({
         host: '0.0.0.0',
         port: 5173,
         strictPort: true,
+        watch: {
+            usePolling: true,
+            interval: 300,
+        },
         hmr: {
-            host: '127.0.0.1',
+            host: 'localhost',
             protocol: 'ws',
             clientPort: 5173,
+        },
+    },
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    vendor: ['vue', '@inertiajs/vue3'],
+                },
+            },
         },
     },
 });
