@@ -1,134 +1,49 @@
 <template>
-  <AppLayout v-if="standalone" :title="computedTitle || 'Novo Tipo de Projeto'" description="">
-    <Form @submit="save" @invalid="handleInvalid" :initial-values="form" :key="formKey">
-      <div class="grid grid-cols-12 gap-6">
-        <div class="xl:col-span-12 col-span-12">
-          <div class="box">
-            <div class="box-header">
-              <h5 class="box-title">{{ mode === 'edit' ? 'Editar Tipo de Projeto' : 'Novo Tipo de Projeto' }}</h5>
-            </div>
-            <div class="box-body">
-              <div class="max-w-2xl space-y-4">
-                <Input
-                  name="title"
-                  label="Título"
-                  rules="required"
-                  v-model="form.title"
-                  placeholder="Ex: Desenvolvimento Web"
-                />
-                
-                <div class="space-y-2">
-                  <label class="ti-form-label">Cor</label>
-                  <div class="flex items-center gap-3">
-                    <input
-                      type="color"
-                      v-model="form.color"
-                      class="h-10 w-20 rounded border border-gray-300 dark:border-gray-600 cursor-pointer"
-                    />
-                    <Input
-                      name="color"
-                      v-model="form.color"
-                      placeholder="#000000"
-                      class="flex-1"
-                    />
-                  </div>
-                </div>
-
-                <div class="flex items-center gap-4">
-                  <Switch
-                    name="is_active"
-                    label="Status Ativo"
-                    v-model="isActive"
-                  />
-                  <span class="text-sm text-textmuted dark:text-textmuted">
-                    {{ isActive ? 'Ativo' : 'Bloqueado' }}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div class="box-footer">
-              <div class="flex justify-end gap-2">
-                <button type="submit" class="ti-btn ti-btn-primary-full">
-                  <i class="ri-save-line mr-2"></i>Salvar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </Form>
+  <AppLayout v-if="standalone" title="" description="">
+    <!-- Breadcrumb -->
+    <Breadcrumb
+      :title="mode === 'edit' ? 'Editar Tipo de Projeto' : 'Novo Tipo de Projeto'"
+      :items="breadcrumbItems"
+    />
+    
+    <!-- Form -->
+    <FormContent 
+      :form="form" 
+      :isActive="isActive" 
+      :mode="mode"
+      :formKey="formKey"
+      @update:form="form = $event"
+      @update:isActive="isActive = $event"
+      @submit="save"
+      @invalid="handleInvalid"
+    />
   </AppLayout>
-  <Form v-else @submit="save" @invalid="handleInvalid" :initial-values="form" :key="formKey">
-    <div class="grid grid-cols-12 gap-6">
-      <div class="xl:col-span-12 col-span-12">
-        <div class="box">
-          <div class="box-header">
-            <h5 class="box-title">{{ mode === 'edit' ? 'Editar Tipo de Projeto' : 'Novo Tipo de Projeto' }}</h5>
-          </div>
-          <div class="box-body">
-            <div class="max-w-2xl space-y-4">
-              <Input
-                name="title"
-                label="Título"
-                rules="required"
-                v-model="form.title"
-                placeholder="Ex: Desenvolvimento Web"
-              />
-              
-              <div class="space-y-2">
-                <label class="ti-form-label">Cor</label>
-                <div class="flex items-center gap-3">
-                  <input
-                    type="color"
-                    v-model="form.color"
-                    class="h-10 w-20 rounded border border-gray-300 dark:border-gray-600 cursor-pointer"
-                  />
-                  <Input
-                    name="color"
-                    v-model="form.color"
-                    placeholder="#000000"
-                    class="flex-1"
-                  />
-                </div>
-              </div>
-
-              <div class="flex items-center gap-4">
-                <Switch
-                  name="is_active"
-                  label="Status Ativo"
-                  v-model="isActive"
-                />
-                <span class="text-sm text-textmuted dark:text-textmuted">
-                  {{ isActive ? 'Ativo' : 'Bloqueado' }}
-                </span>
-              </div>
-            </div>
-          </div>
-          <div class="box-footer">
-            <div class="flex justify-end gap-2">
-              <button type="submit" class="ti-btn ti-btn-primary-full">
-                <i class="ri-save-line mr-2"></i>Salvar
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </Form>
+  
+  <!-- Versão sem AppLayout (para tabs) -->
+  <FormContent 
+    v-else
+    :form="form" 
+    :isActive="isActive" 
+    :mode="mode"
+    :formKey="formKey"
+    @update:form="form = $event"
+    @update:isActive="isActive = $event"
+    @submit="save"
+    @invalid="handleInvalid"
+  />
 </template>
 
 <script>
 import AppLayout from '@/Layouts/AppLayout.vue'
-import Input from '@/Components/Input.vue'
-import Switch from '@/Components/Switch.vue'
+import Breadcrumb from '@/Components/Breadcrumb.vue'
+import FormContent from './FormContent.vue'
 import { useTabFormMemoryStore } from '@/stores/useTabFormMemoryStore'
 import { useTabsMemoryStore } from '@/stores/useTabsMemoryStore'
-import { Form as VeeForm } from 'vee-validate'
 import { useToast } from '@/composables/useToast'
 import projectTypesService from '@/api/projectTypesService'
 
 export default {
-  components: { AppLayout, Form: VeeForm, Input, Switch },
+  components: { AppLayout, Breadcrumb, FormContent },
   props: {
     mode: { type: String, default: 'create' },
     id: { type: String, default: null },
@@ -149,7 +64,6 @@ export default {
       const formDataStore = useTabFormMemoryStore()
       const stored = formDataStore.getFormData(tempKey)
       if (stored) {
-        console.log('[Form] Data() - Recuperando dados (memória):', stored)
         initialForm = { ...initialForm, ...stored }
       }
     }
@@ -169,6 +83,13 @@ export default {
       }
       return 'Novo Tipo de Projeto'
     },
+    breadcrumbItems() {
+      return [
+        { label: 'Projetos', href: '/projects' },
+        { label: 'Tipos de Projetos', href: '/projects/types' },
+        { label: this.mode === 'edit' ? 'Editar' : 'Novo' }
+      ]
+    }
   },
   watch: {
     isActive(newVal) {
@@ -201,9 +122,6 @@ export default {
   },
   mounted() {
     this.tabKey = this.tempKey || this.id
-    
-    console.log('[Form] Mounted - tabKey:', this.tabKey)
-    console.log('[Form] Estado atual do form:', this.form)
 
     if (this.mode === 'edit' && this.id) {
       this.loadData()
