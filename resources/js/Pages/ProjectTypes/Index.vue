@@ -1,5 +1,11 @@
 <template>
-  <AppLayout title="Tipos de Projetos" description="Gerencie os tipos de projetos disponíveis">
+  <AppLayout title="" description="">
+    <!-- Breadcrumb -->
+    <Breadcrumb
+      title="Tipos de Projetos"
+      :items="breadcrumbItems"
+    />
+    
     <div class="grid grid-cols-12 gap-6">
       <div class="xl:col-span-12 col-span-12">
         <DataTable
@@ -60,6 +66,7 @@
 import DataTable from '@/Components/DataTable.vue'
 import DeleteProjectTypeModal from '@/Components/ProjectTypesModals/DeleteProjectTypeModal.vue'
 import AppLayout from '@/Layouts/AppLayout.vue'
+import Breadcrumb from '@/Components/Breadcrumb.vue'
 import { useTabsMemoryStore } from '@/stores/useTabsMemoryStore'
 import { useToast } from '@/composables/useToast'
 import { router } from '@inertiajs/vue3'
@@ -128,6 +135,11 @@ const actions = [
     icon: 'ri-delete-bin-line',
     class: 'ti-btn-outline-danger !py-1 !px-2 !text-[0.75rem] !m-0'
   }
+]
+
+const breadcrumbItems = [
+  { label: 'Início', href: '/' },
+  { label: 'Tipos de Projetos' }
 ]
 
 const filterOptions = computed(() => [

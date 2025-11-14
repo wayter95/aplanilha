@@ -12,6 +12,7 @@
       :isActive="isActive" 
       :mode="mode"
       :formKey="formKey"
+      :showHeader="true"
       @update:form="form = $event"
       @update:isActive="isActive = $event"
       @submit="save"
@@ -20,17 +21,25 @@
   </AppLayout>
   
   <!-- Versão sem AppLayout (para tabs) -->
-  <FormContent 
-    v-else
-    :form="form" 
-    :isActive="isActive" 
-    :mode="mode"
-    :formKey="formKey"
-    @update:form="form = $event"
-    @update:isActive="isActive = $event"
-    @submit="save"
-    @invalid="handleInvalid"
-  />
+  <div v-else>
+    <!-- Breadcrumb -->
+    <Breadcrumb
+      :title="mode === 'edit' ? 'Editar Tipo de Projeto' : 'Novo Tipo de Projeto'"
+      :items="breadcrumbItems"
+    />
+    
+    <FormContent 
+      :form="form" 
+      :isActive="isActive" 
+      :mode="mode"
+      :formKey="formKey"
+      :showHeader="false"
+      @update:form="form = $event"
+      @update:isActive="isActive = $event"
+      @submit="save"
+      @invalid="handleInvalid"
+    />
+  </div>
 </template>
 
 <script>
@@ -85,7 +94,7 @@ export default {
     },
     breadcrumbItems() {
       return [
-        { label: 'Projetos', href: '/projects' },
+        { label: 'Início', href: '/' },
         { label: 'Tipos de Projetos', href: '/projects/types' },
         { label: this.mode === 'edit' ? 'Editar' : 'Novo' }
       ]

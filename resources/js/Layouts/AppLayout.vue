@@ -22,12 +22,6 @@
       <div class="main-content">
         <div class="container-fluid" :class="{ 'tab-active': shouldShowTabContent }">
           <!-- Header sempre visível, mesmo com tab ativa -->
-          <div class="page-header">
-            <div>
-              <h1 class="page-title">{{ shouldShowTabContent && activeTab?.title ? activeTab.title : title }}</h1>
-              <p class="page-description">{{ description }}</p>
-            </div>
-          </div>
           <div v-if="!shouldShowTabContent">
             <slot />
           </div>

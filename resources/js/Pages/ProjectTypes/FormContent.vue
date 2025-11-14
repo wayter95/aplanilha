@@ -5,7 +5,7 @@
         <div class="box">
           <div class="box-header">
             <div class="box-title">
-              {{ mode === 'edit' ? 'Editar Tipo de Projeto' : 'Novo Tipo de Projeto' }}
+              Básico
             </div>
           </div>
           <div class="box-body">
@@ -30,51 +30,28 @@
 
               <!-- Cor -->
               <div class="xl:col-span-6 col-span-12">
-                <label for="color" class="form-label">
-                  Cor <span class="text-danger">*</span>
-                </label>
-                <div class="flex items-center gap-3">
-                  <input
-                    id="color-picker"
-                    type="color"
-                    v-model="localForm.color"
-                    class="form-control form-control-color !w-20"
-                    title="Escolha a cor"
-                  />
-                  <Field
-                    id="color"
-                    name="color"
-                    v-model="localForm.color"
-                    type="text"
-                    class="form-control"
-                    :class="{ 'is-invalid': errors.color }"
-                    placeholder="#000000"
-                    rules="required"
-                  />
-                </div>
-                <ErrorMessage name="color" class="invalid-feedback" />
+                <ColorInput
+                  id="color"
+                  name="color"
+                  label="Cor"
+                  v-model="localForm.color"
+                  placeholder="#000000"
+                  rules="required"
+                  :required="true"
+                />
               </div>
 
               <!-- Status -->
               <div class="xl:col-span-6 col-span-12">
-                <label class="form-label">Status</label>
-                <div class="flex items-center gap-3 mt-2">
-                  <div class="toggle on mb-0">
-                    <span></span>
-                    <input
-                      id="status-toggle"
-                      type="checkbox"
-                      v-model="localIsActive"
-                      class="toggle-checkbox"
-                    />
-                  </div>
-                  <label for="status-toggle" class="text-[0.875rem] text-defaulttextcolor mb-0 cursor-pointer">
-                    {{ localIsActive ? 'Ativo' : 'Bloqueado' }}
-                  </label>
-                </div>
-                <div class="text-[0.75rem] text-textmuted mt-1">
-                  {{ localIsActive ? 'Este tipo de projeto está disponível para uso' : 'Este tipo de projeto está bloqueado' }}
-                </div>
+                <Switch
+                  name="status"
+                  label="Status"
+                  v-model="localIsActive"
+                  active-label="Ativo"
+                  inactive-label="Bloqueado"
+                  :show-inline-label="true"
+                  help-text="Define se o tipo de projeto está disponível para uso"
+                />
               </div>
             </div>
           </div>
@@ -107,6 +84,8 @@
 import { Form, Field, ErrorMessage } from 'vee-validate'
 import { ref, watch, computed } from 'vue'
 import { router } from '@inertiajs/vue3'
+import ColorInput from '@/Components/ColorInput.vue'
+import Switch from '@/Components/Switch.vue'
 
 const props = defineProps({
   form: {
@@ -165,65 +144,4 @@ const handleCancel = () => {
 }
 </script>
 
-<style scoped>
-.toggle {
-  position: relative;
-  display: inline-block;
-  width: 44px;
-  height: 24px;
-}
 
-.toggle input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.toggle span {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  transition: 0.4s;
-  border-radius: 34px;
-}
-
-.toggle span:before {
-  position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: 0.4s;
-  border-radius: 50%;
-}
-
-.toggle input:checked + span {
-  background-color: rgb(var(--primary-rgb));
-}
-
-.toggle input:checked + span:before {
-  transform: translateX(20px);
-}
-
-.form-control-color {
-  height: 40px;
-  cursor: pointer;
-}
-
-.invalid-feedback {
-  display: block;
-  margin-top: 0.25rem;
-  font-size: 0.875em;
-  color: rgb(var(--danger-rgb));
-}
-
-.is-invalid {
-  border-color: rgb(var(--danger-rgb));
-}
-</style>
