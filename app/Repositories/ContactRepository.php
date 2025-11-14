@@ -39,6 +39,35 @@ class ContactRepository extends BaseRepository implements ContactRepositoryInter
             $query->where('responsible_user_id', $filters['responsible_user_id']);
         }
 
+        // Filtros avançados
+        if (!empty($filters['has_email'])) {
+            $query->whereNotNull('email')->where('email', '!=', '');
+        }
+
+        if (!empty($filters['has_phone'])) {
+            $query->whereNotNull('phone')->where('phone', '!=', '');
+        }
+
+        if (!empty($filters['created_recently'])) {
+            $query->where('created_at', '>=', now()->subDays(7));
+        }
+
+        if (!empty($filters['no_location'])) {
+            $query->where(function($q) {
+                $q->whereNull('city_visiting')
+                  ->orWhere('city_visiting', '')
+                  ->whereNull('country_visiting')
+                  ->orWhere('country_visiting', '');
+            });
+        }
+
+        if (!empty($filters['tag'])) {
+            // Para implementar futuramente quando houver sistema de tags
+            // $query->whereHas('tags', function($q) use ($filters) {
+            //     $q->where('name', $filters['tag']);
+            // });
+        }
+
         if (isset($filters['sort_by']) && isset($filters['sort_direction'])) {
             $query->orderBy($filters['sort_by'], $filters['sort_direction']);
         } else {

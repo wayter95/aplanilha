@@ -27,6 +27,13 @@ class ContactController extends Controller
                 'responsible_user_id' => $request->get('responsible_user_id'),
                 'sort_by' => $request->get('sort_by'),
                 'sort_direction' => $request->get('sort_direction', 'asc'),
+                'tag' => $request->get('tag'),
+                'view' => $request->get('view'),
+                // Filtros avançados
+                'has_email' => $request->boolean('has_email'),
+                'has_phone' => $request->boolean('has_phone'),
+                'created_recently' => $request->boolean('created_recently'),
+                'no_location' => $request->boolean('no_location'),
             ];
 
             $contacts = $this->service->getAllPaginated($perPage, $filters);

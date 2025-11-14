@@ -41129,9 +41129,6 @@ h6 {
 .\[--trigger\:hover\] {
   --trigger: hover;
 }
-.\[-\:\=\] {
-  -: =;
-}
 .authentication {
   min-height: 100vh;
 }
