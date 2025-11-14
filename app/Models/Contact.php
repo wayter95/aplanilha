@@ -47,6 +47,7 @@ class Contact extends Model
         'country_billing',
         'lat_billing',
         'lng_billing',
+        'general_notes',
     ];
 
     protected $casts = [

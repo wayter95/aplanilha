@@ -68,6 +68,22 @@ class ContactController extends Controller
             'country_billing' => 'nullable|string|max:100',
             'lat_billing' => 'nullable|numeric|between:-90,90',
             'lng_billing' => 'nullable|numeric|between:-180,180',
+            
+            // Notas gerais do contato
+            'general_notes' => 'nullable|string',
+            
+            // Pessoas de contato
+            'contact_persons' => 'sometimes|array',
+            'contact_persons.*.first_name' => 'required_with:contact_persons|string|max:255',
+            'contact_persons.*.last_name' => 'nullable|string|max:255',
+            'contact_persons.*.mobile' => 'nullable|string|max:50',
+            'contact_persons.*.role' => 'nullable|string|max:255',
+            'contact_persons.*.emails' => 'sometimes|array',
+            'contact_persons.*.emails.*' => 'email|max:255',
+            'contact_persons.*.notes' => 'sometimes|array',
+            'contact_persons.*.notes.*.name' => 'required_with:contact_persons.*.notes|string|max:255',
+            'contact_persons.*.notes.*.content' => 'nullable|string',
+            'contact_persons.*.notes.*.note_date' => 'nullable|date',
         ]);
 
         try {
@@ -126,6 +142,22 @@ class ContactController extends Controller
             'country_billing' => 'nullable|string|max:100',
             'lat_billing' => 'nullable|numeric|between:-90,90',
             'lng_billing' => 'nullable|numeric|between:-180,180',
+            
+            // Notas gerais do contato
+            'general_notes' => 'nullable|string',
+            
+            // Pessoas de contato
+            'contact_persons' => 'sometimes|array',
+            'contact_persons.*.first_name' => 'required_with:contact_persons|string|max:255',
+            'contact_persons.*.last_name' => 'nullable|string|max:255',
+            'contact_persons.*.mobile' => 'nullable|string|max:50',
+            'contact_persons.*.role' => 'nullable|string|max:255',
+            'contact_persons.*.emails' => 'sometimes|array',
+            'contact_persons.*.emails.*' => 'email|max:255',
+            'contact_persons.*.notes' => 'sometimes|array',
+            'contact_persons.*.notes.*.name' => 'required_with:contact_persons.*.notes|string|max:255',
+            'contact_persons.*.notes.*.content' => 'nullable|string',
+            'contact_persons.*.notes.*.note_date' => 'nullable|date',
         ]);
 
         try {

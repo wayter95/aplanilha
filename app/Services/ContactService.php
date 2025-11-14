@@ -35,12 +35,85 @@ class ContactService implements ContactServiceInterface
             $data['responsible_user_id'] = Auth::id();
         }
 
-        return $this->repository->create($data);
+        // Separar dados das pessoas de contato
+        $contactPersonsData = $data['contact_persons'] ?? [];
+        unset($data['contact_persons']);
+
+        // Criar o contato principal
+        $contact = $this->repository->create($data);
+
+        // Criar as pessoas de contato se existirem
+        if (!empty($contactPersonsData)) {
+            $this->createContactPersons($contact, $contactPersonsData);
+        }
+
+        return $contact;
     }
 
     public function update(string $id, array $data): bool
     {
-        return $this->repository->update($id, $data);
+        // Separar dados das pessoas de contato
+        $contactPersonsData = $data['contact_persons'] ?? null;
+        unset($data['contact_persons']);
+
+        // Atualizar o contato principal
+        $success = $this->repository->update($id, $data);
+
+        if ($success && $contactPersonsData !== null) {
+            $contact = $this->find($id);
+            if ($contact) {
+                // Remover pessoas de contato existentes
+                $contact->contactPersons()->delete();
+                
+                // Criar as novas pessoas de contato
+                if (!empty($contactPersonsData)) {
+                    $this->createContactPersons($contact, $contactPersonsData);
+                }
+            }
+        }
+
+        return $success;
+    }
+
+    private function createContactPersons(Model $contact, array $contactPersonsData): void
+    {
+        foreach ($contactPersonsData as $personData) {
+            // Criar a pessoa de contato
+            $contactPerson = $contact->contactPersons()->create([
+                'id' => Str::uuid()->toString(),
+                'first_name' => $personData['first_name'],
+                'last_name' => $personData['last_name'] ?? null,
+                'mobile' => $personData['mobile'] ?? null,
+                'role' => $personData['role'] ?? null,
+            ]);
+
+            // Criar os e-mails da pessoa
+            if (!empty($personData['emails'])) {
+                foreach ($personData['emails'] as $email) {
+                    if (!empty($email)) {
+                        $contactPerson->emails()->create([
+                            'id' => Str::uuid()->toString(),
+                            'email' => $email,
+                        ]);
+                    }
+                }
+            }
+
+            // Criar as notas da pessoa
+            if (!empty($personData['notes'])) {
+                foreach ($personData['notes'] as $noteData) {
+                    if (!empty($noteData['name'])) {
+                        $contactPerson->notes()->create([
+                            'id' => Str::uuid()->toString(),
+                            'name' => $noteData['name'],
+                            'content' => $noteData['content'] ?? null,
+                            'note_date' => $noteData['note_date'] ?? now(),
+                            'created_by' => Auth::id(),
+                        ]);
+                    }
+                }
+            }
+        }
     }
 
     public function delete(string $id): bool
