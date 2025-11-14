@@ -18,11 +18,12 @@
     
     <div class="relative flex items-center gap-3">
       <!-- Color Preview Circle -->
-      <div class="color-preview-wrapper">
+      <div class="color-preview-wrapper" :class="{ 'circle-only': variant === 'circle' }">
         <div 
           class="color-preview"
           :style="{ backgroundColor: fieldValue }"
           :class="{ 'disabled': disabled }"
+          :title="variant === 'circle' ? fieldValue : 'Escolha a cor'"
         ></div>
         <input
           :id="`${inputId}-picker`"
@@ -32,12 +33,13 @@
           class="color-picker-input"
           @input="handleColorPickerInput"
           @blur="handleBlur"
-          title="Escolha a cor"
+          :title="variant === 'circle' ? fieldValue : 'Escolha a cor'"
         />
       </div>
       
-      <!-- Text Input para HEX -->
+      <!-- Text Input para HEX (apenas se variant = 'full') -->
       <input 
+        v-if="variant === 'full'"
         type="text"
         :id="inputId"
         :name="name"
@@ -51,6 +53,16 @@
         @blur="handleBlur"
         @focus="$emit('focus', $event)"
         maxlength="7"
+      >
+      
+      <!-- Input hidden para validação quando variant = 'circle' -->
+      <input
+        v-else
+        type="hidden"
+        :id="inputId"
+        :name="name"
+        :value="fieldValue"
+        v-bind="fieldProps"
       >
     </div>
     
@@ -100,6 +112,12 @@ const props = defineProps({
   help: {
     type: String,
     default: ''
+  },
+  // Variante do componente
+  variant: {
+    type: String,
+    default: 'full', // 'full' = círculo + input, 'circle' = apenas círculo
+    validator: (value) => ['full', 'circle'].includes(value)
   },
   // Props para integração com VeeValidate
   rules: {
@@ -309,5 +327,14 @@ defineExpose({
   background-size: 8px 8px;
   background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
   z-index: -1;
+}
+
+/* Variante apenas círculo */
+.color-preview-wrapper.circle-only {
+  margin: 0 auto;
+}
+
+.color-preview-wrapper.circle-only .color-preview {
+  cursor: pointer;
 }
 </style>
