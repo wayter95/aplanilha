@@ -13,27 +13,30 @@ class UserController extends Controller
         private UserServiceInterface $userService
     ) {
         $this->middleware('auth');
+        $this->middleware('client.subscribe');
     }
 
     public function index(Request $request): JsonResponse
     {
-        $clientId = app('tenant.context')->getClientId();
-        $users = $this->userService->getUsersByClient($clientId);
+        $client = $request->get('client_subscribe');
+        $users = $this->userService->getUsersByClient($client->id);
         return response()->json($users);
     }
 
     public function store(Request $request): JsonResponse
     {
+        $client = $request->get('client_subscribe');
+        
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,NULL,id,client_id,' . app('tenant.context')->getClientId(),
+            'email' => 'required|email|unique:users,email,NULL,id,client_subscribe_id,' . $client->id,
             'password' => 'required|string|min:8',
             'photo_key' => 'nullable|string|max:255',
             'roles' => 'nullable|array',
             'roles.*' => 'exists:user_roles,id',
         ]);
 
-        $validated['client_id'] = app('tenant.context')->getClientId();
+        $validated['client_subscribe_id'] = $client->id;
         
         $user = $this->userService->createUser($validated);
         

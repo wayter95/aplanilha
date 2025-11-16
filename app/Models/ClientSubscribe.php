@@ -13,6 +13,7 @@ class ClientSubscribe extends Model
 
     protected $fillable = [
         'name',
+        'subdomain',
         'cnpj',
         'email',
         'phone',
@@ -20,10 +21,13 @@ class ClientSubscribe extends Model
         'city',
         'state',
         'zip_code',
+        'active',
         'is_active',
+        'plan',
         'subscription_plan',
         'subscription_start_date',
         'subscription_end_date',
+        'expires_at',
         'max_users',
         'max_storage_gb',
         'features',
@@ -32,9 +36,11 @@ class ClientSubscribe extends Model
     protected function casts(): array
     {
         return [
+            'active' => 'boolean',
             'is_active' => 'boolean',
             'subscription_start_date' => 'datetime',
             'subscription_end_date' => 'datetime',
+            'expires_at' => 'datetime',
             'features' => 'array',
         ];
     }

@@ -18,6 +18,7 @@ class UserController extends Controller
     public function __construct(UserServiceInterface $userService)
     {
         $this->middleware('auth');
+        $this->middleware('client.subscribe');
         $this->userService = $userService;
     }
 
@@ -31,14 +32,10 @@ class UserController extends Controller
                 'role' => $request->get('role'),
             ];
 
-            // Obter client_id do tenant context
-            $clientId = app('tenant.context')->getClientId();
-            if (!$clientId) {
-                // Fallback para o client_id do usuário logado
-                $clientId = Auth::user()?->client_id;
-            }
+            // Obter client do middleware
+            $client = $request->get('client_subscribe');
 
-            $users = $this->userService->getUsersByClientPaginated($clientId, $perPage, $filters);
+            $users = $this->userService->getUsersByClientPaginated($client->id, $perPage, $filters);
             $availableRoles = $this->userService->getAvailableRoles();
 
             return Inertia::render('Users', [

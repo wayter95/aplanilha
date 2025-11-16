@@ -16,6 +16,7 @@ class DocumentTypeController extends Controller
     public function __construct(private DocumentTypeServiceInterface $service)
     {
         $this->middleware('auth');
+        $this->middleware('client.subscribe');
     }
 
     public function index(Request $request): Response|RedirectResponse
@@ -27,14 +28,9 @@ class DocumentTypeController extends Controller
                 'status' => $request->get('status'),
             ];
 
-            $clientId = app('tenant.context')->getClientId();
-            if (!$clientId) {
-                $clientId = Auth::user()?->client_id;
-            }
+            $client = $request->get('client_subscribe');
 
-            $types = $clientId 
-                ? $this->service->getByClientPaginated($clientId, $perPage, $filters)
-                : $this->service->getAllPaginated($perPage, $filters);
+            $types = $this->service->getByClientPaginated($client->id, $perPage, $filters);
 
             return Inertia::render('DocumentTypes/Index', [
                 'types' => $types,

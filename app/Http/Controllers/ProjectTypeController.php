@@ -16,6 +16,7 @@ class ProjectTypeController extends Controller
     public function __construct(private ProjectTypeServiceInterface $service)
     {
         $this->middleware('auth');
+        $this->middleware('client.subscribe');
     }
 
     /**
@@ -24,16 +25,14 @@ class ProjectTypeController extends Controller
     public function index(Request $request): Response|RedirectResponse
     {
         try {
+            $client = $request->get('client_subscribe');
+            $clientId = $client->id;
+
             $perPage = $request->get('per_page', 10);
             $filters = [
                 'search' => $request->get('search'),
                 'status' => $request->get('status'),
             ];
-
-            $clientId = app('tenant.context')->getClientId();
-            if (!$clientId) {
-                $clientId = Auth::user()?->client_id;
-            }
 
             $types = $this->service->getProjectTypesByClient($clientId, $perPage, $filters);
 
@@ -56,10 +55,8 @@ class ProjectTypeController extends Controller
     public function exportCsv(Request $request): JsonResponse
     {
         try {
-            $clientId = app('tenant.context')->getClientId();
-            if (!$clientId) {
-                $clientId = Auth::user()?->client_id;
-            }
+            $client = $request->get('client_subscribe');
+            $clientId = $client->id;
 
             $filters = [
                 'search' => $request->get('search'),

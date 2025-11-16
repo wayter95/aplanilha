@@ -13,6 +13,7 @@ class DocumentTypeController extends Controller
     public function __construct(private DocumentTypeServiceInterface $service)
     {
         $this->middleware('auth');
+        $this->middleware('client.subscribe');
     }
 
     public function index(Request $request): JsonResponse
@@ -28,7 +29,7 @@ class DocumentTypeController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        $clientId = app('tenant.context')->getClientId() ?: (auth()->user()->client_id ?? null);
+        $client = $request->get('client_subscribe');
         
         $rules = [
             'code' => [
@@ -36,7 +37,7 @@ class DocumentTypeController extends Controller
                 'string',
                 'max:50',
                 Rule::unique('document_types', 'code')
-                    ->where('client_id', $clientId)
+                    ->where('client_id', $client->id)
                     ->whereNull('deleted_at')
             ],
             'name' => 'required|string|max:255',
@@ -62,7 +63,7 @@ class DocumentTypeController extends Controller
 
     public function update(Request $request, string $id): JsonResponse
     {
-        $clientId = app('tenant.context')->getClientId() ?: (auth()->user()->client_id ?? null);
+        $client = $request->get('client_subscribe');
         
         $rules = [
             'code' => [
@@ -71,7 +72,7 @@ class DocumentTypeController extends Controller
                 'max:50',
                 Rule::unique('document_types', 'code')
                     ->ignore($id)
-                    ->where('client_id', $clientId)
+                    ->where('client_id', $client->id)
                     ->whereNull('deleted_at')
             ],
             'name' => 'sometimes|string|max:255',

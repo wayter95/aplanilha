@@ -3,71 +3,44 @@
 namespace App\Services;
 
 use App\Models\ClientSubscribe;
-use App\Repositories\Interfaces\ClientSubscribeRepositoryInterface;
-use App\Services\Interfaces\ClientSubscribeServiceInterface;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Cache;
 
-class ClientSubscribeService implements ClientSubscribeServiceInterface
+class ClientSubscribeService
 {
-    public function __construct(
-        private ClientSubscribeRepositoryInterface $clientRepository
-    ) {}
-
-    public function createClient(array $data): ClientSubscribe
+    /**
+     * Find a client subscribe by subdomain.
+     *
+     * @param string $subdomain
+     * @return ClientSubscribe|null
+     */
+    public function findBySubdomain(string $subdomain): ?ClientSubscribe
     {
-        return $this->clientRepository->create($data);
+        // Cache the client lookup for 1 hour to improve performance
+        return Cache::remember("client_subscribe:{$subdomain}", 3600, function () use ($subdomain) {
+            return ClientSubscribe::where('subdomain', $subdomain)
+                ->where('active', true) // Only active clients
+                ->first();
+        });
     }
 
-    public function updateClient(string $id, array $data): ClientSubscribe
+    /**
+     * Clear the cache for a specific subdomain.
+     *
+     * @param string $subdomain
+     * @return void
+     */
+    public function clearCache(string $subdomain): void
     {
-        $client = $this->clientRepository->find($id);
-        if (!$client) {
-            throw new \Exception('Client not found');
-        }
-        
-        $this->clientRepository->update($id, $data);
-        return $this->clientRepository->find($id);
+        Cache::forget("client_subscribe:{$subdomain}");
     }
 
-    public function deleteClient(string $id): bool
+    /**
+     * Get the current client subscribe from the application instance.
+     *
+     * @return ClientSubscribe|null
+     */
+    public function getCurrentClient(): ?ClientSubscribe
     {
-        return $this->clientRepository->delete($id);
-    }
-
-    public function getClient(string $id): ?ClientSubscribe
-    {
-        return $this->clientRepository->find($id);
-    }
-
-    public function getClientBySubdomain(string $subdomain): ?ClientSubscribe
-    {
-        return $this->clientRepository->findBySubdomain($subdomain);
-    }
-
-    public function getAllClients(): Collection
-    {
-        return $this->clientRepository->all();
-    }
-
-    public function getActiveClients(): Collection
-    {
-        return $this->clientRepository->getActiveClients();
-    }
-
-    public function activateClient(string $id): bool
-    {
-        return $this->clientRepository->update($id, ['active' => true]);
-    }
-
-    public function deactivateClient(string $id): bool
-    {
-        return $this->clientRepository->update($id, ['active' => false]);
-    }
-
-    public function isClientActive(string $id): bool
-    {
-        $client = $this->clientRepository->find($id);
-        return $client ? $client->isActive() : false;
+        return app('client_subscribe');
     }
 }

@@ -16,6 +16,7 @@ class AuthController extends Controller
     public function __construct()
     {
         $this->middleware('auth')->only(['logout']);
+        $this->middleware('client.subscribe')->only(['login', 'sendResetLink', 'resetPassword']);
     }
 
     public function showLogin()
@@ -36,7 +37,12 @@ class AuthController extends Controller
         $credentials = $request->only(['email', 'password']);
         $remember = $request->boolean('remember');
 
-        $user = $this->findUserForTenant($credentials['email']);
+        // Get the client subscribe from the request (set by middleware)
+        $client = $request->get('client_subscribe');
+        
+        $user = User::where('email', $credentials['email'])
+            ->where('client_subscribe_id', $client->id)
+            ->first();
 
         if (!$user) {
             return back()->withErrors([
@@ -77,7 +83,12 @@ class AuthController extends Controller
     {
         $request->validate(['email' => 'required|email']);
 
-        $user = $this->findUserForTenant($request->email);
+        // Get the client subscribe from the request (set by middleware)
+        $client = $request->get('client_subscribe');
+        
+        $user = User::where('email', $request->email)
+            ->where('client_subscribe_id', $client->id)
+            ->first();
 
         if (!$user) {
             return back()->withErrors([
@@ -112,7 +123,12 @@ class AuthController extends Controller
             'password' => 'required|min:8|confirmed',
         ]);
 
-        $user = $this->findUserForTenant($request->email);
+        // Get the client subscribe from the request (set by middleware)
+        $client = $request->get('client_subscribe');
+        
+        $user = User::where('email', $request->email)
+            ->where('client_subscribe_id', $client->id)
+            ->first();
 
         if (!$user) {
             return back()->withErrors([
@@ -143,24 +159,5 @@ class AuthController extends Controller
         }
 
         return back()->withErrors(['email' => [__($status)]]);
-    }
-
-    private function findUserForTenant(string $email): ?User
-    {
-        try {
-            $tenantContext = app('tenant.context');
-            $clientId = $tenantContext->getClientId();
-        } catch (\Exception $e) {
-            $defaultTenant = \App\Models\ClientSubscribe::first();
-            $clientId = $defaultTenant ? $defaultTenant->id : null;
-        }
-
-        if ($clientId) {
-            return User::where('email', $email)
-                ->where('client_id', $clientId)
-                ->first();
-        }
-
-        return User::where('email', $email)->first();
     }
 }

@@ -15,6 +15,7 @@ class DocumentTemplateController extends Controller
         private DocumentTypeServiceInterface $typeService
     ) {
         $this->middleware('auth');
+        $this->middleware('client.subscribe');
     }
 
     public function index(Request $request): JsonResponse
@@ -49,7 +50,8 @@ class DocumentTemplateController extends Controller
             'fonts_json' => 'nullable',
         ]);
 
-        $validated['client_id'] = app('tenant.context')->getClientId() ?: (auth()->user()->client_id ?? null);
+        $client = $request->get('client_subscribe');
+        $validated['client_id'] = $client->id;
 
         $created = $this->service->create($validated);
 

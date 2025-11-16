@@ -14,6 +14,7 @@ class ProjectTypeController extends Controller
     public function __construct(private ProjectTypeServiceInterface $service)
     {
         $this->middleware('auth');
+        $this->middleware('client.subscribe');
     }
 
     /**
@@ -22,18 +23,18 @@ class ProjectTypeController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
-            $clientId = app('tenant.context')->getClientId() ?: Auth::user()->client_id;
+            $client = $request->get('client_subscribe');
             
             $activeOnly = $request->boolean('active_only', false);
             
             if ($activeOnly) {
-                $types = $this->service->getAllProjectTypesByClient($clientId)
+                $types = $this->service->getAllProjectTypesByClient($client->id)
                     ->where('status', 'a')
                     ->values();
                 return response()->json($types);
             }
 
-            $types = $this->service->getAllProjectTypesByClient($clientId);
+            $types = $this->service->getAllProjectTypesByClient($client->id);
             return response()->json($types);
         } catch (Exception $e) {
             return response()->json([
@@ -49,7 +50,7 @@ class ProjectTypeController extends Controller
     public function store(Request $request): JsonResponse
     {
         try {
-            $clientId = app('tenant.context')->getClientId() ?: Auth::user()->client_id;
+            $client = $request->get('client_subscribe');
             
             $validated = $request->validate([
                 'title' => 'required|string|max:255',
@@ -57,7 +58,7 @@ class ProjectTypeController extends Controller
                 'status' => 'sometimes|in:a,b',
             ]);
 
-            $validated['client_id'] = $clientId;
+            $validated['client_id'] = $client->id;
 
             $projectType = $this->service->create($validated);
 
