@@ -135,7 +135,7 @@ const menuItems = [
     icon: 'bx bx-briefcase',
     children: [
       { label: 'Projetos', route: '/projects' },
-      { label: 'Tipos de Projetos', route: '/projects/types' }
+      { label: 'Tipos de Projetos', route: '/project-types' }
     ]
   },
   

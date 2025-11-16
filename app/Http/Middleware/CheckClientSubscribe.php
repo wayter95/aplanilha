@@ -30,28 +30,27 @@ class CheckClientSubscribe
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Get the subdomain from the request header (sent by Axios)
-        $subdomain = $request->header('X-Tenant-Domain') ?: $request->header('domain');
+        // Extract subdomain from host (e.g., bukjob.sistema -> bukjob)
+        $host = $request->getHost();
+        $parts = explode('.', $host);
+        
+        // Get first part as subdomain
+        $subdomain = $parts[0];
 
-        // If no subdomain in header, try to extract from host
-        if (!$subdomain) {
-            $host = $request->getHost();
-            $parts = explode('.', $host);
-            
-            // If has subdomain (e.g., client.example.com)
-            if (count($parts) > 2) {
-                $subdomain = $parts[0];
+        // Check for API requests with X-Tenant-Domain header (optional override)
+        $headerSubdomain = $request->header('X-Tenant-Domain');
+        if ($headerSubdomain) {
+            // Extract only subdomain if full domain was provided
+            if (strpos($headerSubdomain, '.') !== false) {
+                $subdomain = explode('.', $headerSubdomain)[0];
+            } else {
+                $subdomain = $headerSubdomain;
             }
-        }
-
-        // Extract only subdomain if full domain was provided
-        if ($subdomain && strpos($subdomain, '.') !== false) {
-            $subdomain = explode('.', $subdomain)[0];
         }
 
         // If no subdomain is provided, return a 400 Bad Request response
         if (!$subdomain) {
-            return response()->json(['error' => 'Subdomain not provided'], 400);
+            abort(400, 'Client subdomain is required');
         }
 
         // Attempt to find the client subscribe by subdomain
@@ -59,7 +58,10 @@ class CheckClientSubscribe
 
         // If the client is not found, return a 404 Not Found response
         if (!$client) {
-            return response()->json(['error' => 'Client not found'], 404);
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'Client not found'], 404);
+            }
+            abort(404, 'Client not found');
         }
 
         // Attach the full client instance to the request

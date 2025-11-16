@@ -19,7 +19,7 @@ class Contact extends Model
     protected $fillable = [
         'type',
         'responsible_user_id',
-        'subscribed_client_id',
+        'client_id',
         'name',
         'email',
         'phone',
@@ -82,7 +82,7 @@ class Contact extends Model
      */
     public function client(): BelongsTo
     {
-        return $this->belongsTo(ClientSubscribe::class, 'subscribed_client_id');
+        return $this->belongsTo(ClientSubscribe::class, 'client_id');
     }
 
     /**

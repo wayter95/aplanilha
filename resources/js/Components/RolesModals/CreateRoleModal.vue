@@ -167,7 +167,7 @@ const createRole = async (values, { setErrors }) => {
             is_active: status === 'Ativo'
         }
 
-        const response = await fetch('/api/roles', {
+        const response = await fetch('/roles', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

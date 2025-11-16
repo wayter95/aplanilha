@@ -183,7 +183,7 @@ watch(() => props.show, async (newVal) => {
 
 async function fetchTypes() {
   try {
-    const { data } = await window.axios.get('/api/document-types')
+    const { data } = await window.axios.get('/document-types')
     types.value = data
   } catch (error) {
     console.error('Erro ao buscar tipos:', error)
@@ -224,9 +224,9 @@ async function saveType(values) {
   try {
     const data = values || formData.value
     if (editingType.value) {
-      await window.axios.put(`/api/document-types/${editingType.value.id}`, data)
+      await window.axios.put(`/document-types/${editingType.value.id}`, data)
     } else {
-      await window.axios.post('/api/document-types', data)
+      await window.axios.post('/document-types', data)
     }
     await fetchTypes()
     closeFormModal()
@@ -243,7 +243,7 @@ async function confirmDelete(type) {
   }
 
   try {
-    await window.axios.delete(`/api/document-types/${type.id}`)
+    await window.axios.delete(`/document-types/${type.id}`)
     await fetchTypes()
     emit('updated')
   } catch (error) {

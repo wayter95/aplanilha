@@ -138,7 +138,7 @@ const handleSubmit = async (values, { setErrors }) => {
   loading.value = true
   
   try {
-    const response = await fetch('/api/user/personal-data', {
+    const response = await fetch('/settings/personal-data', {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

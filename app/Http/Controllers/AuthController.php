@@ -41,7 +41,7 @@ class AuthController extends Controller
         $client = $request->get('client_subscribe');
         
         $user = User::where('email', $credentials['email'])
-            ->where('client_subscribe_id', $client->id)
+            ->where('client_id', $client->id)
             ->first();
 
         if (!$user) {
@@ -87,7 +87,7 @@ class AuthController extends Controller
         $client = $request->get('client_subscribe');
         
         $user = User::where('email', $request->email)
-            ->where('client_subscribe_id', $client->id)
+            ->where('client_id', $client->id)
             ->first();
 
         if (!$user) {
@@ -127,7 +127,7 @@ class AuthController extends Controller
         $client = $request->get('client_subscribe');
         
         $user = User::where('email', $request->email)
-            ->where('client_subscribe_id', $client->id)
+            ->where('client_id', $client->id)
             ->first();
 
         if (!$user) {

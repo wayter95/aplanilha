@@ -435,7 +435,7 @@ export default {
         this.isInitializing = true
         const formDataStore = useTabFormMemoryStore()
         const tabsStore = useTabsMemoryStore()
-        const { data } = await window.axios.get(`/api/document-types/${this.id}`)
+        const { data } = await window.axios.get(`/document-types/${this.id}`)
         
         this.form.name = data.name || ''
         this.form.code = data.code || ''
@@ -495,7 +495,7 @@ export default {
       
       try {
         if (this.mode === 'create') {
-          const { data } = await window.axios.post('/api/document-types', formData)
+          const { data } = await window.axios.post('/document-types', formData)
           this.toast.success('Tipo de documento criado com sucesso!')
           if (this.tempKey && data?.id) {
             formDataStore.clearFormData(this.tempKey)
@@ -520,7 +520,7 @@ export default {
             this.$inertia.visit(newPath)
           }
         } else {
-          await window.axios.put(`/api/document-types/${this.id}`, formData)
+          await window.axios.put(`/document-types/${this.id}`, formData)
           formDataStore.clearFormData(this.tabKey)
           this.toast.success('Tipo de documento atualizado com sucesso!')
           

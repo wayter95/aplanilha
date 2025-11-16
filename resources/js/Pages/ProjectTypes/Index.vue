@@ -178,13 +178,13 @@ const openCreateTab = () => {
     key: tempId,
     title: 'Novo Tipo de Projeto',
     componentName: 'ProjectTypes/Form',
-    path: `/projects/types/new/${tempId}`,
+    path: `/project-types/new/${tempId}`,
     mode: 'create',
     props: { tempKey: tempId },
     color: '#6366f1', // Cor padrão azul
     isModified: false
   })
-  router.visit(`/projects/types/new/${tempId}`)
+  router.visit(`/project-types/new/${tempId}`)
 }
 
 const openEditTab = (id) => {
@@ -193,13 +193,13 @@ const openEditTab = (id) => {
     key: id,
     title: type?.title || 'Editar Tipo de Projeto',
     componentName: 'ProjectTypes/Form',
-    path: `/projects/types/${id}/edit`,
+    path: `/project-types/${id}/edit`,
     mode: 'edit',
     props: { id },
     color: type?.color || '#6366f1',
     isModified: false
   })
-  router.visit(`/projects/types/${id}/edit`)
+  router.visit(`/project-types/${id}/edit`)
 }
 
 const toggleStatus = async (type) => {
@@ -229,7 +229,7 @@ const handleSelectionChange = (selectedRows) => {
 
 const handleFilterChange = (filters) => {
   currentFilters.value = filters
-  router.get('/projects/types', {
+  router.get('/project-types', {
     ...filters,
     search: currentSearch.value
   }, {
@@ -240,7 +240,7 @@ const handleFilterChange = (filters) => {
 
 const handleSearchChange = (search) => {
   currentSearch.value = search
-  router.get('/projects/types', {
+  router.get('/project-types', {
     ...currentFilters.value,
     search: search
   }, {

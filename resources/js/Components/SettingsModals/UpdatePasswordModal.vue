@@ -118,7 +118,7 @@ const handleSubmit = async (values, { setErrors }) => {
   loading.value = true
   
   try {
-    const response = await fetch('/api/user/password', {
+    const response = await fetch('/settings/password', {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

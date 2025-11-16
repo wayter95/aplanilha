@@ -154,7 +154,7 @@ const handleSubmit = async (values, { setErrors }) => {
   loading.value = true
   
   try {
-    const response = await fetch('/api/company/data', {
+    const response = await fetch('/settings/company-data/data', {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

@@ -384,7 +384,7 @@ export default {
     },
     async fetchTypeOptions() {
       try {
-        const { data } = await window.axios.get('/api/document-types')
+        const { data } = await window.axios.get('/document-types')
         this.typeOptions = data.map(t => ({
           value: t.code,
           label: t.name
@@ -476,7 +476,7 @@ export default {
     async load() {
       const formDataStore = useTabFormMemoryStore()
       const tabsStore = useTabsMemoryStore()
-      const { data } = await window.axios.get(`/api/document-templates/${this.id}`)
+      const { data } = await window.axios.get(`/document-templates/${this.id}`)
       Object.assign(this.form, data)
       formDataStore.setFormData(this.tabKey, data)
       // Força re-render do VeeForm para refletir os novos valores iniciais
@@ -519,12 +519,12 @@ export default {
       }
       try {
         if (this.mode === 'create') {
-          const { data } = await window.axios.post('/api/document-templates', formData)
+          const { data } = await window.axios.post('/document-templates', formData)
           
           this.toast.success('Modelo criado com sucesso!')
           
           if (formData.is_default && data?.id) {
-            await window.axios.post(`/api/document-templates/${data.id}/set-default`)
+            await window.axios.post(`/document-templates/${data.id}/set-default`)
           }
           
           if (this.tempKey && data?.id) {
@@ -561,7 +561,7 @@ export default {
             this.$inertia.visit(newPath)
           }
         } else {
-          await window.axios.put(`/api/document-templates/${this.id}`, formData)
+          await window.axios.put(`/document-templates/${this.id}`, formData)
           formDataStore.clearFormData(this.tabKey)
           
           this.toast.success('Modelo atualizado com sucesso!')

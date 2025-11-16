@@ -183,7 +183,7 @@ const createUser = async (values, { setErrors }) => {
       is_active: values.status === 'Ativo'
     }
 
-    const response = await fetch('/api/users', {
+    const response = await fetch('/users', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

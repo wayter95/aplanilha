@@ -180,10 +180,10 @@ export default {
     },
     async fetchTypes() {
       try {
-        const { data: typesCodes } = await window.axios.get('/api/document-templates/types')
+        const { data: typesCodes } = await window.axios.get('/document-templates/types')
         this.types = typesCodes
 
-        const { data: typesFull } = await window.axios.get('/api/document-types')
+        const { data: typesFull } = await window.axios.get('/document-types')
         this.typesData = typesFull
 
         if (this.types.length > 0 && !this.defaultType) {
@@ -202,7 +202,7 @@ export default {
     },
     async fetchByType(type) {
       try {
-        const { data } = await window.axios.get('/api/document-templates', { params: { type, per_page: 100 } })
+        const { data } = await window.axios.get('/document-templates', { params: { type, per_page: 100 } })
         const items = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])
         this.itemsByType[type] = items
       } catch (error) {
@@ -251,10 +251,10 @@ export default {
       if (!ok) return this.toast.error('Limite de abas atingido')
       this.$inertia.visit(`/document-templates/${template.id}/edit`)
     },
-    async setDefault(item) { await window.axios.post(`/api/document-templates/${item.id}/set-default`); await this.fetchByType(item.type) },
-    async remove(item) { await window.axios.delete(`/api/document-templates/${item.id}`); await this.fetchByType(item.type); this.selectedIds = this.selectedIds.filter(id => id !== item.id) },
-    async duplicate(item) { const payload = { ...item }; delete payload.id; payload.name = `${item.name} (Cópia)`; payload.is_default = false; await window.axios.post('/api/document-templates', payload); await this.fetchByType(item.type) },
-    async bulkDelete() { const ids = [...this.selectedIds]; for (const id of ids) { const it = this.grouped.flatMap(g => g.items).find(i => i.id === id); if (it) await window.axios.delete(`/api/document-templates/${id}`) } this.selectedIds = []; await Promise.all(this.types.map(t => this.fetchByType(t))) },
+    async setDefault(item) { await window.axios.post(`/document-templates/${item.id}/set-default`); await this.fetchByType(item.type) },
+    async remove(item) { await window.axios.delete(`/document-templates/${item.id}`); await this.fetchByType(item.type); this.selectedIds = this.selectedIds.filter(id => id !== item.id) },
+    async duplicate(item) { const payload = { ...item }; delete payload.id; payload.name = `${item.name} (Cópia)`; payload.is_default = false; await window.axios.post('/document-templates', payload); await this.fetchByType(item.type) },
+    async bulkDelete() { const ids = [...this.selectedIds]; for (const id of ids) { const it = this.grouped.flatMap(g => g.items).find(i => i.id === id); if (it) await window.axios.delete(`/document-templates/${id}`) } this.selectedIds = []; await Promise.all(this.types.map(t => this.fetchByType(t))) },
   }
 }
 </script>

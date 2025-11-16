@@ -40,13 +40,10 @@ class RoleService implements RoleServiceInterface
 
     public function createRole(array $data): UserRole
     {
+        // client_id deve vir do controller (via middleware)
+        // Se não vier, pega do usuário autenticado
         if (!isset($data['client_id'])) {
-            $defaultTenant = \App\Models\ClientSubscribe::first();
-            $clientId = $defaultTenant ? $defaultTenant->id : null;
-            
-            if ($clientId) {
-                $data['client_id'] = $clientId;
-            }
+            $data['client_id'] = auth()->user()?->client_id;
         }
 
         if ($this->roleRepository->nameExists($data['name'], null, $data['client_id'] ?? null)) {

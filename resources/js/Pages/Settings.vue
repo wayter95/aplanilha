@@ -357,7 +357,7 @@ const company = ref({
 const handlePhotoUploadSuccess = async (data) => {
   if (data) {
     try {
-      const response = await fetch(`/api/users/${user.value.id}/photo`, {
+      const response = await fetch(`/users/${user.value.id}/photo`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

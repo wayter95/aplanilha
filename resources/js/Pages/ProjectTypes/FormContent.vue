@@ -140,7 +140,7 @@ const handleInvalid = () => {
 }
 
 const handleCancel = () => {
-  router.visit('/projects/types')
+  router.visit('/project-types')
 }
 </script>
 

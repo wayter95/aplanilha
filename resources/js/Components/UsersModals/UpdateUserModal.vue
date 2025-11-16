@@ -197,7 +197,7 @@ const updateUser = async (values, { setErrors }) => {
       is_active: form.value.status === 'Ativo'
     }
 
-    const response = await fetch(`/api/users/${props.user.id}`, {
+    const response = await fetch(`/users/${props.user.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

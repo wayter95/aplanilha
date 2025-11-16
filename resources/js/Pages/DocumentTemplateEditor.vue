@@ -141,7 +141,7 @@ export default {
             try { return t ? JSON.parse(t) : null } catch { return null }
         },
         async fetchTypes() {
-            const { data } = await window.axios.get('/api/document-templates/types')
+            const { data } = await window.axios.get('/document-templates/types')
             this.types = data
             this.typeOptions = data.map(t => ({ value: t, label: this.labelOf(t) }))
             if (this.templateId) {
@@ -149,7 +149,7 @@ export default {
             }
         },
         async loadTemplate() {
-            const { data } = await window.axios.get(`/api/document-templates/${this.templateId}`)
+            const { data } = await window.axios.get(`/document-templates/${this.templateId}`)
             this.form = {
                 type: data.type,
                 name: data.name,
@@ -172,24 +172,24 @@ export default {
             payload.fonts_json = this.safeParse(this.fontsJsonText)
             payload.layout_json = this.safeParse(this.layoutJsonText)
             if (this.templateId) {
-                await window.axios.put(`/api/document-templates/${this.templateId}`, payload)
+                await window.axios.put(`/document-templates/${this.templateId}`, payload)
             } else {
-                const { data } = await window.axios.post('/api/document-templates', payload)
+                const { data } = await window.axios.post('/document-templates', payload)
                 this.$inertia.visit(`/document-templates/${data.id}/edit`)
                 return
             }
             if (payload.is_default) {
-                await window.axios.post(`/api/document-templates/${this.templateId}/set-default`)
+                await window.axios.post(`/document-templates/${this.templateId}/set-default`)
             }
         },
         async fetchPreviewHtml() {
             if (!this.templateId) return
-            const { data } = await window.axios.post(`/api/document-generation/${this.templateId}/preview-html`, { name: 'Exemplo' })
+            const { data } = await window.axios.post(`/document-templates/${this.templateId}/preview-html`, { name: 'Exemplo' })
             this.serverHtml = data.html
         },
         exportPdf() {
             if (!this.templateId) return
-            const url = `/api/document-generation/${this.templateId}/export-pdf?name=Exemplo`
+            const url = `/document-templates/${this.templateId}/export-pdf?name=Exemplo`
             window.open(url, '_blank')
         },
         goBack() {

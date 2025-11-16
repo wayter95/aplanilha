@@ -95,7 +95,7 @@ export default {
     breadcrumbItems() {
       return [
         { label: 'Início', href: '/' },
-        { label: 'Tipos de Projetos', href: '/projects/types' },
+        { label: 'Tipos de Projetos', href: '/project-types' },
         { label: this.mode === 'edit' ? 'Editar' : 'Novo' }
       ]
     }
@@ -185,7 +185,7 @@ export default {
             await tabsStore.closeTab(currentTab)
           }
           
-          this.$inertia.visit('/projects/types')
+          this.$inertia.visit('/project-types')
         } else {
           toast.error(data.message || 'Erro ao salvar tipo de projeto')
         }

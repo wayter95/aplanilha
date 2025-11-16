@@ -107,7 +107,7 @@ const deleteRole = async () => {
   processing.value = true
   if (props.role && props.role.id) {
     try {
-      const response = await fetch(`/api/roles/${props.role.id}`, {
+      const response = await fetch(`/roles/${props.role.id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

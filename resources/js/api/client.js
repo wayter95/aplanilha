@@ -13,13 +13,14 @@ import { router } from '@inertiajs/vue3';
 
 // Criar instância axios customizada
 const apiClient = axios.create({
-    baseURL: '/api',
+    baseURL: '/',
     headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'X-Requested-With': 'XMLHttpRequest'
     },
-    timeout: 30000 // 30 segundos
+    timeout: 30000, // 30 segundos
+    withCredentials: true // Essencial para enviar cookies de sessão
 });
 
 // Contador de requisições ativas (para loading global)

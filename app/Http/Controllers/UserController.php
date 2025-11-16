@@ -64,20 +64,9 @@ class UserController extends Controller
                 'is_active' => 'boolean',
             ]);
 
-            // Obter client_id do tenant context ou do usuário logado
-            $clientId = app('tenant.context')->getClientId();
-            if (!$clientId) {
-                $clientId = Auth::user()?->client_id;
-            }
-
-            if (!$clientId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Client ID não encontrado. Usuário deve estar logado.',
-                ], 422);
-            }
-
-            $validatedData['client_id'] = $clientId;
+            // Obter client_id do middleware
+            $client = $request->get('client_subscribe');
+            $validatedData['client_id'] = $client->id;
             $user = $this->userService->createUser($validatedData);
 
             return response()->json([

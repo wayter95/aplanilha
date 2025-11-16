@@ -88,7 +88,7 @@ const deleteType = async () => {
   processing.value = true
   if (props.type && props.type.id) {
     try {
-      const response = await fetch(`/api/document-types/${props.type.id}`, {
+      const response = await fetch(`/document-types/${props.type.id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
