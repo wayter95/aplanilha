@@ -17,6 +17,8 @@ class UserController extends Controller
 
     public function __construct(UserServiceInterface $userService)
     {
+        $this->middleware('auth');
+        $this->middleware('client.subscribe');
         $this->userService = $userService;
     }
 
@@ -30,27 +32,21 @@ class UserController extends Controller
                 'role' => $request->get('role'),
             ];
 
-            // Obter client_id do tenant context
-            $clientId = app('tenant.context')->getClientId();
-            if (!$clientId) {
-                // Fallback para o client_id do usuário logado
-                $clientId = Auth::user()?->client_id;
-            }
+            // Obter client do middleware
+            $client = $request->get('client_subscribe');
 
-            $users = $this->userService->getUsersByClientPaginated($clientId, $perPage, $filters);
+            $users = $this->userService->getUsersByClientPaginated($client->id, $perPage, $filters);
             $availableRoles = $this->userService->getAvailableRoles();
 
             return Inertia::render('Users', [
                 'users' => $users,
                 'filters' => $filters,
-                'user' => Auth::user(),
                 'availableRoles' => $availableRoles,
             ]);
         } catch (Exception $e) {
             return Inertia::render('Users', [
-                'users' => [],
+                'users' => ['data' => [], 'current_page' => 1, 'total' => 0],
                 'filters' => [],
-                'user' => Auth::user(),
                 'availableRoles' => [],
                 'error' => 'Erro ao carregar usuários: ' . $e->getMessage(),
             ]);
@@ -68,20 +64,9 @@ class UserController extends Controller
                 'is_active' => 'boolean',
             ]);
 
-            // Obter client_id do tenant context ou do usuário logado
-            $clientId = app('tenant.context')->getClientId();
-            if (!$clientId) {
-                $clientId = Auth::user()?->client_id;
-            }
-
-            if (!$clientId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Client ID não encontrado. Usuário deve estar logado.',
-                ], 422);
-            }
-
-            $validatedData['client_id'] = $clientId;
+            // Obter client_id do middleware
+            $client = $request->get('client_subscribe');
+            $validatedData['client_id'] = $client->id;
             $user = $this->userService->createUser($validatedData);
 
             return response()->json([

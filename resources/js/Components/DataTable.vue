@@ -10,39 +10,31 @@
         </div>
         <div class="flex flex-wrap gap-2">
           <slot name="header-actions"></slot>
-          
-          <button 
-            v-if="showExport"
-            @click="exportCSV"
-            class="ti-btn btn-wave ti-btn-success !py-1 !px-2 !text-[0.75rem] !m-0"
-          >
-            Exportar CSV
-          </button>
         </div>
       </div>
     </div>
 
     <div v-if="showFilters || showSearch" class="box-body !p-0 border-b border-defaultborder">
-      <div class="p-4">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div v-if="showSearch" class="md:col-span-2">
+      <div class="p-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <div v-if="showSearch" class="flex-1 min-w-[200px]">
             <div class="search-input-container">
               <input
                 v-model="searchQuery"
                 type="text"
                 :placeholder="searchPlaceholder"
-                class="ti-form-input pr-4"
+                class="ti-form-input !py-1.5 !text-[0.75rem]"
                 @input="handleSearch"
               />
-              <i class="ri-search-line search-icon text-textmuted dark:text-textmuted text-sm"></i>
+              <i class="ri-search-line search-icon text-[#8c9097] dark:text-white/50 !text-[0.875rem]"></i>
             </div>
           </div>
           
-          <div v-for="filter in filters" :key="filter.key">
+          <div v-for="filter in filters" :key="filter.key" class="min-w-[160px]">
             <select
               v-model="filterValues[filter.key]"
               @change="handleFilter"
-              class="ti-form-select"
+              class="ti-form-select !py-1.5 !text-[0.75rem]"
             >
               <option value="">{{ getFilterPlaceholder(filter) }}</option>
               <option v-for="option in filter.options" :key="option.value" :value="option.value">
@@ -56,11 +48,11 @@
 
     <div class="box-body !p-0">
       <div class="overflow-auto">
-        <div class="ti-custom-table ti-striped-table ti-custom-table-hover">
-          <table class="table whitespace-nowrap min-w-full">
+        <div class="ti-custom-table ti-custom-table-hover">
+          <table class="table whitespace-nowrap min-w-full !text-[0.75rem]">
             <thead>
               <tr class="border-b border-defaultborder">
-                <th v-if="showSelectAll" scope="col" class="text-start">
+                <th v-if="showSelectAll" scope="col" class="text-start !py-2 !px-3">
                   <input
                     type="checkbox"
                     :checked="selectAll"
@@ -73,26 +65,26 @@
                   v-for="column in columns" 
                   :key="column.key"
                   scope="col" 
-                  class="text-start cursor-pointer"
-                  @click="column.sortable !== false ? handleSort(column.key) : null"
+                  class="text-start !py-2 !px-3 !text-[0.75rem] !font-medium"
                   :class="{ 'cursor-pointer': column.sortable !== false }"
+                  @click="column.sortable !== false ? handleSort(column.key) : null"
                 >
                   <div class="flex items-center gap-2">
                     <span>{{ column.label }}</span>
-                    <i v-if="column.sortable !== false" class="ri-arrow-up-down-line text-textmuted dark:text-textmuted"></i>
+                    <i v-if="column.sortable !== false" class="ri-arrow-up-down-line text-[#8c9097] dark:text-white/50 !text-[0.75rem]"></i>
                   </div>
                 </th>
                 
-                <th v-if="hasActions" scope="col" class="text-start">Ações</th>
+                <th v-if="hasActions" scope="col" :class="[actionsAlignClass, '!py-2 !px-3 !text-[0.75rem] !font-medium']">Ações</th>
               </tr>
             </thead>
             <tbody>
               <tr 
                 v-for="(row, rowIndex) in paginatedData" 
                 :key="row.id || rowIndex" 
-                class="crm-contact"
+                class="crm-contact border-b border-defaultborder"
               >
-                <td v-if="showSelectAll" class="text-start">
+                <td v-if="showSelectAll" class="text-start !py-2 !px-3">
                   <input
                     type="checkbox"
                     :checked="selectedItems.includes(row.id)"
@@ -101,33 +93,31 @@
                   >
                 </td>
                 
-                <td v-for="column in columns" :key="column.key" class="text-start">
+                <td v-for="column in columns" :key="column.key" class="text-start !py-2 !px-3">
                   <slot :name="`cell-${column.key}`" :value="getNestedValue(row, column.key)" :row="row" :column="column" :rowIndex="rowIndex">
                     <div v-if="column.type === 'user'">
-                      <div class="flex items-center gap-3">
-                        <div class="avatar avatar-sm avatar-rounded">
+                      <div class="flex items-center gap-2">
+                        <span class="avatar avatar-xs avatar-rounded">
                           <img 
                             v-if="getUserPhoto(row, column.photoKey)"
                             :src="getUserPhoto(row, column.photoKey)"
                             :alt="getNestedValue(row, column.nameKey || 'name')"
-                            class="w-8 h-8 object-cover"
-                            style="border-radius: 50%;"
                             @error="handleImageError"
                           />
                           <div 
                             v-else
-                            class="w-8 h-8 bg-primary text-white flex items-center justify-center text-sm font-semibold fallback-initials"
+                            class="w-7 h-7 bg-primary/10 text-primary flex items-center justify-center !text-[0.65rem] font-semibold"
                             style="border-radius: 50%;"
                           >
                             {{ getInitials(getNestedValue(row, column.nameKey || 'name')) }}
                           </div>
-                        </div>
-                        <div>
-                          <div class="leading-none">
-                            <span class="font-semibold">{{ getNestedValue(row, column.nameKey || 'name') }}</span>
+                        </span>
+                        <div class="leading-tight">
+                          <div class="leading-none mb-0.5">
+                            <span class="font-semibold !text-[0.75rem]">{{ getNestedValue(row, column.nameKey || 'name') }}</span>
                           </div>
                           <div class="leading-none">
-                            <span class="text-[0.6875rem] text-textmuted dark:text-textmuted">
+                            <span class="!text-[0.65rem] text-[#8c9097] dark:text-white/50">
                               {{ getNestedValue(row, column.emailKey || 'email') }}
                             </span>
                           </div>
@@ -138,7 +128,7 @@
                     <div v-else-if="column.type === 'status'">
                       <span 
                         :class="[
-                          'badge',
+                          'badge !text-[0.65rem] !py-0.5 !px-2',
                           getStatusBadgeClass(getStatusValue(row, column.key))
                         ]"
                       >
@@ -149,7 +139,7 @@
                     <div v-else-if="column.type === 'role'">
                       <span 
                         :class="[
-                          'badge',
+                          'badge !text-[0.65rem] !py-0.5 !px-2',
                           getRoleBadgeClass(getNestedValue(row, column.key))
                         ]"
                       >
@@ -158,7 +148,7 @@
                     </div>
 
                     <div v-else-if="column.type === 'date'">
-                      <span class="text-textmuted dark:text-textmuted">
+                      <span class="text-[#8c9097] dark:text-white/50 !text-[0.75rem]">
                         {{ formatDate(getNestedValue(row, column.key)) }}
                       </span>
                     </div>
@@ -166,7 +156,7 @@
                     <div v-else-if="column.type === 'badge'">
                       <span 
                         :class="[
-                          'badge',
+                          'badge !text-[0.65rem] !py-0.5 !px-2',
                           column.badgeClass ? column.badgeClass(getNestedValue(row, column.key)) : 'bg-primary/10 text-primary'
                         ]"
                       >
@@ -175,39 +165,73 @@
                     </div>
 
                     <div v-else-if="column.type === 'permissions_count'">
-                      <span class="badge bg-info/10 text-info">
+                      <span class="badge bg-info/10 text-info !text-[0.65rem] !py-0.5 !px-2">
                         {{ getNestedValue(row, column.key)?.length || 0 }} permissões
                       </span>
                     </div>
 
-                    <span v-else>{{ getNestedValue(row, column.key) }}</span>
+                    <span v-else class="!text-[0.75rem]">{{ getNestedValue(row, column.key) }}</span>
                   </slot>
                 </td>
                 
-                <td v-if="hasActions" class="text-start">
-                  <div class="flex items-center gap-2">
-                    <button 
-                      v-for="action in actions" 
-                      :key="action.name"
-                      @click="handleAction(action.name, row, rowIndex)"
-                      :class="[
-                        'ti-btn btn-wave ti-btn-sm',
-                        action.class || 'ti-btn-outline-primary'
-                      ]"
-                      :title="action.label"
-                    >
-                      <i v-if="action.icon" :class="action.icon"></i>
-                      <span v-if="action.showLabel">{{ action.label }}</span>
-                    </button>
-                  </div>
+                <td v-if="hasActions" :class="[actionsAlignClass, '!py-2 !px-3']">
+                  <slot name="cell-actions" :row="row" :rowIndex="rowIndex">
+                    <div :class="['flex items-center gap-1', actionsAlignClass]">
+                      <button 
+                        v-for="action in actions" 
+                        :key="action.name"
+                        @click="handleAction(action.name, row, rowIndex)"
+                        :class="[
+                          'ti-btn ti-btn-icon ti-btn-sm',
+                          action.class || 'ti-btn-primary-full'
+                        ]"
+                        :title="action.label"
+                      >
+                        <i v-if="action.icon" :class="action.icon"></i>
+                      </button>
+                    </div>
+                  </slot>
                 </td>
               </tr>
               
               <tr v-if="filteredData.length === 0">
-                <td :colspan="columns.length + (hasActions ? 1 : 0) + (showSelectAll ? 1 : 0)" class="text-center py-8">
-                  <div class="text-textmuted dark:text-textmuted">
-                    <i class="ri-search-line text-4xl mb-2"></i>
-                    <p>Nenhum resultado encontrado</p>
+                <td :colspan="columns.length + (hasActions ? 1 : 0) + (showSelectAll ? 1 : 0)" class="text-center !py-8">
+                  <div class="py-8">
+                    <div class="flex flex-col items-center justify-center">
+                      <!-- Ícone -->
+                      <div class="mb-4">
+                        <div class="w-16 h-16 bg-light dark:bg-bodybg rounded-full flex items-center justify-center">
+                          <i class="ri-search-line !text-3xl text-[#8c9097] dark:text-white/50 opacity-50"></i>
+                        </div>
+                      </div>
+                      
+                      <!-- Título -->
+                      <h3 class="!text-[0.938rem] font-semibold text-defaulttextcolor dark:text-white mb-1">
+                        Nenhum resultado encontrado
+                      </h3>
+                      
+                      <!-- Descrição -->
+                      <p class="!text-[0.75rem] text-[#8c9097] dark:text-white/50 max-w-md text-center mb-4">
+                        <span v-if="searchQuery || Object.values(filterValues).some(v => v)">
+                          Não encontramos registros. Tente ajustar os filtros.
+                        </span>
+                        <span v-else>
+                          Ainda não há registros cadastrados.
+                        </span>
+                      </p>
+                      
+                      <!-- Ações -->
+                      <div class="flex gap-2">
+                        <button 
+                          v-if="searchQuery || Object.values(filterValues).some(v => v)"
+                          @click="clearFilters"
+                          class="ti-btn ti-btn-outline-primary !py-1 !px-3 !text-[0.75rem]"
+                        >
+                          <i class="ri-refresh-line me-1 !text-[0.875rem]"></i>
+                          Limpar filtros
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </td>
               </tr>
@@ -216,62 +240,67 @@
         </div>
       </div>
 
-      <div class="box-body !p-0">
-        <div class="flex items-center justify-between p-4">
-          <div class="flex items-center gap-4">
-            <div class="flex items-center gap-2">
+      <div class="box-body !p-0 border-t border-defaultborder">
+        <div class="tabulator">
+          <div class="tabulator-footer">
+            <div class="tabulator-footer-contents">
+            <span class="tabulator-page-counter">
+              <span>{{ startIndex }}-{{ endIndex }} de {{ filteredData.length }}</span>
+            </span>
+            
+            <span class="tabulator-paginator">
+              <label>Registros por página</label>
               <select
                 v-model="itemsPerPage"
                 @change="handleItemsPerPageChange"
-                class="ti-form-select !py-1 !px-2 !text-[0.75rem] !m-0"
+                class="tabulator-page-size"
+                aria-label="Page Size"
+                title="Page Size"
               >
                 <option value="5">5</option>
                 <option value="10">10</option>
                 <option value="25">25</option>
                 <option value="50">50</option>
               </select>
-            </div>
-            
-            <div class="text-sm text-textmuted dark:text-textmuted">
-              Mostrando {{ startIndex }} até {{ endIndex }} de {{ filteredData.length }} resultados
-            </div>
-          </div>
-
-          <div class="flex items-center gap-2">
-            <button
-              @click="goToPage(currentPage - 1)"
-              :disabled="currentPage === 1"
-              class="ti-btn btn-wave ti-btn-outline-default !py-1 !px-2 !text-[0.75rem] !m-0"
-              :class="{ 'opacity-50 cursor-not-allowed': currentPage === 1 }"
-            >
-              <i class="ri-arrow-left-s-line"></i>
-            </button>
-            
-            <div class="flex items-center gap-1">
+              
               <button
-                v-for="page in visiblePages"
-                :key="page"
-                @click="goToPage(page)"
-                :class="[
-                  'ti-btn btn-wave !py-1 !px-2 !text-[0.75rem] !m-0',
-                  page === currentPage 
-                    ? 'ti-btn-primary' 
-                    : 'ti-btn-outline-default'
-                ]"
+                @click="goToPage(currentPage - 1)"
+                :disabled="currentPage === 1"
+                class="tabulator-page"
+                type="button"
+                data-page="prev"
               >
-                {{ page }}
+                ‹
               </button>
-            </div>
-            
-            <button
-              @click="goToPage(currentPage + 1)"
-              :disabled="currentPage === totalPages"
-              class="ti-btn btn-wave ti-btn-outline-default !py-1 !px-2 !text-[0.75rem] !m-0"
-              :class="{ 'opacity-50 cursor-not-allowed': currentPage === totalPages }"
-            >
-              <i class="ri-arrow-right-s-line"></i>
-            </button>
+              
+              <span class="tabulator-pages">
+                <button
+                  v-for="page in visiblePages"
+                  :key="page"
+                  @click="goToPage(page)"
+                  :class="['tabulator-page', { 'active': page === currentPage }]"
+                  type="button"
+                  role="button"
+                  :aria-label="`Show Page ${page}`"
+                  :title="`Show Page ${page}`"
+                  :data-page="page"
+                >
+                  {{ page }}
+                </button>
+              </span>
+              
+              <button
+                @click="goToPage(currentPage + 1)"
+                :disabled="currentPage === totalPages"
+                class="tabulator-page"
+                type="button"
+                data-page="next"
+              >
+                ›
+              </button>
+            </span>
           </div>
+        </div>
         </div>
       </div>
     </div>
@@ -279,6 +308,7 @@
 </template>
 
 <script setup>
+import Button from './Button.vue'
 import { usePhotoUrl } from '@/composables/usePhotoUrl'
 import { computed, ref, watch } from 'vue'
 
@@ -344,6 +374,11 @@ const props = defineProps({
   searchPlaceholder: {
     type: String,
     default: 'Buscar...'
+  },
+  actionsAlign: {
+    type: String,
+    default: 'center',
+    validator: (value) => ['left', 'center', 'right'].includes(value)
   }
 })
 
@@ -366,6 +401,15 @@ props.filters.forEach(filter => {
 })
 
 const hasActions = computed(() => props.actions.length > 0)
+
+const actionsAlignClass = computed(() => {
+  const alignMap = {
+    'left': 'text-start justify-start',
+    'center': 'text-center justify-center',
+    'right': 'text-end justify-end'
+  }
+  return alignMap[props.actionsAlign] || alignMap.center
+})
 
 const filteredData = computed(() => {
   let result = [...props.data]
@@ -589,6 +633,16 @@ const toggleRowSelection = (rowId) => {
   emit('selection-change', selectedItems.value)
 }
 
+const clearFilters = () => {
+  searchQuery.value = ''
+  Object.keys(filterValues.value).forEach(key => {
+    filterValues.value[key] = ''
+  })
+  currentPage.value = 1
+  emit('search-change', '')
+  emit('filter-change', {})
+}
+
 const getStatusBadgeClass = (status) => {
   const statusMap = {
     'Ativo': 'bg-success/10 text-success',
@@ -676,132 +730,7 @@ watch(() => props.data, () => {
 </script>
 
 <style scoped>
-.box {
-  background-color: rgb(var(--default-background));
-  border-color: rgb(var(--bootstrap-card-border));
-}
-
-.custom-box {
-  background-color: rgb(var(--default-background));
-  border-color: rgb(var(--bootstrap-card-border));
-}
-
-.box-header {
-  background-color: rgb(var(--default-background));
-  border-color: rgb(var(--bootstrap-card-border));
-}
-
-.box-title {
-  color: rgb(var(--default-text-color));
-}
-
-.table {
-  background-color: rgb(var(--default-background));
-}
-
-.table thead tr {
-  background-color: rgb(var(--light));
-}
-
-.table th {
-  color: rgb(var(--default-text-color));
-}
-
-.table td {
-  color: rgb(var(--default-text-color));
-}
-
-.table tbody tr:nth-child(even) {
-  background-color: rgb(var(--light));
-}
-
-.crm-contact {
-  border-color: rgb(var(--bootstrap-card-border));
-}
-
-.crm-contact:hover {
-  background-color: rgb(var(--list-hover-focus-bg));
-}
-
-.ti-form-input {
-  background-color: rgb(var(--form-control-bg));
-  border-color: rgb(var(--input-border));
-  color: rgb(var(--default-text-color));
-}
-
-.ti-form-input:focus {
-  background-color: rgb(var(--form-control-bg));
-  border-color: rgb(var(--primary));
-  box-shadow: 0 0 0 2px rgba(132, 90, 223, 0.2);
-}
-
-.ti-form-select {
-  background-color: rgb(var(--form-control-bg));
-  border-color: rgb(var(--input-border));
-  color: rgb(var(--default-text-color));
-}
-
-.ti-form-select:focus {
-  background-color: rgb(var(--form-control-bg));
-  border-color: rgb(var(--primary));
-  box-shadow: 0 0 0 2px rgba(132, 90, 223, 0.2);
-}
-
-.ti-btn-light {
-  background-color: rgb(var(--light));
-  border-color: rgb(var(--default-border));
-  color: rgb(var(--default-text-color));
-}
-
-.ti-dropdown-item {
-  color: rgb(var(--default-text-color));
-}
-
-.bg-light {
-  background-color: rgb(var(--light));
-}
-
-.form-check-input {
-  background-color: rgb(var(--form-control-bg));
-  border-color: rgb(var(--input-border));
-}
-
-.form-check-input:focus {
-  background-color: rgb(var(--form-control-bg));
-  border-color: rgb(var(--primary));
-  box-shadow: 0 0 0 2px rgba(132, 90, 223, 0.2);
-}
-
-/* Search input dark mode fixes */
-.dark .ti-form-input {
-  background-color: rgb(35 38 40) !important;
-  border-color: rgb(49 51 53) !important;
-  color: rgb(255 255 255) !important;
-}
-
-.dark .ti-form-input::placeholder {
-  color: rgb(140 144 151) !important;
-}
-
-.dark .ti-form-input:focus {
-  background-color: rgb(35 38 40) !important;
-  border-color: rgb(132 90 223) !important;
-  box-shadow: 0 0 0 2px rgba(132, 90, 223, 0.2) !important;
-}
-
-.dark .ti-form-select {
-  background-color: rgb(35 38 40) !important;
-  border-color: rgb(49 51 53) !important;
-  color: rgb(255 255 255) !important;
-}
-
-.dark .ti-form-select:focus {
-  background-color: rgb(35 38 40) !important;
-  border-color: rgb(132 90 223) !important;
-  box-shadow: 0 0 0 2px rgba(132, 90, 223, 0.2) !important;
-}
-
-/* Search icon positioning fix */
+/* Search icon positioning */
 .search-input-container {
   position: relative;
 }
@@ -819,79 +748,27 @@ watch(() => props.data, () => {
   padding-left: 40px !important;
 }
 
-/* Dark mode styles */
-.dark .box {
-  background-color: rgb(35 38 40) !important;
-  border-color: rgb(49 51 53) !important;
+/* Remove icons from pagination number buttons */
+.pagination-number::before,
+.pagination-number::after,
+.pagination-number i {
+  display: none !important;
+  content: none !important;
 }
 
-.dark .custom-box {
-  background-color: rgb(35 38 40) !important;
-  border-color: rgb(49 51 53) !important;
+.pagination-number span {
+  display: inline-block;
 }
 
-.dark .box-header {
-  background-color: rgb(35 38 40) !important;
-  border-color: rgb(49 51 53) !important;
-}
-
-.dark .box-title {
-  color: rgb(255 255 255) !important;
-}
-
-.dark .table {
-  background-color: rgb(35 38 40) !important;
-}
-
-.dark .table thead tr {
-  background-color: rgb(43 46 49) !important;
-}
-
-.dark .table th {
-  color: rgb(255 255 255) !important;
-}
-
-.dark .table td {
-  color: rgb(255 255 255) !important;
-}
-
-.dark .crm-contact {
-  border-color: rgb(49 51 53) !important;
-}
-
-.dark .crm-contact:hover {
-  background-color: rgb(43 46 49) !important;
-}
-
-.dark .ti-dropdown-menu {
-  border-color: rgb(49 51 53) !important;
-}
-
-.dark .ti-btn-outline-default {
-  border-color: rgb(49 51 53) !important;
-}
-
-.dark .ti-btn-light {
-  background-color: rgb(43 46 49) !important;
-  border-color: rgb(49 51 53) !important;
-}
-
-.dark .ti-dropdown-item {
-  color: rgb(255 255 255) !important;
-}
-
-.dark .bg-light {
-  background-color: rgb(43 46 49) !important;
-}
-
-.dark .form-check-input {
-  background-color: rgb(35 38 40) !important;
-  border-color: rgb(49 51 53) !important;
-}
-
-.dark .form-check-input:focus {
-  background-color: rgb(35 38 40) !important;
-  border-color: rgb(132 90 223) !important;
-  box-shadow: 0 0 0 2px rgba(132, 90, 223, 0.2) !important;
+/* Items per page select - ensure dropdown arrow is visible */
+.items-per-page-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%238c9097' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 10px;
+  min-width: 60px;
 }
 </style>

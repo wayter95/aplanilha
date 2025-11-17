@@ -34,7 +34,7 @@
           <!-- End::header-element -->
         </div>
 
-        <div class="header-content-right">
+        <div class="header-content-right" style="margin-left: auto;">
           
           <!-- Start::header-element -->
           <div class="header-element header-theme-mode hidden !items-center sm:block !py-[1rem] md:!px-[0.65rem] px-2">
@@ -149,7 +149,7 @@ import { useSidebarToggle } from '@/composables/useSidebarToggle'
 import { useFullscreen } from '@/composables/useFullscreen'
 import { useTheme } from '@/composables/useTheme'
 import { initOverlayTriggers } from '@/composables/useOverlay'
-import { router, Link } from '@inertiajs/vue3'
+import { router, Link, usePage } from '@inertiajs/vue3'
 import { onMounted, ref, watch, computed } from 'vue'
 import desktopLogo from '../../assets/images/brand-logos/desktop-logo.png'
 import toggleLogo from '../../assets/images/brand-logos/toggle-logo.png'
@@ -158,11 +158,11 @@ import toggleDark from '../../assets/images/brand-logos/toggle-dark.png'
 import desktopWhite from '../../assets/images/brand-logos/desktop-white.png'
 import toggleWhite from '../../assets/images/brand-logos/toggle-white.png'
 
-const props = defineProps({
-  user: { type: Object, default: () => ({}) }
-})
-
 defineEmits(['toggle-sidebar'])
+
+// Page props
+const page = usePage()
+const user = computed(() => page.props.auth.user)
 
 // Composables
 const { toggleSidebar } = useSidebarToggle()
@@ -174,19 +174,19 @@ const { getPhotoUrl } = usePhotoUrl()
 const userPhotoUrl = ref(null)
 
 const displayName = computed(() => {
-  if (!props.user?.name) return 'Usuário'
-  const parts = props.user.name.trim().split(' ')
-  return parts.length <= 2 ? props.user.name : `${parts[0]} ${parts[1]}`
+  if (!user.value?.name) return 'Usuário'
+  const parts = user.value.name.trim().split(' ')
+  return parts.length <= 2 ? user.value.name : `${parts[0]} ${parts[1]}`
 })
 
 const loadUserPhoto = async () => {
-  if (props.user?.photo_key) {
-    const url = await getPhotoUrl(props.user.photo_key)
+  if (user.value?.photo_key) {
+    const url = await getPhotoUrl(user.value.photo_key)
     if (url) userPhotoUrl.value = url
   }
 }
 
-watch(() => props.user, loadUserPhoto, { immediate: true })
+watch(user, loadUserPhoto, { immediate: true })
 
 // Logout
 const logout = () => {
@@ -198,3 +198,16 @@ onMounted(() => {
   initOverlayTriggers()
 })
 </script>
+
+<style scoped>
+.header-tabs {
+  max-width: 40%;
+  flex-shrink: 1;
+}
+
+@media (max-width: 1024px) {
+  .header-tabs {
+    display: none !important;
+  }
+}
+</style>

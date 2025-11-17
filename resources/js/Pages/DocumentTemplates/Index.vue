@@ -137,20 +137,16 @@ import Accordion from '@/Components/Accordion.vue'
 import { useToast } from '@/composables/useToast'
 import { useTooltip } from '@/composables/useTooltip'
 import AppLayout from '@/Layouts/AppLayout.vue'
-import { useTabsStore } from '@/stores/useTabsStore'
 
 export default {
   components: { AppLayout, Accordion },
   setup() {
-    const tabsStore = useTabsStore()
     const toast = useToast()
-    // Inicializar tooltips automaticamente
     useTooltip()
-    return { tabsStore, toast }
+    return { toast }
   },
   data() {
     return {
-      user: this.$page.props.user || null,
       types: [],
       typesData: [],
       itemsByType: {},
@@ -181,10 +177,10 @@ export default {
     },
     async fetchTypes() {
       try {
-        const { data: typesCodes } = await window.axios.get('/api/document-templates/types')
+        const { data: typesCodes } = await window.axios.get('/document-templates/types')
         this.types = typesCodes
 
-        const { data: typesFull } = await window.axios.get('/api/document-types')
+        const { data: typesFull } = await window.axios.get('/document-types')
         this.typesData = typesFull
 
         if (this.types.length > 0 && !this.defaultType) {
@@ -203,7 +199,7 @@ export default {
     },
     async fetchByType(type) {
       try {
-        const { data } = await window.axios.get('/api/document-templates', { params: { type, per_page: 100 } })
+        const { data } = await window.axios.get('/document-templates', { params: { type, per_page: 100 } })
         const items = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : [])
         this.itemsByType[type] = items
       } catch (error) {
@@ -223,39 +219,15 @@ export default {
         return
       }
       
-      const tempKey = `new-${Date.now()}`
-      const path = `/document-templates/new/${tempKey}`
-      const ok = this.tabsStore.addTab({
-        key: tempKey,
-        title: `Novo Modelo (${type.name})`,
-        mode: 'create',
-        componentName: 'DocumentTemplatesForm',
-        path,
-        props: { mode: 'create', tempKey, type: type.value },
-        context: 'document-templates'
-      })
-      if (!ok) return this.toast.error('Limite de abas atingido')
-      this.$inertia.visit(path)
+      this.$inertia.visit('/document-templates/create', { data: { type: type.value } })
     },
     openEditTab(template) {
-      const exists = this.tabsStore.tabs.find(t => t.key === template.id)
-      if (exists) { this.tabsStore.setActive(exists); return this.$inertia.visit(exists.path || `/document-templates/${template.id}/edit`) }
-      const ok = this.tabsStore.addTab({
-        key: template.id,
-        title: template.name,
-        mode: 'edit',
-        componentName: 'DocumentTemplatesForm',
-        path: `/document-templates/${template.id}/edit`,
-        props: { mode: 'edit', id: template.id },
-        context: 'document-templates'
-      })
-      if (!ok) return this.toast.error('Limite de abas atingido')
       this.$inertia.visit(`/document-templates/${template.id}/edit`)
     },
-    async setDefault(item) { await window.axios.post(`/api/document-templates/${item.id}/set-default`); await this.fetchByType(item.type) },
-    async remove(item) { await window.axios.delete(`/api/document-templates/${item.id}`); await this.fetchByType(item.type); this.selectedIds = this.selectedIds.filter(id => id !== item.id) },
-    async duplicate(item) { const payload = { ...item }; delete payload.id; payload.name = `${item.name} (Cópia)`; payload.is_default = false; await window.axios.post('/api/document-templates', payload); await this.fetchByType(item.type) },
-    async bulkDelete() { const ids = [...this.selectedIds]; for (const id of ids) { const it = this.grouped.flatMap(g => g.items).find(i => i.id === id); if (it) await window.axios.delete(`/api/document-templates/${id}`) } this.selectedIds = []; await Promise.all(this.types.map(t => this.fetchByType(t))) },
+    async setDefault(item) { await window.axios.post(`/document-templates/${item.id}/set-default`); await this.fetchByType(item.type) },
+    async remove(item) { await window.axios.delete(`/document-templates/${item.id}`); await this.fetchByType(item.type); this.selectedIds = this.selectedIds.filter(id => id !== item.id) },
+    async duplicate(item) { const payload = { ...item }; delete payload.id; payload.name = `${item.name} (Cópia)`; payload.is_default = false; await window.axios.post('/document-templates', payload); await this.fetchByType(item.type) },
+    async bulkDelete() { const ids = [...this.selectedIds]; for (const id of ids) { const it = this.grouped.flatMap(g => g.items).find(i => i.id === id); if (it) await window.axios.delete(`/document-templates/${id}`) } this.selectedIds = []; await Promise.all(this.types.map(t => this.fetchByType(t))) },
   }
 }
 </script>

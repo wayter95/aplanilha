@@ -246,7 +246,7 @@ const confirmUpload = async () => {
 
   try {
     // 1. Solicitar URL pré-assinada
-    const presignedResponse = await fetch('/api/files/presigned-url', {
+    const presignedResponse = await fetch('/files/presigned-url', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -280,7 +280,7 @@ const confirmUpload = async () => {
     }
 
     // 3. Obter URL assinada para exibição
-    const tempUrlResponse = await fetch(`/api/files/signed-url?key=${presignedData.key}`, {
+    const tempUrlResponse = await fetch(`/files/signed-url?key=${presignedData.key}`, {
       method: 'GET',
       headers: {
         'X-CSRF-TOKEN': page.props.csrf_token

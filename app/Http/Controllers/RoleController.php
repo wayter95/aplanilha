@@ -17,6 +17,8 @@ class RoleController extends Controller
 
     public function __construct(RoleServiceInterface $roleService)
     {
+        $this->middleware('auth');
+        $this->middleware('client.subscribe');
         $this->roleService = $roleService;
     }
     public function index(Request $request): Response|RedirectResponse
@@ -28,27 +30,20 @@ class RoleController extends Controller
                 'status' => $request->get('status'),
             ];
 
-            // Obter client_id do tenant context
-            $clientId = app('tenant.context')->getClientId();
-            if (!$clientId) {
-                // Fallback para o client_id do usuário logado
-                $clientId = Auth::user()?->client_id;
-            }
+            $client = $request->get('client_subscribe');
 
-            $roles = $this->roleService->getRolesByClient($clientId, $perPage, $filters);
+            $roles = $this->roleService->getRolesByClient($client->id, $perPage, $filters);
             $availablePermissions = $this->roleService->getAvailablePermissions();
 
             return Inertia::render('Roles', [
                 'roles' => $roles,
                 'filters' => $filters,
-                'user' => Auth::user(),
                 'availablePermissions' => $availablePermissions,
             ]);
         } catch (Exception $e) {
             return Inertia::render('Roles', [
                 'roles' => [],
                 'filters' => [],
-                'user' => Auth::user(),
                 'availablePermissions' => [],
                 'error' => 'Erro ao carregar funções: ' . $e->getMessage(),
             ]);
@@ -67,20 +62,9 @@ class RoleController extends Controller
                 'is_active' => 'boolean',
             ]);
 
-            // Obter client_id do tenant context ou do usuário logado
-            $clientId = app('tenant.context')->getClientId();
-            if (!$clientId) {
-                $clientId = Auth::user()?->client_id;
-            }
+            $client = $request->get('client_subscribe');
 
-            if (!$clientId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Client ID não encontrado. Usuário deve estar logado.',
-                ], 422);
-            }
-
-            $validatedData['client_id'] = $clientId;
+            $validatedData['client_id'] = $client->id;
             $role = $this->roleService->createRole($validatedData);
 
             return response()->json([

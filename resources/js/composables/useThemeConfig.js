@@ -6,7 +6,6 @@
 
 // Função síncrona executada ANTES do Vue montar
 export function applyThemeConfigSync() {
-  console.log('[useThemeConfig] Aplicando configuracoes de tema')
   const html = document.querySelector('html')
   if (!html) return
   
@@ -41,18 +40,13 @@ export function applyThemeConfigSync() {
   // Sidebar toggled state
   // Se tem algo salvo, aplica. Se não, mantém o padrão do HTML (icon-overlay-close)
   const savedToggled = localStorage.getItem('ynextoggledSidebar')
-  console.log('[useThemeConfig] Estado sidebar no localStorage:', savedToggled)
   
   if (savedToggled !== null) {
     if (savedToggled) {
       html.setAttribute('data-toggled', savedToggled)
-      console.log('[useThemeConfig] Sidebar fechada - data-toggled:', savedToggled)
     } else {
       html.removeAttribute('data-toggled')
-      console.log('[useThemeConfig] Sidebar aberta - data-toggled removido')
     }
-  } else {
-    console.log('[useThemeConfig] Nenhum estado salvo - mantendo padrao HTML')
   }
   // Se não tem nada salvo, mantém o que está no HTML (data-toggled="icon-overlay-close")
   

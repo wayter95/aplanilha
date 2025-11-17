@@ -21,8 +21,8 @@ class DocumentRenderService implements DocumentRenderServiceInterface
 
         $bgStyle = $template->background_image_path ? "background-image:url('" . $template->background_image_path . "');background-size:cover;background-position:center;" : '';
 
-        $fonts = is_array($template->fonts_json) ? $template->fonts_json : json_decode((string)$template->fonts_json, true) ?: [];
-        $layout = is_array($template->layout_json) ? $template->layout_json : json_decode((string)$template->layout_json, true) ?: [];
+        $fonts = is_array($template->fonts_json) ? $template->fonts_json : (json_decode((string)$template->fonts_json, true) ?: []);
+        $layout = is_array($template->layout_json) ? $template->layout_json : (json_decode((string)$template->layout_json, true) ?: []);
 
         $fontFamily = $fonts['family'] ?? 'Inter, system-ui, sans-serif';
         $fontSize = (string)($fonts['size'] ?? 12) . 'px';

@@ -22,13 +22,14 @@
           @search-change="handleSearchChange"
         >
           <template #header-actions>
-            <button 
+            <Button
+              variant="primary"
+              size="sm"
+              left-icon="ri-add-line"
               @click="openCreateTab"
-              class="ti-btn btn-wave ti-btn-primary-full !py-1 !px-2 !text-[0.75rem]"
             >
-              <i class="ri-add-line font-semibold align-middle"></i>
               Novo Tipo
-            </button>
+            </Button>
           </template>
           
           <template #cell-code="{ value }">
@@ -49,9 +50,9 @@
 
 <script setup>
 import DataTable from '@/Components/DataTable.vue'
+import Button from '@/Components/Button.vue'
 import DeleteDocumentTypeModal from '@/Components/DocumentTypesModals/DeleteDocumentTypeModal.vue'
 import AppLayout from '@/Layouts/AppLayout.vue'
-import { useTabsStore } from '@/stores/useTabsStore'
 import { useToast } from '@/composables/useToast'
 import { router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
@@ -71,7 +72,6 @@ const props = defineProps({
   }
 })
 
-const tabsStore = useTabsStore()
 const toast = useToast()
 const showDeleteModal = ref(false)
 const selectedType = ref(null)

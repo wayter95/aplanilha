@@ -10,7 +10,13 @@
     
     <!-- FAVICON -->
     <link rel="icon" href="{{ asset('build/assets/images/brand-logos/favicon.ico') }}" type="image/x-icon">
+
+    <!-- MAIN STYLES (Static) -->
+    <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet">
     
+    <!-- ICONS CSS (Static) -->
+    <link href="{{ asset('assets/iconfonts/icons.css') }}" rel="stylesheet">
+
     <!-- Vite Assets -->
     @vite([
       'resources/sass/app.scss',

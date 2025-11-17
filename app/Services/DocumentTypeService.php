@@ -20,7 +20,12 @@ class DocumentTypeService implements DocumentTypeServiceInterface
     public function create(array $data): Model
     {
         $data['id'] = $data['id'] ?? Str::uuid()->toString();
-        $data['client_id'] = $data['client_id'] ?? app('tenant.context')->getClientId() ?: (auth()->user()->client_id ?? null);
+        
+        // client_id deve vir do controller (via middleware)
+        // Se não vier, pega do usuário autenticado
+        if (!isset($data['client_id'])) {
+            $data['client_id'] = auth()->user()?->client_id;
+        }
         
         if (empty($data['code'])) {
             $data['code'] = Str::slug($data['name']);

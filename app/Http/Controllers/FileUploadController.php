@@ -14,6 +14,8 @@ class FileUploadController extends Controller
 
     public function __construct()
     {
+        $this->middleware('auth');
+        
         $this->s3Client = new S3Client([
             'version' => 'latest',
             'region' => config('filesystems.disks.s3.region'),

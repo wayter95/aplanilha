@@ -2,6 +2,7 @@ import tailwindcss from "@tailwindcss/vite";
 import vue from "@vitejs/plugin-vue";
 import laravel from "laravel-vite-plugin";
 import { defineConfig } from "vite";
+import path from "path";
 
 export default defineConfig({
     plugins: [
@@ -131,12 +132,31 @@ export default defineConfig({
         vue(),
         tailwindcss(),
     ],
+    resolve: {
+        alias: {
+            '@': path.resolve(__dirname, './resources/js'),
+            '~': path.resolve(__dirname, './resources'),
+        },
+    },
+    assetsInclude: ['**/*.woff', '**/*.woff2', '**/*.ttf', '**/*.eot', '**/*.svg', '**/*.otf'],
+    build: {
+        rollupOptions: {
+            output: {
+                assetFileNames: (assetInfo) => {
+                    if (assetInfo.name.match(/\.(woff|woff2|ttf|eot|otf)$/)) {
+                        return 'assets/fonts/[name]-[hash][extname]';
+                    }
+                    return 'assets/[name]-[hash][extname]';
+                }
+            }
+        }
+    },
     server: {
         host: '0.0.0.0',
         port: 5173,
         strictPort: true,
         hmr: {
-            host: '127.0.0.1',
+            host: 'bukjob.sistema',
             protocol: 'ws',
             clientPort: 5173,
         },

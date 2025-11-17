@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 use Exception;
@@ -15,6 +16,8 @@ class DocumentTypeController extends Controller
 {
     public function __construct(private DocumentTypeServiceInterface $service)
     {
+        $this->middleware('auth');
+        $this->middleware('client.subscribe');
     }
 
     public function index(Request $request): Response|RedirectResponse
@@ -26,25 +29,18 @@ class DocumentTypeController extends Controller
                 'status' => $request->get('status'),
             ];
 
-            $clientId = app('tenant.context')->getClientId();
-            if (!$clientId) {
-                $clientId = Auth::user()?->client_id;
-            }
+            $client = $request->get('client_subscribe');
 
-            $types = $clientId 
-                ? $this->service->getByClientPaginated($clientId, $perPage, $filters)
-                : $this->service->getAllPaginated($perPage, $filters);
+            $types = $this->service->getByClientPaginated($client->id, $perPage, $filters);
 
             return Inertia::render('DocumentTypes/Index', [
                 'types' => $types,
                 'filters' => $filters,
-                'user' => Auth::user(),
             ]);
         } catch (Exception $e) {
             return Inertia::render('DocumentTypes/Index', [
                 'types' => ['data' => [], 'current_page' => 1, 'total' => 0],
                 'filters' => [],
-                'user' => Auth::user(),
                 'error' => 'Erro ao carregar tipos: ' . $e->getMessage(),
             ]);
         }
@@ -88,6 +84,123 @@ class DocumentTypeController extends Controller
                 'message' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function create(string $tempId): Response
+    {
+        return Inertia::render('DocumentTypes/Form', [
+            'id' => null,
+            'tempKey' => $tempId,
+        ]);
+    }
+
+    public function edit(string $id): Response
+    {
+        return Inertia::render('DocumentTypes/Form', [
+            'id' => $id,
+            'tempKey' => null,
+        ]);
+    }
+
+    // ==================== API JSON Methods ====================
+
+    /**
+     * API: Criar novo tipo de documento
+     */
+    public function store(Request $request): JsonResponse
+    {
+        $client = $request->get('client_subscribe');
+        
+        $rules = [
+            'code' => [
+                'nullable',
+                'string',
+                'max:50',
+                Rule::unique('document_types', 'code')
+                    ->where('client_id', $client->id)
+                    ->whereNull('deleted_at')
+            ],
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'is_active' => 'sometimes|boolean',
+            'sort_order' => 'sometimes|integer|min:0',
+        ];
+        
+        $validated = $request->validate($rules);
+
+        $created = $this->service->create($validated);
+        return response()->json($created, 201);
+    }
+
+    /**
+     * API: Exibir tipo de documento específico
+     */
+    public function show(string $id): JsonResponse
+    {
+        $item = $this->service->find($id);
+        if (!$item) {
+            return response()->json(['message' => 'Not found'], 404);
+        }
+        return response()->json($item);
+    }
+
+    /**
+     * API: Atualizar tipo de documento
+     */
+    public function update(Request $request, string $id): JsonResponse
+    {
+        $client = $request->get('client_subscribe');
+        
+        $rules = [
+            'code' => [
+                'sometimes',
+                'string',
+                'max:50',
+                Rule::unique('document_types', 'code')
+                    ->ignore($id)
+                    ->where('client_id', $client->id)
+                    ->whereNull('deleted_at')
+            ],
+            'name' => 'sometimes|string|max:255',
+            'description' => 'nullable|string',
+            'is_active' => 'sometimes|boolean',
+            'sort_order' => 'sometimes|integer|min:0',
+        ];
+        
+        $validated = $request->validate($rules);
+
+        $ok = $this->service->update($id, $validated);
+        if (!$ok) {
+            return response()->json(['message' => 'Not found'], 404);
+        }
+
+        $item = $this->service->find($id);
+        return response()->json($item);
+    }
+
+    /**
+     * API: Deletar tipo de documento
+     */
+    public function destroy(string $id): JsonResponse
+    {
+        try {
+            $ok = $this->service->delete($id);
+            if (!$ok) {
+                return response()->json(['message' => 'Not found'], 404);
+            }
+            return response()->json(['message' => 'Deleted']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+    }
+
+    /**
+     * API: Obter códigos de tipos de documento
+     */
+    public function codes(): JsonResponse
+    {
+        $codes = $this->service->getCodes();
+        return response()->json($codes);
     }
 }
 

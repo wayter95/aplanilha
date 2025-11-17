@@ -99,7 +99,6 @@ export default {
     },
     data() {
         return {
-            user: this.$page.props.user || null,
             openTypes: {},
             selectedIds: []
         }

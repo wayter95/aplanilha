@@ -212,7 +212,7 @@ const updateRole = async (values, { setErrors }) => {
       is_active: form.value.status === 'Ativo'
     }
 
-        const response = await fetch(`/api/roles/${props.role.id}`, {
+        const response = await fetch(`/roles/${props.role.id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

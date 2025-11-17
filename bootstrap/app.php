@@ -9,6 +9,7 @@ use App\Http\Middleware\EnsureTenantResolved;
 use App\Http\Middleware\DefaultTenantFallback;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\RedirectIfNotAuthenticated;
+use App\Http\Middleware\CheckClientSubscribe;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -25,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'tenant.resolve' => ResolveTenant::class,
             'tenant.ensure' => EnsureTenantResolved::class,
             'tenant.fallback' => DefaultTenantFallback::class,
+            'client.subscribe' => CheckClientSubscribe::class,
             'guest' => RedirectIfAuthenticated::class,
             'auth' => RedirectIfNotAuthenticated::class,
         ]);

@@ -103,7 +103,7 @@ const deleteUser = async () => {
   }
 
   try {
-    const response = await fetch(`/api/users/${props.user.id}`, {
+    const response = await fetch(`/users/${props.user.id}`, {
       method: 'DELETE',
       headers: {
         'X-CSRF-TOKEN': page.props.csrf_token

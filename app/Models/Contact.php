@@ -1,18 +1,21 @@
 <?php
+<?php
 
 namespace App\Models;
 
+use App\Scopes\TenantScope;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Scopes\TenantScope;
 
 class Contact extends Model
 {
     use HasFactory, HasUuids, SoftDeletes;
+
+    protected $table = 'contacts';
 
     protected $fillable = [
         'type',
@@ -23,6 +26,7 @@ class Contact extends Model
         'phone',
         'name_line',
         'website',
+        // Visiting address
         'street_visiting',
         'house_number_visiting',
         'postal_code_visiting',
@@ -31,6 +35,7 @@ class Contact extends Model
         'country_visiting',
         'lat_visiting',
         'lng_visiting',
+        // Mailing address
         'street_mailing',
         'house_number_mailing',
         'postal_code_mailing',
@@ -39,6 +44,7 @@ class Contact extends Model
         'country_mailing',
         'lat_mailing',
         'lng_mailing',
+        // Billing address
         'street_billing',
         'house_number_billing',
         'postal_code_billing',
@@ -51,6 +57,7 @@ class Contact extends Model
     ];
 
     protected $casts = [
+        'type' => 'string',
         'lat_visiting' => 'decimal:8',
         'lng_visiting' => 'decimal:8',
         'lat_mailing' => 'decimal:8',
@@ -79,9 +86,34 @@ class Contact extends Model
         return $this->hasMany(ContactPerson::class, 'contact_id');
     }
 
+    public function projectsAsClient(): HasMany
+    {
+        return $this->hasMany(Project::class, 'client_contact_id');
+    }
+
+    public function projectsAsLocation(): HasMany
+    {
+        return $this->hasMany(Project::class, 'location_contact_id');
+    }
+
     public function scopeByType($query, string $type)
     {
         return $query->where('type', $type);
+    }
+
+    public function scopeCustomer($query)
+    {
+        return $query->where('type', 'customer');
+    }
+
+    public function scopeSupplier($query)
+    {
+        return $query->where('type', 'supplier');
+    }
+
+    public function scopeLocation($query)
+    {
+        return $query->where('type', 'location');
     }
 
     public function scopeByCity($query, string $city)
@@ -114,6 +146,16 @@ class Contact extends Model
         });
     }
 
+    public function getTypeLabelAttribute(): string
+    {
+        return match ($this->type) {
+            'customer' => 'Cliente',
+            'supplier' => 'Fornecedor',
+            'location' => 'Localização',
+            default => 'Desconhecido',
+        };
+    }
+
     public function getFullAddressVisitingAttribute(): string
     {
         $parts = array_filter([
@@ -124,8 +166,13 @@ class Contact extends Model
             $this->state_visiting,
             $this->country_visiting,
         ]);
-        
+
         return implode(', ', $parts);
+    }
+
+    public function getVisitingAddressAttribute(): string
+    {
+        return $this->getFullAddressVisitingAttribute();
     }
 
     public function getFullAddressMailingAttribute(): string
@@ -138,8 +185,13 @@ class Contact extends Model
             $this->state_mailing,
             $this->country_mailing,
         ]);
-        
+
         return implode(', ', $parts);
+    }
+
+    public function getMailingAddressAttribute(): string
+    {
+        return $this->getFullAddressMailingAttribute();
     }
 
     public function getFullAddressBillingAttribute(): string
@@ -152,7 +204,12 @@ class Contact extends Model
             $this->state_billing,
             $this->country_billing,
         ]);
-        
+
         return implode(', ', $parts);
+    }
+
+    public function getBillingAddressAttribute(): string
+    {
+        return $this->getFullAddressBillingAttribute();
     }
 }
