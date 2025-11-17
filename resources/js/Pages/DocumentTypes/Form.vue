@@ -19,6 +19,7 @@
                   placeholder="Ex: Contratos"
                   rules="required"
                   required
+                  :error-message="backendErrors?.name?.[0]"
                 />
               </div>
 
@@ -32,6 +33,7 @@
                   rules="required"
                   required
                   :disabled="mode === 'edit'"
+                  :error-message="backendErrors?.code?.[0]"
                 />
               </div>
 
@@ -43,6 +45,7 @@
                   v-model="localForm.sort_order"
                   type="number"
                   placeholder="0"
+                  :error-message="backendErrors?.sort_order?.[0]"
                 />
               </div>
 
@@ -54,6 +57,7 @@
                   v-model="localForm.description"
                   rows="3"
                   placeholder="Descrição do tipo de documento"
+                  :error-message="backendErrors?.description?.[0]"
                 />
               </div>
 
@@ -124,6 +128,10 @@ const props = defineProps({
   formKey: {
     type: [String, Number],
     default: 0
+  },
+  backendErrors: {
+    type: Object,
+    default: () => ({})
   }
 })
 

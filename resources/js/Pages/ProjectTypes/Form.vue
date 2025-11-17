@@ -26,6 +26,7 @@
                     placeholder="Ex: Desenvolvimento Web"
                     rules="required"
                     required
+                    :error-message="backendErrors?.title?.[0]"
                   />
                 </div>
 
@@ -107,7 +108,8 @@ export default {
     
     return {
       form: initialForm,
-      isActive: initialForm.status === 'a'
+      isActive: initialForm.status === 'a',
+      backendErrors: {}
     }
   },
   
@@ -166,6 +168,7 @@ export default {
     
     async createRecord() {
       try {
+        this.backendErrors = {}
         const { success, message } = await projectTypesService.create(this.form)
         
         if (success) {
@@ -176,6 +179,9 @@ export default {
         }
       } catch (error) {
         console.error('Erro ao criar:', error)
+        if (error.response?.data?.errors) {
+          this.backendErrors = error.response.data.errors
+        }
         useToast().error('Erro ao criar tipo de projeto')
       }
     },
@@ -187,6 +193,7 @@ export default {
       }
       
       try {
+        this.backendErrors = {}
         const recordId = this.id || this.projectType.id
         const { success, message } = await projectTypesService.update(recordId, this.form)
         
@@ -198,6 +205,9 @@ export default {
         }
       } catch (error) {
         console.error('Erro ao atualizar:', error)
+        if (error.response?.data?.errors) {
+          this.backendErrors = error.response.data.errors
+        }
         useToast().error('Erro ao atualizar tipo de projeto')
       }
     },
