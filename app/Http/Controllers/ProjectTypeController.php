@@ -93,11 +93,19 @@ class ProjectTypeController extends Controller
     /**
      * Renderizar formulário de edição
      */
-    public function edit(string $id): Response
+    public function edit(string $id): Response|RedirectResponse
     {
+        $projectType = $this->service->findById($id);
+        
+        if (!$projectType) {
+            return redirect()->route('projects.types')
+                ->with('error', 'Tipo de projeto não encontrado.');
+        }
+        
         return Inertia::render('ProjectTypes/Form', [
             'mode' => 'edit',
             'id' => $id,
+            'projectType' => $projectType,
         ]);
     }
 

@@ -6,13 +6,16 @@
  * - HSOverlay
  * - HSTooltip
  * - HSAccordion
- * - HSTabs
+ * - HSTabs (MANUAL - não auto-init)
  * - HSCollapse
  * - etc
  * 
  * Uso:
  * - initPreline() no app.js (mount inicial)
  * - reinitPreline() após navegação Inertia
+ * 
+ * IMPORTANTE: HSTabs NÃO é inicializado automaticamente!
+ * Use initTabs() manualmente em componentes que têm tabs.
  */
 
 import { 
@@ -24,6 +27,25 @@ import {
     HSCollapse,
     HSStaticMethods
 } from 'preline';
+
+// Desabilitar auto-init do HSTabs para evitar erros
+// HSTabs será inicializado manualmente apenas quando necessário
+if (typeof window !== 'undefined' && HSTabs) {
+    // Sobrescrever o autoInit do HSTabs para torná-lo seguro
+    const originalAutoInit = HSTabs.autoInit;
+    HSTabs.autoInit = function() {
+        try {
+            // Só executar se houver elementos [data-hs-tab]
+            const tabElements = document.querySelectorAll('[data-hs-tab]');
+            if (tabElements.length > 0) {
+                return originalAutoInit.call(this);
+            }
+        } catch (error) {
+            // Silenciar erros do HSTabs
+            return;
+        }
+    };
+}
 
 /**
  * Componentes Preline ESSENCIAIS (sempre inicializar)
@@ -38,10 +60,12 @@ const ESSENTIAL_COMPONENTS = {
 /**
  * Componentes Preline OPCIONAIS (inicializar se existirem elementos)
  * Estes só existem em páginas específicas
+ * 
+ * NOTA: HSTabs foi REMOVIDO daqui porque causa erros quando não há tabs
+ * Use initTabs() manualmente nos componentes que precisam de tabs
  */
 const OPTIONAL_COMPONENTS = {
     HSAccordion,
-    // HSTabs - REMOVIDO! Será inicializado manualmente nos componentes que usam
     HSCollapse
 };
 
@@ -90,13 +114,11 @@ export function initPreline() {
         if (!hasElementsForComponent(name)) {
             // Silencioso para componentes opcionais
             if (OPTIONAL_COMPONENTS[name]) return;
-            console.log(`[Preline] ${name} skipped (no elements found)`);
             return;
         }
         
         try {
             Component.autoInit();
-            console.log(`[Preline] ${name} initialized`);
         } catch (error) {
             console.error(`[Preline] Error initializing ${name}:`, error);
         }
@@ -110,30 +132,21 @@ export function initPreline() {
 export function reinitPreline() {
     // Pequeno delay para garantir que DOM foi atualizado
     setTimeout(() => {
-        // ESTRATÉGIA 1: Tentar usar HSStaticMethods (mais confiável)
-        try {
-            if (HSStaticMethods && HSStaticMethods.autoInit) {
-                HSStaticMethods.autoInit();
-                console.log('[Preline] All components reinitialized via HSStaticMethods');
-                return;
-            }
-        } catch (error) {
-            console.log('[Preline] HSStaticMethods not available, using safe reinit');
-        }
+        // NÃO usar HSStaticMethods.autoInit() porque ele inicializa HSTabs
+        // que causa erro quando não há tabs na página
         
-        // ESTRATÉGIA 2: Reinicializar componentes ESSENCIAIS sempre
+        // ESTRATÉGIA 1: Reinicializar componentes ESSENCIAIS sempre
         Object.entries(ESSENTIAL_COMPONENTS).forEach(([name, Component]) => {
             if (!Component || !Component.autoInit) return;
             
             try {
                 Component.autoInit();
-                console.log(`[Preline] ${name} reinitialized (essential)`);
             } catch (error) {
                 console.error(`[Preline] Error reinitializing ${name}:`, error);
             }
         });
         
-        // ESTRATÉGIA 3: Reinicializar componentes OPCIONAIS apenas se existirem
+        // ESTRATÉGIA 2: Reinicializar componentes OPCIONAIS apenas se existirem
         Object.entries(OPTIONAL_COMPONENTS).forEach(([name, Component]) => {
             if (!Component || !Component.autoInit) return;
             
@@ -145,7 +158,6 @@ export function reinitPreline() {
             
             try {
                 Component.autoInit();
-                console.log(`[Preline] ${name} reinitialized (optional)`);
             } catch (error) {
                 // Erro silencioso para componentes opcionais
                 console.warn(`[Preline] ${name} reinit failed (optional, safe to ignore)`, error.message);
@@ -165,6 +177,7 @@ export function destroyPreline() {
 
 /**
  * Inicializar HSTabs manualmente (para uso em componentes específicos)
+ * IMPORTANTE: Só chame esta função em componentes que realmente têm tabs!
  */
 export function initTabs() {
     if (!HSTabs) {
@@ -174,12 +187,24 @@ export function initTabs() {
     
     try {
         const tabElements = document.querySelectorAll('[data-hs-tab]');
-        if (tabElements.length > 0) {
+        if (tabElements.length === 0) {
+            // Não há tabs na página, não fazer nada
+            return;
+        }
+        
+        // Verificar se já foram inicializados para evitar duplicação
+        const alreadyInitialized = Array.from(tabElements).some(el => {
+            return el.classList.contains('hs-tab-active') || el.hasAttribute('data-hs-tab-initialized');
+        });
+        
+        if (!alreadyInitialized) {
             HSTabs.autoInit();
-            console.log(`[Preline] HSTabs initialized manually (${tabElements.length} tabs found)`);
         }
     } catch (error) {
-        console.warn('[Preline] HSTabs init failed (safe to ignore):', error.message);
+        // Silenciar erro se não for crítico
+        if (!error.message.includes("can't access property")) {
+            console.warn('[Preline] HSTabs init failed:', error.message);
+        }
     }
 }
 

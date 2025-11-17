@@ -202,10 +202,10 @@ module.exports = {
                         {},
                 },
                 ".ti-striped-table tbody tr:nth-child(even)": {
-                    "@apply bg-gray-50/50 dark:bg-gray-800/50": {},
+                    "@apply bg-light/50 dark:bg-black/20": {},
                 },
                 ".ti-custom-table-hover tbody tr:hover": {
-                    "@apply bg-primary/5 dark:bg-primary/10": {},
+                    "@apply bg-light dark:bg-white/5": {},
                 },
             });
         }),

@@ -34,11 +34,6 @@
           <!-- End::header-element -->
         </div>
 
-        <!-- Tab Bar - Center -->
-        <div class="header-tabs hidden lg:flex items-center overflow-hidden px-2">
-          <TabBar :inline="true" />
-        </div>
-
         <div class="header-content-right" style="margin-left: auto;">
           
           <!-- Start::header-element -->
@@ -149,7 +144,6 @@
 </template>
 
 <script setup>
-import TabBar from '@/Components/TabBar.vue'
 import { usePhotoUrl } from '@/composables/usePhotoUrl'
 import { useSidebarToggle } from '@/composables/useSidebarToggle'
 import { useFullscreen } from '@/composables/useFullscreen'

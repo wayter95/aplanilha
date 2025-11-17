@@ -12,7 +12,7 @@
           title="Lista de Tipos de Projetos"
           :data="types.data"
           :columns="columns"
-          :actions="actions"
+          :actions="[{}]"
           :filters="filterOptions"
           :server-side-filtering="true"
           :initial-filters="props.filters"
@@ -21,20 +21,22 @@
           :show-search="true"
           :show-export="true"
           :show-filters="true"
+          actions-align="left"
           search-placeholder="Buscar tipos de projetos..."
-          @action="handleAction"
           @selection-change="handleSelectionChange"
           @filter-change="handleFilterChange"
           @search-change="handleSearchChange"
         >
           <template #header-actions>
-            <button 
-              @click="openCreateTab"
-              class="ti-btn btn-wave ti-btn-primary-full !py-1 !px-2 !text-[0.75rem]"
+            <Button
+              variant="primary"
+              style-type="outline"
+              size="sm"
+              left-icon="ri-add-line"
+              @click="createNew"
             >
-              <i class="ri-add-line font-semibold align-middle"></i>
               Novo Tipo
-            </button>
+            </Button>
           </template>
           
           <template #cell-color="{ value }">
@@ -44,10 +46,26 @@
             </div>
           </template>
 
-          <template #cell-status="{ value }">
-            <span :class="['badge', value === 'a' ? 'bg-primary' : 'bg-secondary']">
-              {{ value === 'a' ? 'Ativo' : 'Bloqueado' }}
-            </span>
+          <template #cell-status="{ row }">
+            <Switch
+              :name="`status-${row.id}`"
+              :model-value="row.status === 'a'"
+              variant="primary"
+              size="xs"
+              :show-inline-label="false"
+              :show-help-text="false"
+              @update:model-value="toggleStatus(row)"
+            />
+          </template>
+          
+          <template #cell-actions="{ row }">
+            <ActionButtons
+              :show-edit="true"
+              :show-delete="true"
+              :show-toggle-status="false"
+              @edit="editRecord(row.id)"
+              @delete="handleDeleteClick(row)"
+            />
           </template>
         </DataTable>
       </div>
@@ -67,9 +85,12 @@ import DataTable from '@/Components/DataTable.vue'
 import DeleteProjectTypeModal from '@/Components/ProjectTypesModals/DeleteProjectTypeModal.vue'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import Breadcrumb from '@/Components/Breadcrumb.vue'
-import { useTabsMemoryStore } from '@/stores/useTabsMemoryStore'
+import StatusBadge from '@/Components/Common/StatusBadge.vue'
+import ActionButtons from '@/Components/Common/ActionButtons.vue'
+import Switch from '@/Components/Switch.vue'
+import Button from '@/Components/Button.vue'
 import { useToast } from '@/composables/useToast'
-import { router } from '@inertiajs/vue3'
+import { router} from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import projectTypesService from '@/api/projectTypesService'
 
@@ -84,7 +105,6 @@ const props = defineProps({
   }
 })
 
-const tabsStore = useTabsMemoryStore()
 const toast = useToast()
 const showDeleteModal = ref(false)
 const selectedType = ref(null)
@@ -116,27 +136,6 @@ const columns = [
   }
 ]
 
-const actions = [
-  {
-    name: 'edit',
-    label: 'Editar',
-    icon: 'ri-edit-line',
-    class: 'ti-btn-outline-primary !py-1 !px-2 !text-[0.75rem] !m-0'
-  },
-  {
-    name: 'toggle-status',
-    label: 'Ativar/Bloquear',
-    icon: 'ri-toggle-line',
-    class: 'ti-btn-outline-warning !py-1 !px-2 !text-[0.75rem] !m-0'
-  },
-  {
-    name: 'delete',
-    label: 'Excluir',
-    icon: 'ri-delete-bin-line',
-    class: 'ti-btn-outline-danger !py-1 !px-2 !text-[0.75rem] !m-0'
-  }
-]
-
 const breadcrumbItems = [
   { label: 'Início', href: '/' },
   { label: 'Tipos de Projetos' }
@@ -156,49 +155,17 @@ const filterOptions = computed(() => [
 const currentFilters = ref({ ...props.filters })
 const currentSearch = ref(props.filters.search || '')
 
-const handleAction = ({ action, row }) => {
+const handleDeleteClick = (row) => {
   selectedType.value = row
-  
-  switch (action) {
-    case 'edit':
-      openEditTab(row.id)
-      break
-    case 'toggle-status':
-      toggleStatus(row)
-      break
-    case 'delete':
-      showDeleteModal.value = true
-      break
-  }
+  showDeleteModal.value = true
 }
 
-const openCreateTab = () => {
+const createNew = () => {
   const tempId = `temp_${Date.now()}`
-  tabsStore.addTab({
-    key: tempId,
-    title: 'Novo Tipo de Projeto',
-    componentName: 'ProjectTypes/Form',
-    path: `/project-types/new/${tempId}`,
-    mode: 'create',
-    props: { tempKey: tempId },
-    color: '#6366f1', // Cor padrão azul
-    isModified: false
-  })
   router.visit(`/project-types/new/${tempId}`)
 }
 
-const openEditTab = (id) => {
-  const type = props.types.data.find(t => t.id === id)
-  tabsStore.addTab({
-    key: id,
-    title: type?.title || 'Editar Tipo de Projeto',
-    componentName: 'ProjectTypes/Form',
-    path: `/project-types/${id}/edit`,
-    mode: 'edit',
-    props: { id },
-    color: type?.color || '#6366f1',
-    isModified: false
-  })
+const editRecord = (id) => {
   router.visit(`/project-types/${id}/edit`)
 }
 
@@ -224,7 +191,7 @@ const handleTypeDeleted = () => {
 }
 
 const handleSelectionChange = (selectedRows) => {
-  console.log('Selected rows:', selectedRows)
+  // Handle selection change
 }
 
 const handleFilterChange = (filters) => {

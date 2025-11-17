@@ -9,13 +9,11 @@ export function useSidebarToggle() {
   const mouseEntered = () => {
     const html = getHtml()
     setAttr(html, 'data-icon-overlay', 'open')
-    console.log('[useSidebarToggle] Mouse entered - overlay temporario aberto')
   }
 
   const mouseLeave = () => {
     const html = getHtml()
     removeAttr(html, 'data-icon-overlay')
-    console.log('[useSidebarToggle] Mouse leave - overlay temporario fechado')
   }
   
   // Salvar estado no localStorage
@@ -37,26 +35,21 @@ export function useSidebarToggle() {
   
   // Restaurar estado do sidebar após navegação
   const restoreSidebarState = () => {
-    console.log('[useSidebarToggle] Restaurando estado da sidebar')
     const html = getHtml()
     const sidebar = getElement('#sidebar')
     const verticalStyle = getAttr(html, 'data-vertical-style')
     
     // Remover overlay temporário de hover
     removeAttr(html, 'data-icon-overlay')
-    console.log('[useSidebarToggle] data-icon-overlay removido')
     
     // Restaurar estado salvo
     const savedToggled = loadFromLocalStorage()
-    console.log('[useSidebarToggle] Estado salvo no localStorage:', savedToggled)
     
     if (savedToggled !== null && window.innerWidth >= 992) {
       if (savedToggled) {
         setAttr(html, 'data-toggled', savedToggled)
-        console.log('[useSidebarToggle] data-toggled restaurado:', savedToggled)
       } else {
         removeAttr(html, 'data-toggled')
-        console.log('[useSidebarToggle] data-toggled removido - sidebar aberta')
       }
       
       // Re-adicionar listeners se necessário
@@ -66,7 +59,6 @@ export function useSidebarToggle() {
           sidebar.removeEventListener('mouseleave', mouseLeave)
           sidebar.addEventListener('mouseenter', mouseEntered)
           sidebar.addEventListener('mouseleave', mouseLeave)
-          console.log('[useSidebarToggle] Listeners de hover re-adicionados')
         }
       }
     }
@@ -74,40 +66,25 @@ export function useSidebarToggle() {
   
   // Inicializar estado do sidebar baseado nos atributos HTML e localStorage
   const initializeSidebar = () => {
-    console.log('[useSidebarToggle] Inicializando sidebar')
     const html = getHtml()
     const sidebar = getElement('#sidebar')
     const currentToggled = getAttr(html, 'data-toggled')
     const verticalStyle = getAttr(html, 'data-vertical-style')
-    
-    console.log('[useSidebarToggle] Estado inicial:', {
-      currentToggled,
-      verticalStyle,
-      windowWidth: window.innerWidth
-    })
     
     // Se está em overlay mode e toggled, adicionar event listeners
     if (verticalStyle === 'overlay' && currentToggled === 'icon-overlay-close') {
       if (sidebar && window.innerWidth >= 992) {
         sidebar.addEventListener('mouseenter', mouseEntered)
         sidebar.addEventListener('mouseleave', mouseLeave)
-        console.log('[useSidebarToggle] Listeners de hover adicionados')
       }
     }
   }
   
   const toggleSidebar = () => {
-    console.log('[useSidebarToggle] Toggle sidebar iniciado')
     const html = getHtml()
     const sidebar = getElement('#sidebar')
     const currentToggled = getAttr(html, 'data-toggled')
     const verticalStyle = getAttr(html, 'data-vertical-style')
-    
-    console.log('[useSidebarToggle] Estado atual:', {
-      currentToggled,
-      verticalStyle,
-      windowWidth: window.innerWidth
-    })
 
     if (window.innerWidth >= 992) {
       // Desktop
@@ -175,7 +152,6 @@ export function useSidebarToggle() {
       }
       
       // Salvar no localStorage
-      console.log('[useSidebarToggle] Salvando estado no localStorage:', newToggled)
       saveToLocalStorage(newToggled)
       isOpen.value = !html.getAttribute('data-toggled')
     } else {

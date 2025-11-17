@@ -1,5 +1,5 @@
 <!--
-    🔄 Switch - Componente para switches/toggles com validação
+    Switch - Componente para switches/toggles com validação
     
     Componente reutilizável que integra VeeValidate com design system
     seguindo padrões de nomenclatura e multi-tenant
@@ -39,7 +39,7 @@
                     @blur="handleBlur"
                 />
                 <label 
-                    v-if="!label || showInlineLabel" 
+                    v-if="showInlineLabel && (!label || showInlineLabel)" 
                     :for="switchId" 
                     class="form-check-label ms-2"
                     :class="{ 'text-muted': !isChecked }"
@@ -55,7 +55,7 @@
         </div>
 
         <!-- Help Text -->
-        <small v-if="helpText && !errorMessage" class="form-text text-muted">
+        <small v-if="showHelpText && helpText && !errorMessage" class="form-text text-muted">
             {{ helpText }}
         </small>
 
@@ -78,7 +78,7 @@ import { computed, nextTick, watch } from 'vue'
 import { useField } from 'vee-validate'
 
 /**
- * 📝 Props do componente
+ * Props do componente
  */
 const props = defineProps({
     // v-model
@@ -134,12 +134,18 @@ const props = defineProps({
     size: {
         type: String,
         default: 'md',
-        validator: (value) => ['sm', 'md', 'lg'].includes(value)
+        validator: (value) => ['xs', 'sm', 'md', 'lg'].includes(value)
     },
     variant: {
         type: String,
         default: 'default',
         validator: (value) => ['default', 'primary', 'success', 'warning', 'danger'].includes(value)
+    },
+    
+    // Classes customizadas para controle total
+    customClasses: {
+        type: String,
+        default: ''
     },
     
     // Ícones
@@ -157,6 +163,10 @@ const props = defineProps({
         type: String,
         default: ''
     },
+    showHelpText: {
+        type: Boolean,
+        default: true
+    },
     successMessage: {
         type: String,
         default: ''
@@ -164,7 +174,7 @@ const props = defineProps({
 })
 
 /**
- * 🔧 Configuração do campo com VeeValidate
+ * Configuração do campo com VeeValidate
  */
 const { 
     value, 
@@ -186,26 +196,39 @@ watch(() => props.modelValue, (newVal) => {
 }, { immediate: true })
 
 /**
- * 🎯 ID único para o switch
+ * ID único para o switch
  */
 const switchId = computed(() => `switch-${props.name}-${Math.random().toString(36).substr(2, 9)}`)
 
 /**
- * ✅ Estado checked
+ * Estado checked
  */
 const isChecked = computed(() => {
     return value.value === true || value.value === 'true' || value.value === 1 || value.value === '1'
 })
 
 /**
- * 🎨 Classes dinâmicas do switch
+ * Classes dinâmicas do switch
  */
 const switchClasses = computed(() => {
-    const baseClasses = []
+    const baseClasses = ['shrink-0']
     
-    // Tamanho
-    if (props.size === 'sm') baseClasses.push('ti-switch-sm')
-    if (props.size === 'lg') baseClasses.push('ti-switch-lg')
+    // Se há classes customizadas, usa elas diretamente
+    if (props.customClasses) {
+        return `${baseClasses.join(' ')} ${props.customClasses}`
+    }
+    
+    // Tamanhos padrão usando Tailwind
+    const sizeClasses = {
+        'xs': '!w-[35px] !h-[21px] before:size-4',
+        'sm': '!w-11 !h-6 before:size-5',
+        'md': '', // Tamanho padrão do ti-switch
+        'lg': '!w-[4.25rem] !h-9 before:w-8 before:h-8'
+    }
+    
+    if (sizeClasses[props.size]) {
+        baseClasses.push(sizeClasses[props.size])
+    }
     
     // Variante (pode ser aplicado via CSS customizado se necessário)
     if (props.variant !== 'default') {
@@ -221,12 +244,12 @@ const switchClasses = computed(() => {
         }
     }
     
-    return baseClasses
+    return baseClasses.join(' ')
 })
 
 
 /**
- * 📝 Manipulação de mudança
+ * Manipulação de mudança
  */
 function handleChange(event) {
     const newValue = event.target.checked
@@ -237,7 +260,7 @@ function handleChange(event) {
 }
 
 /**
- * 🎬 Emits
+ * Emits
  */
 const emit = defineEmits(['update:modelValue', 'change', 'blur'])
 
@@ -259,71 +282,4 @@ defineExpose({
     isChecked
 })
 </script>
-
-<style scoped>
-.form-label.required {
-    font-weight: 500;
-}
-
-.form-label.d-flex {
-    display: flex;
-    align-items: center;
-}
-
-.input-group-text {
-    background-color: var(--bs-gray-50);
-    border-color: var(--bs-gray-300);
-}
-
-.form-check {
-    display: flex;
-    align-items: center;
-}
-
-.form-check-label {
-    cursor: pointer;
-    user-select: none;
-}
-
-.ti-switch:focus {
-    outline: 2px solid var(--bs-primary);
-    outline-offset: 2px;
-}
-
-.ti-switch.is-valid {
-    border-color: var(--bs-success);
-}
-
-.ti-switch.is-invalid {
-    border-color: var(--bs-danger);
-}
-
-.invalid-feedback,
-.valid-feedback {
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
-}
-
-.form-text {
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
-}
-
-/* Variantes de cor customizadas (opcional) */
-.ti-switch-primary {
-    /* Usa a cor primária padrão do sistema */
-}
-
-.ti-switch-success:checked {
-    background-color: var(--bs-success);
-}
-
-.ti-switch-warning:checked {
-    background-color: var(--bs-warning);
-}
-
-.ti-switch-danger:checked {
-    background-color: var(--bs-danger);
-}
-</style>
 

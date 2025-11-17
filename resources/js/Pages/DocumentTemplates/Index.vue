@@ -137,16 +137,13 @@ import Accordion from '@/Components/Accordion.vue'
 import { useToast } from '@/composables/useToast'
 import { useTooltip } from '@/composables/useTooltip'
 import AppLayout from '@/Layouts/AppLayout.vue'
-import { useTabsMemoryStore } from '@/stores/useTabsMemoryStore'
 
 export default {
   components: { AppLayout, Accordion },
   setup() {
-    const tabsStore = useTabsMemoryStore()
     const toast = useToast()
-    // Inicializar tooltips automaticamente
     useTooltip()
-    return { tabsStore, toast }
+    return { toast }
   },
   data() {
     return {
@@ -222,33 +219,9 @@ export default {
         return
       }
       
-      const tempKey = `new-${Date.now()}`
-      const path = `/document-templates/new/${tempKey}`
-      const ok = this.tabsStore.addTab({
-        key: tempKey,
-        title: `Novo Modelo (${type.name})`,
-        mode: 'create',
-        componentName: 'DocumentTemplatesForm',
-        path,
-        props: { mode: 'create', tempKey, type: type.value },
-        context: 'document-templates'
-      })
-      if (!ok) return this.toast.error('Limite de abas atingido')
-      this.$inertia.visit(path)
+      this.$inertia.visit('/document-templates/create', { data: { type: type.value } })
     },
     openEditTab(template) {
-      const exists = this.tabsStore.tabs.find(t => t.key === template.id)
-      if (exists) { this.tabsStore.setActive(exists); return this.$inertia.visit(exists.path || `/document-templates/${template.id}/edit`) }
-      const ok = this.tabsStore.addTab({
-        key: template.id,
-        title: template.name,
-        mode: 'edit',
-        componentName: 'DocumentTemplatesForm',
-        path: `/document-templates/${template.id}/edit`,
-        props: { mode: 'edit', id: template.id },
-        context: 'document-templates'
-      })
-      if (!ok) return this.toast.error('Limite de abas atingido')
       this.$inertia.visit(`/document-templates/${template.id}/edit`)
     },
     async setDefault(item) { await window.axios.post(`/document-templates/${item.id}/set-default`); await this.fetchByType(item.type) },
