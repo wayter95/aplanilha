@@ -53,37 +53,43 @@
                   </div>
                 </div>
 
-                <!-- Botão de Busca -->
+                <!-- Botão de Busca com Expansão -->
                 <div class="relative search-container">
-                  <button
-                    v-if="!showSearchBar"
-                    @click="showSearchBar = true"
-                    class="ti-btn ti-btn-soft-secondary !py-2.5 !px-4 flex items-center gap-2 rounded-lg"
-                  >
-                    <i class="ri-search-line text-sm"></i>
-                  </button>
-                  <div
-                    v-else
-                    class="flex items-center gap-2"
-                  >
-                    <div class="relative">
-                      <i class="ri-search-line absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-                      <input
-                        ref="searchInput"
-                        v-model="searchQuery"
-                        @input="handleSearchChange"
-                        @blur="handleSearchBlur"
-                        type="text"
-                        placeholder="Buscar contato..."
-                        class="form-control !py-2.5 !pl-10 !pr-4 w-64 rounded-lg"
-                      />
-                    </div>
+                  <div class="flex items-center overflow-hidden transition-all duration-300 ease-in-out"
+                       :class="showSearchBar ? 'w-80' : 'w-auto'">
                     <button
-                      @click="closeSearch"
-                      class="ti-btn ti-btn-soft-secondary !py-2.5 !px-2.5 rounded-lg"
+                      @click="toggleSearchBar"
+                      class="ti-btn ti-btn-soft-secondary !py-2.5 !px-4 flex items-center gap-2 rounded-lg shrink-0"
+                      :class="{ '!bg-primary/10 !text-primary !border-primary/20': showSearchBar }"
                     >
-                      <i class="ri-close-line text-sm"></i>
+                      <i class="ri-search-line text-sm"></i>
                     </button>
+                    
+                    <!-- Barra de pesquisa expansível -->
+                    <div 
+                      v-if="showSearchBar"
+                      class="flex items-center gap-2 ml-2 animate-slide-in"
+                    >
+                      <div class="relative">
+                        <input
+                          ref="searchInput"
+                          v-model="searchQuery"
+                          @input="handleSearchChange"
+                          @blur="handleSearchBlur"
+                          @keydown.escape="closeSearch"
+                          type="text"
+                          placeholder="Buscar contato..."
+                          class="form-control !py-2.5 !pl-3 !pr-10 w-60 rounded-lg transition-all duration-200 focus:w-64"
+                        />
+                        <button
+                          v-if="searchQuery"
+                          @click="clearSearch"
+                          class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                        >
+                          <i class="ri-close-line text-sm"></i>
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -679,7 +685,7 @@ const searchQuery = ref(props.filters.search || '')
 const currentSort = ref(props.filters.sort_by || 'name')
 const sortDirection = ref(props.filters.sort_direction || 'asc')
 const showFoldersDropdown = ref(false)
-const showSearchBar = ref(false)
+const showSearchBar = ref(!!props.filters.search) // Inicia aberta se há busca ativa
 const searchInput = ref(null)
 const showTagsDropdown = ref(false)
 const showFiltersDropdown = ref(false)
@@ -755,6 +761,34 @@ watch(showSearchBar, (newValue) => {
   }
 })
 
+const toggleSearchBar = () => {
+  showSearchBar.value = !showSearchBar.value
+  if (!showSearchBar.value) {
+    searchQuery.value = ''
+    // Limpar busca se a barra for fechada
+    if (props.filters.search) {
+      router.get('/contacts', {
+        ...props.filters,
+        search: undefined,
+      }, {
+        preserveState: true,
+        preserveScroll: true,
+      })
+    }
+  }
+}
+
+const clearSearch = () => {
+  searchQuery.value = ''
+  router.get('/contacts', {
+    ...props.filters,
+    search: undefined,
+  }, {
+    preserveState: true,
+    preserveScroll: true,
+  })
+}
+
 const toggleFoldersDropdown = () => {
   showFoldersDropdown.value = !showFoldersDropdown.value
 }
@@ -770,22 +804,24 @@ const closeSearch = () => {
   showSearchBar.value = false
   searchQuery.value = ''
   // Atualizar a busca para limpar filtros
-  router.get('/contacts', {
-    ...props.filters,
-    search: undefined,
-  }, {
-    preserveState: true,
-    preserveScroll: true,
-  })
+  if (props.filters.search) {
+    router.get('/contacts', {
+      ...props.filters,
+      search: undefined,
+    }, {
+      preserveState: true,
+      preserveScroll: true,
+    })
+  }
 }
 
 const handleSearchBlur = () => {
-  // Fechar a barra de busca se o campo estiver vazio
+  // Fechar a barra de busca se o campo estiver vazio e não houver filtro de busca ativo
   setTimeout(() => {
-    if (!searchQuery.value) {
+    if (!searchQuery.value && !props.filters.search) {
       showSearchBar.value = false
     }
-  }, 100)
+  }, 200) // Aumentei o tempo para evitar conflitos com cliques
 }
 
 const selectType = (type) => {
@@ -1167,3 +1203,41 @@ const getTypeBadgeClass = (type) => {
   return classes[type] || 'badge-secondary-transparent'
 }
 </script>
+
+<style scoped>
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+/* Transições suaves para a expansão */
+.search-container .form-control {
+  transition: all 0.3s ease-in-out;
+}
+
+.search-container .form-control:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: rgb(59, 130, 246);
+}
+
+/* Ajustes responsivos */
+@media (max-width: 768px) {
+  .search-container .form-control {
+    width: 240px !important;
+  }
+  
+  .search-container .form-control:focus {
+    width: 260px !important;
+  }
+}
+</style>

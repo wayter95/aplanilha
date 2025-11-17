@@ -35,37 +35,120 @@ class ContactController extends Controller
     {
         $validated = $request->validate([
             'type' => ['required', Rule::in(['customer', 'supplier', 'location'])],
-            'name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:50',
-            'name_line' => 'nullable|string|max:255',
+            'name' => [
+                'required',
+                'string',
+                'min:2',
+                'max:255',
+                'regex:/^[A-Za-zÀ-ÿ0-9\s\.\-\_\&\(\)]+$/'
+            ],
+            'email' => [
+                'required',
+                'email',
+                'max:255'
+            ],
+            'phone' => [
+                'required',
+                'string',
+                'max:50',
+                'regex:/^(\(\d{2}\)\s?|\d{2}\s?)?\d{4,5}-?\d{4}$/'
+            ],
+            'name_line' => [
+                'required',
+                'string',
+                'min:2',
+                'max:255'
+            ],
             'website' => 'nullable|url|max:255',
             'responsible_user_id' => 'nullable|exists:users,id',
             
+            // Endereço de visita
             'street_visiting' => 'nullable|string|max:255',
             'house_number_visiting' => 'nullable|string|max:50',
-            'postal_code_visiting' => 'nullable|string|max:20',
-            'city_visiting' => 'nullable|string|max:100',
-            'state_visiting' => 'nullable|string|max:100',
-            'country_visiting' => 'nullable|string|max:100',
+            'postal_code_visiting' => [
+                'nullable',
+                'string',
+                'max:20',
+                'regex:/^\d{5}-?\d{3}$/'
+            ],
+            'city_visiting' => [
+                'required',
+                'string',
+                'max:100',
+                'regex:/^[A-Za-zÀ-ÿ\s\.\-]+$/'
+            ],
+            'state_visiting' => [
+                'required',
+                'string',
+                'max:100',
+                'regex:/^[A-Za-z]{2}$/'
+            ],
+            'country_visiting' => [
+                'nullable',
+                'string',
+                'max:100',
+                'regex:/^[A-Za-zÀ-ÿ\s]+$/'
+            ],
             'lat_visiting' => 'nullable|numeric|between:-90,90',
             'lng_visiting' => 'nullable|numeric|between:-180,180',
             
+            // Endereço de correspondência
             'street_mailing' => 'nullable|string|max:255',
             'house_number_mailing' => 'nullable|string|max:50',
-            'postal_code_mailing' => 'nullable|string|max:20',
-            'city_mailing' => 'nullable|string|max:100',
-            'state_mailing' => 'nullable|string|max:100',
-            'country_mailing' => 'nullable|string|max:100',
+            'postal_code_mailing' => [
+                'nullable',
+                'string',
+                'max:20',
+                'regex:/^\d{5}-?\d{3}$/'
+            ],
+            'city_mailing' => [
+                'nullable',
+                'string',
+                'max:100',
+                'regex:/^[A-Za-zÀ-ÿ\s\.\-]+$/'
+            ],
+            'state_mailing' => [
+                'nullable',
+                'string',
+                'max:100',
+                'regex:/^[A-Za-z]{2}$/'
+            ],
+            'country_mailing' => [
+                'nullable',
+                'string',
+                'max:100',
+                'regex:/^[A-Za-zÀ-ÿ\s]+$/'
+            ],
             'lat_mailing' => 'nullable|numeric|between:-90,90',
             'lng_mailing' => 'nullable|numeric|between:-180,180',
             
+            // Endereço de cobrança
             'street_billing' => 'nullable|string|max:255',
             'house_number_billing' => 'nullable|string|max:50',
-            'postal_code_billing' => 'nullable|string|max:20',
-            'city_billing' => 'nullable|string|max:100',
-            'state_billing' => 'nullable|string|max:100',
-            'country_billing' => 'nullable|string|max:100',
+            'postal_code_billing' => [
+                'nullable',
+                'string',
+                'max:20',
+                'regex:/^\d{5}-?\d{3}$/'
+            ],
+            'city_billing' => [
+                'nullable',
+                'string',
+                'max:100',
+                'regex:/^[A-Za-zÀ-ÿ\s\.\-]+$/'
+            ],
+            'state_billing' => [
+                'nullable',
+                'string',
+                'max:100',
+                'regex:/^[A-Za-z]{2}$/'
+            ],
+            'country_billing' => [
+                'nullable',
+                'string',
+                'max:100',
+                'regex:/^[A-Za-zÀ-ÿ\s]+$/'
+            ],
             'lat_billing' => 'nullable|numeric|between:-90,90',
             'lng_billing' => 'nullable|numeric|between:-180,180',
             
@@ -74,16 +157,37 @@ class ContactController extends Controller
             
             // Pessoas de contato
             'contact_persons' => 'sometimes|array',
-            'contact_persons.*.first_name' => 'required_with:contact_persons|string|max:255',
-            'contact_persons.*.last_name' => 'nullable|string|max:255',
-            'contact_persons.*.mobile' => 'nullable|string|max:50',
+            'contact_persons.*.first_name' => [
+                'required_with:contact_persons',
+                'string',
+                'min:2',
+                'max:255',
+                'regex:/^[A-Za-zÀ-ÿ\s]+$/'
+            ],
+            'contact_persons.*.last_name' => [
+                'nullable',
+                'string',
+                'max:255',
+                'regex:/^[A-Za-zÀ-ÿ\s]*$/'
+            ],
+            'contact_persons.*.mobile' => [
+                'nullable',
+                'string',
+                'max:50',
+                'regex:/^(\(\d{2}\)\s?|\d{2}\s?)?\d{4,5}-?\d{4}$/'
+            ],
             'contact_persons.*.role' => 'nullable|string|max:255',
             'contact_persons.*.emails' => 'sometimes|array',
             'contact_persons.*.emails.*' => 'email|max:255',
             'contact_persons.*.notes' => 'sometimes|array',
-            'contact_persons.*.notes.*.name' => 'required_with:contact_persons.*.notes|string|max:255',
+            'contact_persons.*.notes.*.name' => [
+                'required_with:contact_persons.*.notes',
+                'string',
+                'min:3',
+                'max:255'
+            ],
             'contact_persons.*.notes.*.content' => 'nullable|string',
-            'contact_persons.*.notes.*.note_date' => 'nullable|date',
+            'contact_persons.*.notes.*.note_date' => 'nullable|date|before_or_equal:today',
         ]);
 
         try {
@@ -109,37 +213,111 @@ class ContactController extends Controller
     {
         $validated = $request->validate([
             'type' => ['sometimes', Rule::in(['customer', 'supplier', 'location'])],
-            'name' => 'sometimes|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:50',
-            'name_line' => 'nullable|string|max:255',
+            'name' => [
+                'sometimes',
+                'string',
+                'min:2',
+                'max:255',
+                'regex:/^[A-Za-zÀ-ÿ0-9\s\.\-\_\&\(\)]+$/'
+            ],
+            'email' => 'sometimes|email|max:255',
+            'phone' => [
+                'sometimes',
+                'string',
+                'max:50',
+                'regex:/^(\(\d{2}\)\s?|\d{2}\s?)?\d{4,5}-?\d{4}$/'
+            ],
+            'name_line' => 'sometimes|string|min:2|max:255',
             'website' => 'nullable|url|max:255',
             'responsible_user_id' => 'nullable|exists:users,id',
             
+            // Endereço de visita
             'street_visiting' => 'nullable|string|max:255',
             'house_number_visiting' => 'nullable|string|max:50',
-            'postal_code_visiting' => 'nullable|string|max:20',
-            'city_visiting' => 'nullable|string|max:100',
-            'state_visiting' => 'nullable|string|max:100',
-            'country_visiting' => 'nullable|string|max:100',
+            'postal_code_visiting' => [
+                'nullable',
+                'string',
+                'max:20',
+                'regex:/^\d{5}-?\d{3}$/'
+            ],
+            'city_visiting' => [
+                'required',
+                'string',
+                'max:100',
+                'regex:/^[A-Za-zÀ-ÿ\s\.\-]+$/'
+            ],
+            'state_visiting' => [
+                'required',
+                'string',
+                'max:100',
+                'regex:/^[A-Za-z]{2}$/'
+            ],
+            'country_visiting' => [
+                'nullable',
+                'string',
+                'max:100',
+                'regex:/^[A-Za-zÀ-ÿ\s]+$/'
+            ],
             'lat_visiting' => 'nullable|numeric|between:-90,90',
             'lng_visiting' => 'nullable|numeric|between:-180,180',
             
+            // Endereço de correspondência
             'street_mailing' => 'nullable|string|max:255',
             'house_number_mailing' => 'nullable|string|max:50',
-            'postal_code_mailing' => 'nullable|string|max:20',
-            'city_mailing' => 'nullable|string|max:100',
-            'state_mailing' => 'nullable|string|max:100',
-            'country_mailing' => 'nullable|string|max:100',
+            'postal_code_mailing' => [
+                'nullable',
+                'string',
+                'max:20',
+                'regex:/^\d{5}-?\d{3}$/'
+            ],
+            'city_mailing' => [
+                'nullable',
+                'string',
+                'max:100',
+                'regex:/^[A-Za-zÀ-ÿ\s\.\-]+$/'
+            ],
+            'state_mailing' => [
+                'nullable',
+                'string',
+                'max:100',
+                'regex:/^[A-Za-z]{2}$/'
+            ],
+            'country_mailing' => [
+                'nullable',
+                'string',
+                'max:100',
+                'regex:/^[A-Za-zÀ-ÿ\s]+$/'
+            ],
             'lat_mailing' => 'nullable|numeric|between:-90,90',
             'lng_mailing' => 'nullable|numeric|between:-180,180',
             
+            // Endereço de cobrança
             'street_billing' => 'nullable|string|max:255',
             'house_number_billing' => 'nullable|string|max:50',
-            'postal_code_billing' => 'nullable|string|max:20',
-            'city_billing' => 'nullable|string|max:100',
-            'state_billing' => 'nullable|string|max:100',
-            'country_billing' => 'nullable|string|max:100',
+            'postal_code_billing' => [
+                'nullable',
+                'string',
+                'max:20',
+                'regex:/^\d{5}-?\d{3}$/'
+            ],
+            'city_billing' => [
+                'nullable',
+                'string',
+                'max:100',
+                'regex:/^[A-Za-zÀ-ÿ\s\.\-]+$/'
+            ],
+            'state_billing' => [
+                'nullable',
+                'string',
+                'max:100',
+                'regex:/^[A-Za-z]{2}$/'
+            ],
+            'country_billing' => [
+                'nullable',
+                'string',
+                'max:100',
+                'regex:/^[A-Za-zÀ-ÿ\s]+$/'
+            ],
             'lat_billing' => 'nullable|numeric|between:-90,90',
             'lng_billing' => 'nullable|numeric|between:-180,180',
             
@@ -148,16 +326,37 @@ class ContactController extends Controller
             
             // Pessoas de contato
             'contact_persons' => 'sometimes|array',
-            'contact_persons.*.first_name' => 'required_with:contact_persons|string|max:255',
-            'contact_persons.*.last_name' => 'nullable|string|max:255',
-            'contact_persons.*.mobile' => 'nullable|string|max:50',
+            'contact_persons.*.first_name' => [
+                'required_with:contact_persons',
+                'string',
+                'min:2',
+                'max:255',
+                'regex:/^[A-Za-zÀ-ÿ\s]+$/'
+            ],
+            'contact_persons.*.last_name' => [
+                'nullable',
+                'string',
+                'max:255',
+                'regex:/^[A-Za-zÀ-ÿ\s]*$/'
+            ],
+            'contact_persons.*.mobile' => [
+                'nullable',
+                'string',
+                'max:50',
+                'regex:/^(\(\d{2}\)\s?|\d{2}\s?)?\d{4,5}-?\d{4}$/'
+            ],
             'contact_persons.*.role' => 'nullable|string|max:255',
             'contact_persons.*.emails' => 'sometimes|array',
             'contact_persons.*.emails.*' => 'email|max:255',
             'contact_persons.*.notes' => 'sometimes|array',
-            'contact_persons.*.notes.*.name' => 'required_with:contact_persons.*.notes|string|max:255',
+            'contact_persons.*.notes.*.name' => [
+                'required_with:contact_persons.*.notes',
+                'string',
+                'min:3',
+                'max:255'
+            ],
             'contact_persons.*.notes.*.content' => 'nullable|string',
-            'contact_persons.*.notes.*.note_date' => 'nullable|date',
+            'contact_persons.*.notes.*.note_date' => 'nullable|date|before_or_equal:today',
         ]);
 
         try {

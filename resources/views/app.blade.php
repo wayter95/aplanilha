@@ -11,13 +11,11 @@
     <!-- FAVICON -->
     <link rel="icon" href="{{ asset('build/assets/images/brand-logos/favicon.ico') }}" type="image/x-icon">
     
-    <!-- Icon Fonts -->
-    <link rel="stylesheet" href="{{ asset('build/assets/iconfonts/icons.css') }}">
-    
     <!-- Vite Assets -->
     @vite([
       'resources/sass/app.scss',
       'resources/assets/css/style.css',
+      'resources/assets/iconfonts/icons.css',
       'resources/js/app.js'
     ])
     
