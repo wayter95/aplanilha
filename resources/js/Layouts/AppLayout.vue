@@ -105,6 +105,14 @@ const menuItems = [
     ]
   },
   {
+    label: 'Contatos',
+    icon: 'bx bx-group',
+    children: [
+      { label: 'Lista de Contatos', route: '/contacts' },
+      // { label: 'Novo Contato', route: '/contacts/create' }
+    ]
+  },
+  {
     label: 'Configurações',
     icon: 'bx bx-cog',
     children: [

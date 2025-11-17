@@ -3,16 +3,19 @@
 namespace App\Providers;
 
 use App\Repositories\ClientSubscribeRepository;
+use App\Repositories\ContactRepository;
 use App\Repositories\UserRepository;
 use App\Repositories\RoleRepository;
 use App\Repositories\DocumentTemplateRepository;
 use App\Repositories\DocumentTypeRepository;
 use App\Repositories\Interfaces\ClientSubscribeRepositoryInterface;
+use App\Repositories\Interfaces\ContactRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Repositories\Interfaces\RoleRepositoryInterface;
 use App\Repositories\Interfaces\DocumentTemplateRepositoryInterface;
 use App\Repositories\Interfaces\DocumentTypeRepositoryInterface;
 use App\Services\ClientSubscribeService;
+use App\Services\ContactService;
 use App\Services\UserService;
 use App\Services\RoleService;
 use App\Services\DocumentTemplateService;
@@ -20,6 +23,7 @@ use App\Services\DocumentTypeService;
 use App\Services\DocumentRenderService;
 use App\Services\DocumentPdfService;
 use App\Services\Interfaces\ClientSubscribeServiceInterface;
+use App\Services\Interfaces\ContactServiceInterface;
 use App\Services\Interfaces\UserServiceInterface;
 use App\Services\Interfaces\RoleServiceInterface;
 use App\Services\Interfaces\DocumentTemplateServiceInterface;
@@ -34,6 +38,7 @@ class RepositoryServiceProvider extends ServiceProvider
     {
         // Repository Bindings
         $this->app->bind(ClientSubscribeRepositoryInterface::class, ClientSubscribeRepository::class);
+        $this->app->bind(ContactRepositoryInterface::class, ContactRepository::class);
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
         $this->app->bind(RoleRepositoryInterface::class, RoleRepository::class);
         $this->app->bind(DocumentTemplateRepositoryInterface::class, DocumentTemplateRepository::class);
@@ -41,6 +46,7 @@ class RepositoryServiceProvider extends ServiceProvider
         
         // Service Bindings
         $this->app->bind(ClientSubscribeServiceInterface::class, ClientSubscribeService::class);
+        $this->app->bind(ContactServiceInterface::class, ContactService::class);
         $this->app->bind(UserServiceInterface::class, UserService::class);
         $this->app->bind(RoleServiceInterface::class, RoleService::class);
         $this->app->bind(DocumentTemplateServiceInterface::class, DocumentTemplateService::class);

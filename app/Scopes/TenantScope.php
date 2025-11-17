@@ -16,6 +16,10 @@ class TenantScope implements Scope
      * - Se o usuário logado é master (is_master = true), não aplica filtro (pode ver todos)
      * - Se há client_id no contexto, aplica filtro por client_id
      * - Se não há contexto mas usuário logado, usa client_id do usuário
+     *
+     * @param Builder $builder
+     * @param Model $model
+     * @return void
      */
     public function apply(Builder $builder, Model $model): void
     {
@@ -43,9 +47,10 @@ class TenantScope implements Scope
         
         if ($clientId) {
             // Aplica filtro por client_id, incluindo registros globais
-            $builder->where(function ($query) use ($clientId, $model) {
-                $query->where($model->getTable() . '.client_id', $clientId)
-                      ->orWhereNull($model->getTable() . '.client_id');
+            $tableName = $model->getTable();
+            $builder->where(function ($query) use ($clientId, $tableName) {
+                $query->where($tableName . '.client_id', $clientId)
+                      ->orWhereNull($tableName . '.client_id');
             });
         }
         // Se não há client_id, não aplica filtro (permite páginas públicas funcionarem)

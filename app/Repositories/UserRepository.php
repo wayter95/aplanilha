@@ -15,7 +15,6 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     {
         parent::__construct($model);
     }
-
     public function getAllPaginated(int $perPage = 10, array $filters = []): LengthAwarePaginator
     {
         $query = $this->model->with(['roles', 'client']);

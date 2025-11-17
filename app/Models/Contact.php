@@ -1,4 +1,5 @@
 <?php
+<?php
 
 namespace App\Models;
 
@@ -52,6 +53,7 @@ class Contact extends Model
         'country_billing',
         'lat_billing',
         'lng_billing',
+        'general_notes',
     ];
 
     protected $casts = [
@@ -69,65 +71,81 @@ class Contact extends Model
         static::addGlobalScope(new TenantScope);
     }
 
-    /**
-     * Relacionamento com usuário responsável
-     */
-    public function responsibleUser(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'responsible_user_id');
-    }
-
-    /**
-     * Relacionamento com client_subscribes
-     */
     public function client(): BelongsTo
     {
         return $this->belongsTo(ClientSubscribe::class, 'client_id');
     }
 
-    /**
-     * Relacionamento com projetos como cliente
-     */
+    public function responsibleUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'responsible_user_id');
+    }
+
+    public function contactPersons(): HasMany
+    {
+        return $this->hasMany(ContactPerson::class, 'contact_id');
+    }
+
     public function projectsAsClient(): HasMany
     {
         return $this->hasMany(Project::class, 'client_contact_id');
     }
 
-    /**
-     * Relacionamento com projetos como localização
-     */
     public function projectsAsLocation(): HasMany
     {
         return $this->hasMany(Project::class, 'location_contact_id');
     }
 
-    /**
-     * Scope para filtrar por tipo cliente
-     */
+    public function scopeByType($query, string $type)
+    {
+        return $query->where('type', $type);
+    }
+
     public function scopeCustomer($query)
     {
         return $query->where('type', 'customer');
     }
 
-    /**
-     * Scope para filtrar por tipo fornecedor
-     */
     public function scopeSupplier($query)
     {
         return $query->where('type', 'supplier');
     }
 
-    /**
-     * Scope para filtrar por tipo localização
-     */
     public function scopeLocation($query)
     {
         return $query->where('type', 'location');
     }
 
-    /**
-     * Accessor para retornar o tipo formatado
-     */
+    public function scopeByCity($query, string $city)
+    {
+        return $query->where(function($q) use ($city) {
+            $q->where('city_visiting', $city)
+              ->orWhere('city_mailing', $city)
+              ->orWhere('city_billing', $city);
+        });
+    }
+
+    public function scopeByCountry($query, string $country)
+    {
+        return $query->where(function($q) use ($country) {
+            $q->where('country_visiting', $country)
+              ->orWhere('country_mailing', $country)
+              ->orWhere('country_billing', $country);
+        });
+    }
+
+    public function scopeSearch($query, string $search)
+    {
+        return $query->where(function($q) use ($search) {
+            $q->where('name', 'ILIKE', "%{$search}%")
+              ->orWhere('email', 'ILIKE', "%{$search}%")
+              ->orWhere('phone', 'ILIKE', "%{$search}%")
+              ->orWhere('city_visiting', 'ILIKE', "%{$search}%")
+              ->orWhere('city_mailing', 'ILIKE', "%{$search}%")
+              ->orWhere('city_billing', 'ILIKE', "%{$search}%");
+        });
+    }
+
     public function getTypeLabelAttribute(): string
     {
         return match ($this->type) {
@@ -138,10 +156,7 @@ class Contact extends Model
         };
     }
 
-    /**
-     * Retorna o endereço de visitação completo
-     */
-    public function getVisitingAddressAttribute(): string
+    public function getFullAddressVisitingAttribute(): string
     {
         $parts = array_filter([
             $this->street_visiting,
@@ -155,10 +170,12 @@ class Contact extends Model
         return implode(', ', $parts);
     }
 
-    /**
-     * Retorna o endereço de correspondência completo
-     */
-    public function getMailingAddressAttribute(): string
+    public function getVisitingAddressAttribute(): string
+    {
+        return $this->getFullAddressVisitingAttribute();
+    }
+
+    public function getFullAddressMailingAttribute(): string
     {
         $parts = array_filter([
             $this->street_mailing,
@@ -172,10 +189,12 @@ class Contact extends Model
         return implode(', ', $parts);
     }
 
-    /**
-     * Retorna o endereço de cobrança completo
-     */
-    public function getBillingAddressAttribute(): string
+    public function getMailingAddressAttribute(): string
+    {
+        return $this->getFullAddressMailingAttribute();
+    }
+
+    public function getFullAddressBillingAttribute(): string
     {
         $parts = array_filter([
             $this->street_billing,
@@ -187,5 +206,10 @@ class Contact extends Model
         ]);
 
         return implode(', ', $parts);
+    }
+
+    public function getBillingAddressAttribute(): string
+    {
+        return $this->getFullAddressBillingAttribute();
     }
 }

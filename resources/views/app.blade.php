@@ -17,8 +17,13 @@
     <!-- ICONS CSS (Static) -->
     <link href="{{ asset('assets/iconfonts/icons.css') }}" rel="stylesheet">
 
-    <!-- APP JS -->
-    @vite(['resources/js/app.js'])
+    <!-- Vite Assets -->
+    @vite([
+      'resources/sass/app.scss',
+      'resources/assets/css/style.css',
+      'resources/assets/iconfonts/icons.css',
+      'resources/js/app.js'
+    ])
     
     @inertiaHead
   </head>

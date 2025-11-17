@@ -74,22 +74,99 @@ defineRule("uuid_v7", (value) => {
     return true;
 });
 
-defineRule("unique_remote", async (value, [url, field]) => {
-    if (!value || !value.length || !url) {
+// 📞 Regra customizada para telefone brasileiro
+defineRule("br_phone", (value) => {
+    if (!value || !value.length) {
         return true;
     }
-    try {
-        const response = await fetch(
-            url + `?${field}=` + encodeURIComponent(value)
-        );
-        const data = await response.json();
-        if (data.exists) {
-            return `O valor já está em uso.`;
-        }
-        return true;
-    } catch (e) {
-        return "Erro ao validar unicidade.";
+    const regex = /^(\(\d{2}\)\s?|\d{2}\s?)?\d{4,5}-?\d{4}$/;
+    if (!regex.test(value)) {
+        return "Telefone deve ter formato válido (ex: (11) 99999-9999)";
     }
+    return true;
+});
+
+// 📮 Regra customizada para CEP brasileiro  
+defineRule("br_postal_code", (value) => {
+    if (!value || !value.length) {
+        return true;
+    }
+    const regex = /^\d{5}-?\d{3}$/;
+    if (!regex.test(value)) {
+        return "CEP deve ter formato válido (ex: 12345-678)";
+    }
+    return true;
+});
+
+// 🏙️ Regra customizada para nomes de cidades
+defineRule("city_name", (value) => {
+    if (!value || !value.length) {
+        return true;
+    }
+    const regex = /^[A-Za-zÀ-ÿ\s\.\-]+$/;
+    if (!regex.test(value)) {
+        return "Cidade deve conter apenas letras, espaços e caracteres válidos";
+    }
+    return true;
+});
+
+// 🌎 Regra customizada para estados brasileiros (sigla)
+defineRule("br_state", (value) => {
+    if (!value || !value.length) {
+        return true;
+    }
+    const regex = /^[A-Za-z]{2}$/;
+    if (!regex.test(value)) {
+        return "Estado deve ter 2 letras (ex: SP)";
+    }
+    return true;
+});
+
+// 🌍 Regra customizada para nomes de países
+defineRule("country_name", (value) => {
+    if (!value || !value.length) {
+        return true;
+    }
+    const regex = /^[A-Za-zÀ-ÿ\s]+$/;
+    if (!regex.test(value)) {
+        return "País deve conter apenas letras e espaços";
+    }
+    return true;
+});
+
+// 🏢 Regra customizada para nomes de empresas
+defineRule("company_name", (value) => {
+    if (!value || !value.length) {
+        return true;
+    }
+    const regex = /^[A-Za-zÀ-ÿ0-9\s\.\-\_\&\(\)]+$/;
+    if (!regex.test(value)) {
+        return "Nome da empresa deve conter apenas letras, números, espaços e caracteres especiais válidos";
+    }
+    return true;
+});
+
+// 📍 Regras para latitude e longitude
+defineRule("latitude", (value) => {
+    if (!value && value !== 0) {
+        return true;
+    }
+    const num = parseFloat(value);
+    if (isNaN(num) || num < -90 || num > 90) {
+        return "Latitude deve estar entre -90 e 90";
+    }
+    return true;
+});
+
+defineRule("longitude", (value) => {
+    if (!value && value !== 0) {
+        return true;
+    }
+    const num = parseFloat(value);
+    if (isNaN(num) || num < -180 || num > 180) {
+        return "Longitude deve estar entre -180 e 180";
+    }
+    return true;
 });
 
 const ptBR = {
@@ -105,6 +182,15 @@ const ptBR = {
         password:
             "A senha deve ter ao menos 8 caracteres, incluindo maiúscula, minúscula e número.",
         unique_email_tenant: "Este email já está em uso neste tenant.",
+        br_phone: "Telefone deve ter formato válido (ex: (11) 99999-9999).",
+        br_postal_code: "CEP deve ter formato válido (ex: 12345-678).",
+        city_name: "Cidade deve conter apenas letras, espaços e caracteres válidos.",
+        br_state: "Estado deve ter 2 letras (ex: SP).",
+        country_name: "País deve conter apenas letras e espaços.",
+        company_name: "Nome da empresa deve conter apenas letras, números, espaços e caracteres especiais válidos.",
+        latitude: "Latitude deve estar entre -90 e 90.",
+        longitude: "Longitude deve estar entre -180 e 180.",
+        url: "Website deve ser uma URL válida (ex: https://exemplo.com)."
     },
     names: {
         email: "Email",
@@ -119,6 +205,30 @@ const ptBR = {
         phone: "Telefone",
         address: "Endereço",
         display_name: "Nome de exibição",
+        type: "Tipo",
+        website: "Website",
+        name_line: "Linha de nome",
+        street_visiting: "Rua (visita)",
+        house_number_visiting: "Número (visita)",
+        postal_code_visiting: "CEP (visita)",
+        city_visiting: "Cidade (visita)",
+        state_visiting: "Estado (visita)",
+        country_visiting: "País (visita)",
+        street_mailing: "Rua (correspondência)",
+        house_number_mailing: "Número (correspondência)",
+        postal_code_mailing: "CEP (correspondência)",
+        city_mailing: "Cidade (correspondência)",
+        state_mailing: "Estado (correspondência)",
+        country_mailing: "País (correspondência)",
+        street_billing: "Rua (cobrança)",
+        house_number_billing: "Número (cobrança)",
+        postal_code_billing: "CEP (cobrança)",
+        city_billing: "Cidade (cobrança)",
+        state_billing: "Estado (cobrança)",
+        country_billing: "País (cobrança)",
+        general_notes: "Notas gerais",
+        mobile: "Celular",
+        role: "Cargo"
     },
 };
 
