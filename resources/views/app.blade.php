@@ -10,16 +10,15 @@
     
     <!-- FAVICON -->
     <link rel="icon" href="{{ asset('build/assets/images/brand-logos/favicon.ico') }}" type="image/x-icon">
+
+    <!-- MAIN STYLES (Static) -->
+    <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet">
     
-    <!-- Icon Fonts -->
-    <link rel="stylesheet" href="{{ asset('build/assets/iconfonts/icons.css') }}">
-    
-    <!-- Vite Assets -->
-    @vite([
-      'resources/sass/app.scss',
-      'resources/assets/css/style.css',
-      'resources/js/app.js'
-    ])
+    <!-- ICONS CSS (Static) -->
+    <link href="{{ asset('assets/iconfonts/icons.css') }}" rel="stylesheet">
+
+    <!-- APP JS -->
+    @vite(['resources/js/app.js'])
     
     @inertiaHead
   </head>

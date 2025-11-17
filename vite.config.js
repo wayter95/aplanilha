@@ -10,9 +10,6 @@ export default defineConfig({
     plugins: [
         laravel({
             input: [
-                "resources/sass/app.scss",
-                "resources/css/app.css",
-                "resources/assets/css/style.css",
                 "resources/js/app.js",
             ],
             refresh: true,
@@ -59,9 +56,23 @@ export default defineConfig({
     resolve: {
         alias: {
             '@': path.resolve(__dirname, './resources/js'),
+            '~': path.resolve(__dirname, './resources'),
         },
     },
-    assetsInclude: ['**/*.woff', '**/*.woff2', '**/*.ttf', '**/*.eot', '**/*.svg'],
+    assetsInclude: ['**/*.woff', '**/*.woff2', '**/*.ttf', '**/*.eot', '**/*.svg', '**/*.otf'],
+    build: {
+        rollupOptions: {
+            output: {
+                assetFileNames: (assetInfo) => {
+                    // Manter estrutura de fontes
+                    if (assetInfo.name.match(/\.(woff|woff2|ttf|eot|otf)$/)) {
+                        return 'assets/fonts/[name]-[hash][extname]';
+                    }
+                    return 'assets/[name]-[hash][extname]';
+                }
+            }
+        }
+    },
     server: {
         host: '0.0.0.0',
         port: 5173,
