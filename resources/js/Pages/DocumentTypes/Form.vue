@@ -12,68 +12,47 @@
             <div class="grid grid-cols-12 gap-4">
               <!-- Nome -->
               <div class="xl:col-span-12 col-span-12">
-                <label for="name" class="form-label">
-                  Nome <span class="text-danger">*</span>
-                </label>
-                <Field
-                  id="name"
+                <FormInput
                   name="name"
+                  label="Nome"
                   v-model="localForm.name"
-                  type="text"
-                  class="form-control"
-                  :class="{ 'is-invalid': errors.name }"
                   placeholder="Ex: Contratos"
                   rules="required"
+                  required
                 />
-                <ErrorMessage name="name" class="invalid-feedback" />
               </div>
 
               <!-- Código -->
               <div class="xl:col-span-6 col-span-12">
-                <label for="code" class="form-label">
-                  Código <span class="text-danger">*</span>
-                </label>
-                <Field
-                  id="code"
+                <FormInput
                   name="code"
+                  label="Código"
                   v-model="localForm.code"
-                  type="text"
-                  class="form-control"
-                  :class="{ 'is-invalid': errors.code }"
                   placeholder="Ex: contract"
                   rules="required"
+                  required
                   :disabled="mode === 'edit'"
                 />
-                <ErrorMessage name="code" class="invalid-feedback" />
               </div>
 
               <!-- Ordem -->
               <div class="xl:col-span-6 col-span-12">
-                <label for="sort_order" class="form-label">
-                  Ordem
-                </label>
-                <Field
-                  id="sort_order"
+                <FormInput
                   name="sort_order"
-                  v-model.number="localForm.sort_order"
+                  label="Ordem"
+                  v-model="localForm.sort_order"
                   type="number"
-                  class="form-control"
                   placeholder="0"
                 />
               </div>
 
               <!-- Descrição -->
               <div class="xl:col-span-12 col-span-12">
-                <label for="description" class="form-label">
-                  Descrição
-                </label>
-                <Field
-                  id="description"
+                <FormTextarea
                   name="description"
+                  label="Descrição"
                   v-model="localForm.description"
-                  as="textarea"
                   rows="3"
-                  class="form-control"
                   placeholder="Descrição do tipo de documento"
                 />
               </div>
@@ -84,6 +63,7 @@
                   name="is_active"
                   label="Status"
                   v-model="localIsActive"
+                  size="sm"
                   active-label="Ativo"
                   inactive-label="Inativo"
                   :show-inline-label="true"
@@ -94,21 +74,23 @@
           </div>
           <div class="box-footer">
             <div class="flex items-center justify-end gap-2">
-              <button
-                type="button"
-                class="ti-btn ti-btn-light"
+              <Button
+                variant="light"
+                style-type="outline"
+                size="sm"
+                left-icon="ri-close-line"
                 @click="handleCancel"
               >
-                <i class="ri-close-line mr-1"></i>
                 Cancelar
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
-                class="ti-btn ti-btn-primary-full"
+                variant="primary"
+                size="sm"
+                left-icon="ri-save-line"
               >
-                <i class="ri-save-line mr-1"></i>
                 {{ mode === 'edit' ? 'Atualizar' : 'Salvar' }}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -118,10 +100,12 @@
 </template>
 
 <script setup>
-import { Form, Field, ErrorMessage } from 'vee-validate'
-import { ref, watch, computed } from 'vue'
+import { Form } from 'vee-validate'
+import { ref, watch } from 'vue'
 import { router } from '@inertiajs/vue3'
-import ColorPicker from '@/Components/Common/ColorPicker.vue'
+import FormInput from '@/Components/Form/FormInput.vue'
+import FormTextarea from '@/Components/Form/FormTextarea.vue'
+import Button from '@/Components/Button.vue'
 import Switch from '@/Components/Switch.vue'
 
 const props = defineProps({

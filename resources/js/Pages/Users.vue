@@ -22,13 +22,14 @@
           @search-change="handleSearchChange"
         >
           <template #header-actions>
-            <button 
+            <Button
+              variant="primary"
+              size="sm"
+              left-icon="ri-add-line"
               @click="showCreateModal = true"
-              class="ti-btn btn-wave ti-btn-primary-full !py-1 !px-2 !text-[0.75rem]"
             >
-              <i class="ri-add-line font-semibold align-middle"></i>
               Novo Usuário
-            </button>
+            </Button>
           </template>
         </DataTable>
       </div>
@@ -59,6 +60,7 @@
 
 <script setup>
 import DataTable from '@/Components/DataTable.vue'
+import Button from '@/Components/Button.vue'
 import CreateUserModal from '@/Components/UsersModals/CreateUserModal.vue'
 import DeleteUserModal from '@/Components/UsersModals/DeleteUserModal.vue'
 import UpdateUserModal from '@/Components/UsersModals/UpdateUserModal.vue'

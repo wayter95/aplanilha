@@ -46,14 +46,16 @@
                     />
                   </div>
                   <div class="xl:col-span-12 col-span-12 grid">
-                    <button 
-                      type="submit" 
-                      class="ti-btn ti-btn-lg bg-primary text-white btn-wave !font-medium w-full"
+                    <Button
+                      type="submit"
+                      variant="primary"
+                      size="lg"
                       :disabled="isLoading"
+                      :loading="isLoading"
+                      custom-class="w-full"
                     >
-                      <span v-if="isLoading">Entrando...</span>
-                      <span v-else>Entrar</span>
-                    </button>
+                      Entrar
+                    </Button>
                   </div>
                 </div>
               </BaseForm>
@@ -109,6 +111,7 @@ import { nextTick, onMounted, ref } from 'vue';
 import BaseForm from '@/Components/Form/BaseForm.vue';
 import Input from '@/Components/Input.vue';
 import InputPassword from '@/Components/InputPassword.vue';
+import Button from '@/Components/Button.vue';
 import ToastContainer from '@/Components/ToastContainer.vue';
 import { useToast } from '@/composables/useToast';
 import { useAuthValidation } from '@/composables/useAuthValidation';
