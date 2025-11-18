@@ -7,6 +7,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectTypeController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DocumentTypeController;
 use App\Http\Controllers\DocumentTemplateController;
 use App\Http\Controllers\SettingsController;
@@ -95,7 +96,31 @@ Route::prefix('roles')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::prefix('projects')->group(function () {
-    Route::get('/', [ProjectController::class, 'index'])->name('projects');
+    Route::get('/', [ProjectController::class, 'index'])->name('projects.index');
+    Route::get('/create', [ProjectController::class, 'create'])->name('projects.create');
+    Route::get('/{id}/edit', [ProjectController::class, 'edit'])->name('projects.edit');
+    
+    // API Routes
+    Route::post('/', [ProjectController::class, 'store'])->name('api.projects.store');
+    Route::get('/{id}', [ProjectController::class, 'show'])->name('api.projects.show');
+    Route::put('/{id}', [ProjectController::class, 'update'])->name('api.projects.update');
+    Route::delete('/{id}', [ProjectController::class, 'destroy'])->name('api.projects.destroy');
+    Route::patch('/{id}/activate', [ProjectController::class, 'activate'])->name('api.projects.activate');
+    Route::patch('/{id}/cancel', [ProjectController::class, 'cancel'])->name('api.projects.cancel');
+    Route::patch('/{id}/complete', [ProjectController::class, 'complete'])->name('api.projects.complete');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Authenticated Routes - Contacts
+|--------------------------------------------------------------------------
+*/
+Route::prefix('contacts')->group(function () {
+    // API Routes
+    Route::get('/search-select2', [ContactController::class, 'searchForSelect2'])->name('api.contacts.search-select2');
+    Route::get('/customers', [ContactController::class, 'getCustomers'])->name('api.contacts.customers');
+    Route::get('/locations', [ContactController::class, 'getLocations'])->name('api.contacts.locations');
+    Route::get('/{id}', [ContactController::class, 'show'])->name('api.contacts.show');
 });
 
 /*

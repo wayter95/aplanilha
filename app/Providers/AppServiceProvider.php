@@ -12,6 +12,8 @@ use App\Repositories\Interfaces\DocumentTemplateRepositoryInterface;
 use App\Repositories\Interfaces\ClientSubscribeRepositoryInterface;
 use App\Repositories\Interfaces\PasswordResetTokenRepositoryInterface;
 use App\Repositories\Interfaces\ProjectTypeRepositoryInterface;
+use App\Repositories\Interfaces\ProjectRepositoryInterface;
+use App\Repositories\Interfaces\ContactRepositoryInterface;
 
 use App\Repositories\UserRepository;
 use App\Repositories\RoleRepository;
@@ -20,6 +22,8 @@ use App\Repositories\DocumentTemplateRepository;
 use App\Repositories\ClientSubscribeRepository;
 use App\Repositories\PasswordResetTokenRepository;
 use App\Repositories\ProjectTypeRepository;
+use App\Repositories\ProjectRepository;
+use App\Repositories\ContactRepository;
 
 // Services
 use App\Services\Interfaces\UserServiceInterface;
@@ -31,6 +35,8 @@ use App\Services\Interfaces\DocumentRenderServiceInterface;
 use App\Services\Interfaces\ClientSubscribeServiceInterface;
 use App\Services\Interfaces\PasswordResetTokenServiceInterface;
 use App\Services\Interfaces\ProjectTypeServiceInterface;
+use App\Services\Interfaces\ProjectServiceInterface;
+use App\Services\Interfaces\ContactServiceInterface;
 
 use App\Services\UserService;
 use App\Services\RoleService;
@@ -41,6 +47,8 @@ use App\Services\DocumentRenderService;
 use App\Services\ClientSubscribeService;
 use App\Services\PasswordResetTokenService;
 use App\Services\ProjectTypeService;
+use App\Services\ProjectService;
+use App\Services\ContactService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -54,6 +62,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ClientSubscribeRepositoryInterface::class, ClientSubscribeRepository::class);
         $this->app->bind(PasswordResetTokenRepositoryInterface::class, PasswordResetTokenRepository::class);
         $this->app->bind(ProjectTypeRepositoryInterface::class, ProjectTypeRepository::class);
+        $this->app->bind(ProjectRepositoryInterface::class, ProjectRepository::class);
+        $this->app->bind(ContactRepositoryInterface::class, ContactRepository::class);
 
         // Service Bindings
         $this->app->bind(UserServiceInterface::class, UserService::class);
@@ -65,6 +75,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ClientSubscribeServiceInterface::class, ClientSubscribeService::class);
         $this->app->bind(PasswordResetTokenServiceInterface::class, PasswordResetTokenService::class);
         $this->app->bind(ProjectTypeServiceInterface::class, ProjectTypeService::class);
+        $this->app->bind(ProjectServiceInterface::class, ProjectService::class);
+        $this->app->bind(ContactServiceInterface::class, ContactService::class);
     }
 
     public function boot(): void
