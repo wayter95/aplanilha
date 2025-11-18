@@ -1,35 +1,35 @@
 <template>
   <div class="photo-upload-container">
-    <!-- Avatar com botão de alterar -->
+    <!-- Avatar com botão único -->
     <div class="flex items-center space-x-4">
       <!-- Avatar -->
       <div class="relative">
-        <div class="w-20 h-20 overflow-hidden bg-gray-200 dark:bg-gray-700 flex items-center justify-center" style="border-radius: 50%;">
+        <div class="w-20 h-20 min-w-[5rem] min-h-[5rem] max-w-[5rem] max-h-[5rem] overflow-hidden bg-gray-200 dark:bg-gray-700 flex items-center justify-center" style="border-radius: 50%; aspect-ratio: 1/1;">
           <img 
             v-if="currentPhotoUrl" 
             :src="currentPhotoUrl" 
             :alt="altText"
             class="w-full h-full object-cover"
+            style="border-radius: 50%;"
           />
-          <i v-else class="ri-user-line text-3xl text-gray-400 dark:text-gray-500"></i>
+          <div v-else class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-600 dark:to-gray-700 flex items-center justify-center" style="border-radius: 50%;">
+            <i class="ri-user-line text-3xl text-gray-400 dark:text-gray-500"></i>
+          </div>
         </div>
-        
-        <!-- Botão de alterar -->
-        <button
-          @click="openModal"
-          class="absolute -bottom-1 -right-1 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary-dark transition-colors shadow-lg"
-          title="Alterar foto"
-        >
-          <i class="ri-camera-line text-sm"></i>
-        </button>
       </div>
       
-      <!-- Informações -->
+      <!-- Informações e botão -->
       <div>
         <h4 class="font-medium text-gray-900 dark:text-white">{{ altText }}</h4>
-        <p class="text-sm text-gray-500 dark:text-gray-400">
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">
           {{ currentPhotoUrl ? 'Foto atualizada' : 'Nenhuma foto' }}
         </p>
+        <button
+          @click="openModal"
+          class="px-3 py-1.5 text-sm bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+        >
+          {{ currentPhotoUrl ? 'Alterar foto' : 'Adicionar foto' }}
+        </button>
       </div>
     </div>
 
