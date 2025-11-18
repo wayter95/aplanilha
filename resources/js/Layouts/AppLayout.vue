@@ -99,47 +99,26 @@ const menuItems = [
     label: 'Usuários',
     icon: 'bx bx-user',
     children: [
-      { label: 'Lista de Usuários', route: '/users' },
-      { label: 'Novo Usuário', route: '/users/create' },
-      { label: 'Funções e Permissões', route: '/roles' }
+      { label: 'Usuários', icon: 'bx bx-user', route: '/users' },
+      { label: 'Funções', icon: 'bx bx-shield', route: '/roles' },
     ]
   },
   {
     label: 'Configurações',
     icon: 'bx bx-cog',
     children: [
-      { label: 'Geral', route: '/settings/general' },
-      { label: 'Email', route: '/settings/email' },
-      { label: 'Integrações', route: '/settings/integrations' }
+      { label: 'Modelos de Documentos', icon: 'bx bx-file', route: '/document-templates' }
+
     ]
   },
-  
-  { category: 'DOCUMENTOS' },
-  { label: 'Meus Documentos', icon: 'bx bx-file', route: '/documents' },
-  {
-    label: 'Templates',
-    icon: 'bx bx-folder',
-    children: [
-      { label: 'Modelos de Documentos', route: '/document-templates' },
-      { label: 'Criar Template', route: '/document-templates/create' }
-    ]
-  },
-  
   { category: 'RELATÓRIOS' },
   {
     label: 'Relatórios',
     icon: 'bx bx-bar-chart',
     children: [
-      { label: 'Dashboard Financeiro', route: '/reports/financial' },
-      { label: 'Projetos', route: '/reports/projects' },
-      { label: 'Vendas', route: '/reports/sales' },
-      { label: 'Usuários', route: '/reports/users' }
+      { label: 'Financeiro', icon: 'bx bx-wallet', route: '/reports/financial' },
+      { label: 'Projetos', icon: 'bx bx-folder', route: '/reports/projects' }
     ]
-  },
-  { label: 'Logs do Sistema', icon: 'bx bx-history', route: '/logs' }
+  }
 ]
 </script>
-
-<style scoped>
-/* Layout usando CSS do template Ynex */
-</style>
