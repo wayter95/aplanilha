@@ -17,13 +17,12 @@
           :server-side-filtering="true"
           :initial-filters="props.filters"
           :initial-search="props.filters.search || ''"
-          :show-select-all="true"
+          :show-select-all="false"
           :show-search="true"
           :show-export="true"
           :show-filters="true"
           actions-align="left"
           search-placeholder="Buscar tipos de projetos..."
-          @selection-change="handleSelectionChange"
           @filter-change="handleFilterChange"
           @search-change="handleSearchChange"
         >
@@ -47,15 +46,17 @@
           </template>
 
           <template #cell-status="{ row }">
-            <Switch
-              :name="`status-${row.id}`"
-              :model-value="row.status === 'a'"
-              variant="primary"
-              size="xs"
-              :show-inline-label="false"
-              :show-help-text="false"
-              @update:model-value="toggleStatus(row)"
-            />
+            <div class="flex justify-center">
+              <Switch
+                :name="`status-${row.id}`"
+                :model-value="row.status === 'a'"
+                variant="primary"
+                size="xs"
+                :show-inline-label="false"
+                :show-help-text="false"
+                @update:model-value="toggleStatus(row)"
+              />
+            </div>
           </template>
           
           <template #cell-actions="{ row }">
@@ -114,25 +115,33 @@ const columns = [
     key: 'title',
     label: 'Título',
     type: 'text',
-    sortable: true
+    sortable: true,
+    width: '20%',           // Largura em porcentagem
+    align: 'left'           // left, center, right
   },
   {
     key: 'color',
     label: 'Cor',
     type: 'text',
-    sortable: false
+    sortable: false,
+    width: '10%',         // Largura em pixels
+    align: 'left'
   },
   {
     key: 'status',
     label: 'Status',
     type: 'text',
-    sortable: true
+    sortable: true,
+    width: '10%',
+    align: 'center'
   },
   {
     key: 'created_at',
     label: 'Data de Criação',
     type: 'date',
-    sortable: true
+    sortable: true,
+    minWidth: '15%',      // Largura mínima
+    align: 'left'
   }
 ]
 

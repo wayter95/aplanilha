@@ -65,11 +65,15 @@
                   v-for="column in columns" 
                   :key="column.key"
                   scope="col" 
-                  class="text-start !py-2 !px-3 !text-[0.75rem] !font-medium"
-                  :class="{ 'cursor-pointer': column.sortable !== false }"
+                  class="!py-2 !px-3 !text-[0.75rem] !font-medium"
+                  :class="[
+                    { 'cursor-pointer': column.sortable !== false },
+                    getColumnAlignClass(column.align)
+                  ]"
+                  :style="getColumnStyle(column)"
                   @click="column.sortable !== false ? handleSort(column.key) : null"
                 >
-                  <div class="flex items-center gap-2">
+                  <div class="flex items-center gap-2" :class="getColumnContentAlignClass(column.align)">
                     <span>{{ column.label }}</span>
                     <i v-if="column.sortable !== false" class="ri-arrow-up-down-line text-[#8c9097] dark:text-white/50 !text-[0.75rem]"></i>
                   </div>
@@ -93,7 +97,13 @@
                   >
                 </td>
                 
-                <td v-for="column in columns" :key="column.key" class="text-start !py-2 !px-3">
+                <td 
+                  v-for="column in columns" 
+                  :key="column.key" 
+                  class="!py-2 !px-3"
+                  :class="getColumnAlignClass(column.align)"
+                  :style="getColumnStyle(column)"
+                >
                   <slot :name="`cell-${column.key}`" :value="getNestedValue(row, column.key)" :row="row" :column="column" :rowIndex="rowIndex">
                     <div v-if="column.type === 'user'">
                       <div class="flex items-center gap-2">
@@ -696,6 +706,42 @@ const getFilterPlaceholder = (filter) => {
   }
   
   return placeholders[filter.key] || `Selecione ${filter.label.toLowerCase()}`
+}
+
+const getColumnAlignClass = (align) => {
+  const alignMap = {
+    'left': 'text-start',
+    'center': 'text-center',
+    'right': 'text-end'
+  }
+  return alignMap[align] || 'text-start'
+}
+
+const getColumnContentAlignClass = (align) => {
+  const alignMap = {
+    'left': 'justify-start',
+    'center': 'justify-center',
+    'right': 'justify-end'
+  }
+  return alignMap[align] || 'justify-start'
+}
+
+const getColumnStyle = (column) => {
+  const style = {}
+  
+  if (column.width) {
+    style.width = column.width
+  }
+  
+  if (column.minWidth) {
+    style.minWidth = column.minWidth
+  }
+  
+  if (column.maxWidth) {
+    style.maxWidth = column.maxWidth
+  }
+  
+  return style
 }
 
 const exportCSV = () => {
