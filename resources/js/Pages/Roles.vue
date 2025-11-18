@@ -1,5 +1,9 @@
 <template>
   <AppLayout :title="'Funções'" :description="'Gerenciar funções do sistema'" :user="user">
+    <Breadcrumb
+      title="Funções"
+      :items="breadcrumbItems"
+    />
     <div class="grid grid-cols-12 gap-6">
       <div class="xl:col-span-12 col-span-12">
         <DataTable
@@ -22,10 +26,12 @@
           @search-change="handleSearchChange"
         >
           <template #header-actions>
+            <div class="flex items-center gap-2"></div>
             <Button
               variant="primary"
               size="sm"
               left-icon="ri-add-line"
+              class="h-7 px-2 py-1 text-xs"
               @click="showCreateModal = true"
             >
               Nova Função
@@ -65,8 +71,13 @@ import CreateRoleModal from '@/Components/RolesModals/CreateRoleModal.vue'
 import DeleteRoleModal from '@/Components/RolesModals/DeleteRoleModal.vue'
 import UpdateRoleModal from '@/Components/RolesModals/UpdateRoleModal.vue'
 import AppLayout from '@/Layouts/AppLayout.vue'
+import Breadcrumb from '@/Components/Breadcrumb.vue'
 import { router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
+const breadcrumbItems = [
+  { label: 'Início', href: '/' },
+  { label: 'Funções' }
+]
 
 const props = defineProps({
   roles: {

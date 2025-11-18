@@ -114,29 +114,29 @@ const menuItems = [
     ]
   },
   
-  { category: 'DOCUMENTOS' },
-  { label: 'Meus Documentos', icon: 'bx bx-file', route: '/documents' },
-  {
-    label: 'Templates',
-    icon: 'bx bx-folder',
-    children: [
-      { label: 'Modelos de Documentos', route: '/document-templates' },
-      { label: 'Criar Template', route: '/document-templates/create' }
-    ]
-  },
+  // { category: 'DOCUMENTOS' },
+  // { label: 'Meus Documentos', icon: 'bx bx-file', route: '/documents' },
+  // {
+  //   label: 'Templates',
+  //   icon: 'bx bx-folder',
+  //   children: [
+  //     { label: 'Modelos de Documentos', route: '/document-templates' },
+  //     { label: 'Criar Template', route: '/document-templates/create' }
+  //   ]
+  // },
   
-  { category: 'RELATÓRIOS' },
-  {
-    label: 'Relatórios',
-    icon: 'bx bx-bar-chart',
-    children: [
-      { label: 'Dashboard Financeiro', route: '/reports/financial' },
-      { label: 'Projetos', route: '/reports/projects' },
-      { label: 'Vendas', route: '/reports/sales' },
-      { label: 'Usuários', route: '/reports/users' }
-    ]
-  },
-  { label: 'Logs do Sistema', icon: 'bx bx-history', route: '/logs' }
+  // { category: 'RELATÓRIOS' },
+  // {
+  //   label: 'Relatórios',
+  //   icon: 'bx bx-bar-chart',
+  //   children: [
+  //     { label: 'Dashboard Financeiro', route: '/reports/financial' },
+  //     { label: 'Projetos', route: '/reports/projects' },
+  //     { label: 'Vendas', route: '/reports/sales' },
+  //     { label: 'Usuários', route: '/reports/users' }
+  //   ]
+  // },
+  // { label: 'Logs do Sistema', icon: 'bx bx-history', route: '/logs' }
 ]
 </script>
 

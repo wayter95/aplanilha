@@ -1,266 +1,227 @@
 <template>
-  <AppLayout :user="user">
-    <div class="flex">
-      <!-- Menu de Navegação Lateral -->
-      <div class="w-64 bg-defaultbackground dark:bg-bodybg border-r border-defaultborder dark:border-gray-800 p-6">
-        <nav class="space-y-2">
-          <h3 class="text-sm font-semibold text-defaulttextcolor dark:text-defaulttextcolor uppercase tracking-wider mb-4">
-            Configurações
-          </h3>
-          
-          <a 
-            href="#" 
-            @click.prevent="activeSection = 'personal'"
-            :class="[
-              'flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-              activeSection === 'personal' 
-                ? 'bg-primary text-white' 
-                : 'text-defaulttextcolor dark:text-defaulttextcolor hover:bg-light dark:hover:bg-bodybg'
-            ]"
-          >
-            <div class="flex items-center">
-              <i class="ri-user-line mr-3"></i>
-              Dados pessoais
+  <AppLayout title="Configurações" description="Gerencie suas configurações de conta e empresa">
+    <!-- Breadcrumb -->
+    <Breadcrumb
+      title="Configurações"
+      :items="breadcrumbItems"
+    />
+    
+    <div class="grid grid-cols-12 gap-6">
+      <!-- Menu lateral de navegação -->
+      <div class="xl:col-span-3 col-span-12">
+        <div class="box">
+          <div class="box-header">
+            <div class="box-title">
+              Menu de Configurações
             </div>
-            <i class="ri-arrow-right-s-line"></i>
-          </a>
+          </div>
+          <div class="box-body p-0">
+            <nav class="space-y-1">
+              <a 
+                href="#" 
+                @click.prevent="activeSection = 'personal'"
+                :class="[
+                  'flex items-center px-4 py-3 text-sm font-medium transition-colors border-b border-defaultborder dark:border-gray-700',
+                  activeSection === 'personal' 
+                    ? 'bg-primary/10 text-primary border-r-2 border-r-primary' 
+                    : 'text-defaulttextcolor dark:text-defaulttextcolor hover:bg-light dark:hover:bg-gray-700'
+                ]"
+              >
+                <i class="ri-user-line mr-3 text-base"></i>
+                <div>
+                  <div class="font-medium">Dados Pessoais</div>
+                  <div class="text-xs opacity-75">Informações do usuário</div>
+                </div>
+              </a>
 
-          <a 
-            href="#" 
-            @click.prevent="activeSection = 'company'"
-            :class="[
-              'flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-              activeSection === 'company' 
-                ? 'bg-primary text-white' 
-                : 'text-defaulttextcolor dark:text-defaulttextcolor hover:bg-light dark:hover:bg-bodybg'
-            ]"
-          >
-            <div class="flex items-center">
-              <i class="ri-building-line mr-3"></i>
-              Dados da empresa
-            </div>
-            <i class="ri-arrow-right-s-line"></i>
-          </a>
-        </nav>
+              <a 
+                href="#" 
+                @click.prevent="activeSection = 'company'"
+                :class="[
+                  'flex items-center px-4 py-3 text-sm font-medium transition-colors',
+                  activeSection === 'company' 
+                    ? 'bg-primary/10 text-primary border-r-2 border-r-primary' 
+                    : 'text-defaulttextcolor dark:text-defaulttextcolor hover:bg-light dark:hover:bg-gray-700'
+                ]"
+              >
+                <i class="ri-building-line mr-3 text-base"></i>
+                <div>
+                  <div class="font-medium">Dados da Empresa</div>
+                  <div class="text-xs opacity-75">Informações corporativas</div>
+                </div>
+              </a>
+            </nav>
+          </div>
+        </div>
       </div>
 
-      <!-- Conteúdo Principal -->
-      <div class="flex-1 p-6">
-        <!-- Cabeçalho -->
-        <div class="mb-8">
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Configurações
-          </h1>
-          <p class="text-gray-600 dark:text-gray-400">
-            Gerencie as informações de conta, dados pessoais e configurações da empresa
-          </p>
-        </div>
-
-        <!-- Conteúdo Dinâmico -->
-        <div class="space-y-6">
-          <!-- Dados Pessoais -->
-          <div v-if="activeSection === 'personal'" class="space-y-6">
-
-            <!-- Card Dados Pessoais -->
-            <div class="bg-defaultbackground dark:bg-bodybg rounded-lg border border-defaultborder dark:border-gray-800 p-6">
-              <div class="flex items-center justify-between mb-6">
-                <div>
-                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                    Dados pessoais
-                  </h3>
-                  <p class="text-sm text-gray-600 dark:text-gray-400">
-                    Informações básicas da sua conta
-                  </p>
-                </div>
-                <button 
-                  @click="showPersonalDataModal = true"
-                  class="text-primary hover:text-primary-dark text-sm font-medium"
-                >
-                  Alterar
-                </button>
+      <!-- Conteúdo principal -->
+      <div class="xl:col-span-9 col-span-12">
+        <!-- Seção Dados Pessoais -->
+        <div v-if="activeSection === 'personal'" class="space-y-6">
+          
+          <!-- Card Informações Pessoais -->
+          <div class="box">
+            <div class="box-header">
+              <div class="box-title">
+                Informações Pessoais
               </div>
-              
-              <!-- Upload de Foto -->
-              <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Foto do perfil
-                </label>
-                <PhotoUpload 
-                  v-model="userPhoto"
-                  :current-photo-url="currentPhotoUrl"
-                  alt-text="Foto do usuário"
-                  folder="users/photos"
-                  @upload-success="handlePhotoUploadSuccess"
-                  @upload-error="handlePhotoUploadError"
-                />
-              </div>
-              
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="flex items-center space-x-3">
-                  <div class="w-10 h-10 bg-light dark:bg-bodybg rounded-lg flex items-center justify-center">
-                    <i class="ri-user-line text-defaulttextcolor dark:text-defaulttextcolor"></i>
-                  </div>
-                  <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Nome</p>
-                    <p class="font-medium text-gray-900 dark:text-white">{{ user?.name || 'Não informado' }}</p>
-                  </div>
-                </div>
-
-                <div class="flex items-center space-x-3">
-                  <div class="w-10 h-10 bg-light dark:bg-bodybg rounded-lg flex items-center justify-center">
-                    <i class="ri-at-line text-defaulttextcolor dark:text-defaulttextcolor"></i>
-                  </div>
-                  <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Usuário</p>
-                    <p class="font-medium text-gray-900 dark:text-white">{{ user?.username || 'Não informado' }}</p>
-                  </div>
-                </div>
-
-                <div class="flex items-center space-x-3">
-                  <div class="w-10 h-10 bg-light dark:bg-bodybg rounded-lg flex items-center justify-center">
-                    <i class="ri-mail-line text-defaulttextcolor dark:text-defaulttextcolor"></i>
-                  </div>
-                  <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">E-mail</p>
-                    <p class="font-medium text-gray-900 dark:text-white">{{ user?.email || 'Não informado' }}</p>
-                  </div>
-                </div>
-
-                <div class="flex items-center space-x-3">
-                  <div class="w-10 h-10 bg-light dark:bg-bodybg rounded-lg flex items-center justify-center">
-                    <i class="ri-phone-line text-defaulttextcolor dark:text-defaulttextcolor"></i>
-                  </div>
-                  <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Telefone</p>
-                    <p class="font-medium text-gray-900 dark:text-white">{{ user?.phone || 'Não informado' }}</p>
-                  </div>
-                </div>
-              </div>
+              <Button
+                variant="primary"
+                style-type="outline"
+                size="xs"
+                left-icon="ri-edit-line"
+                class="h-7 px-2 py-1 text-xs"
+                @click="showPersonalDataModal = true"
+              >
+                Editar
+              </Button>
             </div>
-
-            <!-- Card Dados de Acesso -->
-            <div class="bg-defaultbackground dark:bg-bodybg rounded-lg border border-defaultborder dark:border-gray-800 p-6">
-              <div class="flex items-center justify-between mb-6">
-                <div>
-                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                    Dados de acesso
-                  </h3>
-                  <p class="text-sm text-gray-600 dark:text-gray-400">
-                    Credenciais para entrar na plataforma
-                  </p>
+            <div class="box-body">
+              <!-- Layout compacto: Foto à esquerda, informações à direita -->
+              <div class="flex items-start space-x-6 mb-6">
+                <!-- Foto do Perfil -->
+                <div class="flex-shrink-0">
+                  <PhotoUpload 
+                    v-model="userPhoto"
+                    :current-photo-url="currentPhotoUrl"
+                    alt-text="Foto do usuário"
+                    folder="users/photos"
+                    @upload-success="handlePhotoUploadSuccess"
+                    @upload-error="handlePhotoUploadError"
+                  />
                 </div>
-                <button 
-                  @click="showPasswordModal = true"
-                  class="text-primary hover:text-primary-dark text-sm font-medium"
-                >
-                  Alterar
-                </button>
-              </div>
-              
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="flex items-center space-x-3">
-                  <div class="w-10 h-10 bg-light dark:bg-bodybg rounded-lg flex items-center justify-center">
-                    <i class="ri-mail-line text-defaulttextcolor dark:text-defaulttextcolor"></i>
-                  </div>
-                  <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">E-mail</p>
-                    <p class="font-medium text-gray-900 dark:text-white">{{ user?.email || 'Não informado' }}</p>
-                  </div>
-                </div>
+                
+                <!-- Informações Pessoais -->
+                <div class="flex-1">
+                  <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                    Informações Pessoais
+                  </h4>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                      <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nome Completo</label>
+                      <p class="text-sm font-medium text-defaulttextcolor dark:text-defaulttextcolor">
+                        {{ user?.name || 'Não informado' }}
+                      </p>
+                    </div>
 
-                <div class="flex items-center space-x-3">
-                  <div class="w-10 h-10 bg-light dark:bg-bodybg rounded-lg flex items-center justify-center">
-                    <i class="ri-at-line text-defaulttextcolor dark:text-defaulttextcolor"></i>
-                  </div>
-                  <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Usuário</p>
-                    <p class="font-medium text-gray-900 dark:text-white">{{ user?.username || 'Não informado' }}</p>
-                  </div>
-                </div>
+                    <div class="space-y-1">
+                      <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nome de Usuário</label>
+                      <p class="text-sm font-medium text-defaulttextcolor dark:text-defaulttextcolor">
+                        {{ user?.username || 'Não informado' }}
+                      </p>
+                    </div>
 
-                <div class="flex items-center space-x-3">
-                  <div class="w-10 h-10 bg-light dark:bg-bodybg rounded-lg flex items-center justify-center">
-                    <i class="ri-lock-line text-defaulttextcolor dark:text-defaulttextcolor"></i>
-                  </div>
-                  <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Senha</p>
-                    <p class="font-medium text-gray-900 dark:text-white">*********</p>
+                    <div class="space-y-1">
+                      <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">E-mail</label>
+                      <p class="text-sm font-medium text-defaulttextcolor dark:text-defaulttextcolor">
+                        {{ user?.email || 'Não informado' }}
+                      </p>
+                    </div>
+
+                    <div class="space-y-1">
+                      <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Telefone</label>
+                      <p class="text-sm font-medium text-defaulttextcolor dark:text-defaulttextcolor">
+                        {{ user?.phone || 'Não informado' }}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Dados da Empresa -->
-          <div v-if="activeSection === 'company'" class="space-y-6">
-            <!-- Card Dados da Empresa -->
-            <div class="bg-defaultbackground dark:bg-bodybg rounded-lg border border-defaultborder dark:border-gray-800 p-6">
-              <div class="flex items-center justify-between mb-6">
-                <div>
-                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                    Dados da empresa
-                  </h3>
-                  <p class="text-sm text-gray-600 dark:text-gray-400">
-                    Informações da sua organização
+          <!-- Card Dados de Acesso -->
+          <div class="box">
+            <div class="box-header">
+              <div class="box-title">
+                Dados de Acesso
+              </div>
+              <Button
+                variant="primary"
+                style-type="outline"
+                size="xs"
+                left-icon="ri-lock-line"
+                class="h-7 px-2 py-1 text-xs"
+                @click="showPasswordModal = true"
+              >
+                Alterar Senha
+              </Button>
+            </div>
+            <div class="box-body">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-1">
+                  <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Usuário de Acesso</label>
+                  <p class="text-sm font-medium text-defaulttextcolor dark:text-defaulttextcolor">
+                    {{ user?.username || 'Não informado' }}
                   </p>
                 </div>
-                <button 
-                  @click="showCompanyDataModal = true"
-                  class="text-primary hover:text-primary-dark text-sm font-medium"
-                >
-                  Alterar
-                </button>
+
+                <div class="space-y-1">
+                  <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Senha</label>
+                  <p class="text-sm font-medium text-defaulttextcolor dark:text-defaulttextcolor flex items-center">
+                    <span class="mr-2">••••••••••</span>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">(Última alteração: nunca)</span>
+                  </p>
+                </div>
               </div>
-              
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="flex items-center space-x-3">
-                  <div class="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                    <i class="ri-building-line text-gray-600 dark:text-gray-400"></i>
-                  </div>
-                  <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Nome da empresa</p>
-                    <p class="font-medium text-gray-900 dark:text-white">{{ props.company?.name || 'Não informado' }}</p>
-                  </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seção Dados da Empresa -->
+        <div v-if="activeSection === 'company'" class="space-y-6">
+          <div class="box">
+            <div class="box-header">
+              <div class="box-title">
+                Informações da Empresa
+              </div>
+              <Button
+                variant="primary"
+                style-type="outline"
+                size="xs"
+                left-icon="ri-edit-line"
+                class="h-7 px-2 py-1 text-xs"
+                @click="showCompanyDataModal = true"
+              >
+                Editar
+              </Button>
+            </div>
+            <div class="box-body">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-1">
+                  <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nome da Empresa</label>
+                  <p class="text-sm font-medium text-defaulttextcolor dark:text-defaulttextcolor">
+                    {{ company?.name || 'Não informado' }}
+                  </p>
                 </div>
 
-                <div class="flex items-center space-x-3">
-                  <div class="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                    <i class="ri-file-text-line text-gray-600 dark:text-gray-400"></i>
-                  </div>
-                  <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">CNPJ</p>
-                    <p class="font-medium text-gray-900 dark:text-white">{{ props.company?.cnpj || 'Não informado' }}</p>
-                  </div>
+                <div class="space-y-1">
+                  <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">CNPJ</label>
+                  <p class="text-sm font-medium text-defaulttextcolor dark:text-defaulttextcolor">
+                    {{ company?.cnpj || 'Não informado' }}
+                  </p>
                 </div>
 
-                <div class="flex items-center space-x-3">
-                  <div class="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                    <i class="ri-mail-line text-gray-600 dark:text-gray-400"></i>
-                  </div>
-                  <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">E-mail comercial</p>
-                    <p class="font-medium text-gray-900 dark:text-white">{{ props.company?.email || 'Não informado' }}</p>
-                  </div>
+                <div class="space-y-1">
+                  <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">E-mail Comercial</label>
+                  <p class="text-sm font-medium text-defaulttextcolor dark:text-defaulttextcolor">
+                    {{ company?.email || 'Não informado' }}
+                  </p>
                 </div>
 
-                <div class="flex items-center space-x-3">
-                  <div class="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                    <i class="ri-phone-line text-gray-600 dark:text-gray-400"></i>
-                  </div>
-                  <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Telefone comercial</p>
-                    <p class="font-medium text-gray-900 dark:text-white">{{ props.company?.phone || 'Não informado' }}</p>
-                  </div>
+                <div class="space-y-1">
+                  <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Telefone Comercial</label>
+                  <p class="text-sm font-medium text-defaulttextcolor dark:text-defaulttextcolor">
+                    {{ company?.phone || 'Não informado' }}
+                  </p>
                 </div>
 
-                <div class="flex items-center space-x-3 md:col-span-2">
-                  <div class="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                    <i class="ri-map-pin-line text-gray-600 dark:text-gray-400"></i>
-                  </div>
-                  <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Endereço</p>
-                    <p class="font-medium text-gray-900 dark:text-white">{{ props.company?.address || 'Não informado' }}</p>
-                  </div>
+                <div class="space-y-1 md:col-span-2">
+                  <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Endereço</label>
+                  <p class="text-sm font-medium text-defaulttextcolor dark:text-defaulttextcolor">
+                    {{ company?.address || 'Não informado' }}
+                  </p>
                 </div>
               </div>
             </div>
@@ -268,28 +229,28 @@
         </div>
       </div>
     </div>
+    
+    <!-- Modais -->
+    <UpdatePersonalDataModal 
+      :show="showPersonalDataModal" 
+      :user="user"
+      @close="showPersonalDataModal = false"
+      @personal-data-updated="handlePersonalDataUpdated"
+    />
+    
+    <UpdatePasswordModal 
+      :show="showPasswordModal" 
+      @close="showPasswordModal = false"
+      @password-updated="handlePasswordUpdated"
+    />
+
+    <UpdateCompanyDataModal 
+      :show="showCompanyDataModal" 
+      :company="company"
+      @close="showCompanyDataModal = false"
+      @company-data-updated="handleCompanyDataUpdated"
+    />
   </AppLayout>
-
-  <!-- Modais -->
-  <UpdatePersonalDataModal 
-    :show="showPersonalDataModal" 
-    :user="user"
-    @close="showPersonalDataModal = false"
-    @personal-data-updated="handlePersonalDataUpdated"
-  />
-  
-  <UpdatePasswordModal 
-    :show="showPasswordModal" 
-    @close="showPasswordModal = false"
-    @password-updated="handlePasswordUpdated"
-  />
-
-  <UpdateCompanyDataModal 
-    :show="showCompanyDataModal" 
-    :company="props.company"
-    @close="showCompanyDataModal = false"
-    @company-data-updated="handleCompanyDataUpdated"
-  />
 </template>
 
 <script setup>
@@ -297,14 +258,18 @@ import PhotoUpload from '@/Components/PhotoUpload.vue'
 import UpdateCompanyDataModal from '@/Components/SettingsModals/UpdateCompanyDataModal.vue'
 import UpdatePasswordModal from '@/Components/SettingsModals/UpdatePasswordModal.vue'
 import UpdatePersonalDataModal from '@/Components/SettingsModals/UpdatePersonalDataModal.vue'
+import Button from '@/Components/Button.vue'
+import AppLayout from '@/Layouts/AppLayout.vue'
+import Breadcrumb from '@/Components/Breadcrumb.vue'
 import { usePhotoUrl } from '@/composables/usePhotoUrl'
 import { useToast } from '@/composables/useToast'
-import AppLayout from '@/Layouts/AppLayout.vue'
+import { useUserEvents } from '@/composables/useEvents'
 import { router, usePage } from '@inertiajs/vue3'
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 
 const { success, error: showError } = useToast()
 const { getPhotoUrl } = usePhotoUrl()
+const { emitPhotoUpdated, onPhotoUpdated } = useUserEvents()
 const page = usePage()
 
 const props = defineProps({
@@ -315,6 +280,7 @@ const props = defineProps({
 })
 
 const user = computed(() => page.props.auth.user)
+const company = computed(() => props.company)
 const activeSection = ref('personal')
 const userPhoto = ref(user.value?.photo_key || null)
 const currentPhotoUrl = ref(null)
@@ -324,6 +290,11 @@ const showPersonalDataModal = ref(false)
 const showPasswordModal = ref(false)
 const showCompanyDataModal = ref(false)
 
+const breadcrumbItems = [
+  { label: 'Início', href: '/' },
+  { label: 'Configurações' }
+]
+
 const loadUserPhotoUrl = async () => {
   if (userPhoto.value) {
     return await getPhotoUrl(userPhoto.value)
@@ -331,27 +302,12 @@ const loadUserPhotoUrl = async () => {
   return null
 }
 
-// Importar composable de eventos
-import { useUserEvents } from '@/composables/useEvents'
-
 // Função para atualizar a foto localmente
 const updateLocalPhoto = async (photoKey, photoUrl) => {
   userPhoto.value = photoKey
   currentPhotoUrl.value = photoUrl
-  
-  // Usar composable em vez de window.dispatchEvent direto
-  const { emitPhotoUpdated } = useUserEvents()
   emitPhotoUpdated(photoUrl)
 }
-
-// Dados da empresa (mockados por enquanto)
-const company = ref({
-  name: 'Empresa Demo Ltda',
-  cnpj: '12.345.678/0001-90',
-  email: 'contato@empresademo.com',
-  phone: '+55 34 99930-5492',
-  address: 'Rua das Flores, 123 - Centro, Uberlândia - MG'
-})
 
 // Funções para upload de foto
 const handlePhotoUploadSuccess = async (data) => {
@@ -365,15 +321,14 @@ const handlePhotoUploadSuccess = async (data) => {
           'X-Requested-With': 'XMLHttpRequest'
         },
         body: JSON.stringify({
-          photo_key: data.key // Mudança: enviar photo_key em vez de avatar_path
+          photo_key: data.key
         })
       })
 
       if (response.ok) {
         const result = await response.json()
         if (result.success) {
-          // Atualizar localmente usando a nova função
-          updateLocalPhoto(data.key, data.url) // Mudança: usar data.url em vez de data.awsUrl
+          updateLocalPhoto(data.key, data.url)
           success('Foto atualizada com sucesso!')
         } else {
           showError('Erro ao atualizar foto: ' + result.message)
@@ -394,10 +349,7 @@ const handlePhotoUploadError = (error) => {
   console.error('Erro no upload:', error)
 }
 
-// Escutar eventos de atualização da foto usando composable
-const { onPhotoUpdated } = useUserEvents()
-
-// Handler automático com cleanup (composable gerencia o removeEventListener)
+// Escutar eventos de atualização da foto
 onPhotoUpdated((event) => {
   if (event.detail.url) {
     currentPhotoUrl.value = event.detail.url
@@ -408,29 +360,22 @@ onMounted(async () => {
   if (userPhoto.value) {
     currentPhotoUrl.value = await loadUserPhotoUrl()
   }
-  // Listener registrado acima com onPhotoUpdated (cleanup automático)
 })
 
 // Funções de callback para os modais
 const handlePersonalDataUpdated = (updatedUser) => {
-  // Atualizar os dados do usuário na página
   if (updatedUser) {
-    // Recarregar a página para atualizar os dados
     router.reload()
   }
 }
 
 const handlePasswordUpdated = () => {
   // Senha foi alterada com sucesso
-  // Não precisa fazer nada específico além do toast que já é exibido no modal
 }
 
 const handleCompanyDataUpdated = (updatedCompany) => {
-  // Atualizar os dados da empresa na página
   if (updatedCompany) {
-    // Recarregar a página para atualizar os dados
     router.reload()
   }
 }
-
 </script>
