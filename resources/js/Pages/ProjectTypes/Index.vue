@@ -27,15 +27,18 @@
           @search-change="handleSearchChange"
         >
           <template #header-actions>
-            <Button
-              variant="primary"
-              style-type="outline"
-              size="sm"
-              left-icon="ri-add-line"
-              @click="createNew"
-            >
-              Novo Tipo
-            </Button>
+            <div class="flex items-center gap-2">
+              <Button
+                variant="primary"
+                style-type="outline"
+                size="sm"
+                left-icon="ri-add-line"
+                class="h-7 px-2 py-1 text-xs"
+                @click="createNew"
+              >
+                Novo Tipo
+              </Button>
+            </div>
           </template>
           
           <template #cell-color="{ value }">

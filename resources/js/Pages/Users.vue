@@ -1,5 +1,9 @@
 <template>
   <AppLayout :title="'Usuários'" :description="'Gerenciar usuários do sistema'" :user="user">
+    <Breadcrumb
+      title="Usuários"
+      :items="breadcrumbItems"
+    />
     <div class="grid grid-cols-12 gap-6">
       <div class="xl:col-span-12 col-span-12">
         <DataTable
@@ -22,14 +26,17 @@
           @search-change="handleSearchChange"
         >
           <template #header-actions>
+            <div class="flex items-center gap-2">
             <Button
               variant="primary"
               size="sm"
               left-icon="ri-add-line"
+              class="h-7 px-2 py-1 text-xs"
               @click="showCreateModal = true"
             >
               Novo Usuário
             </Button>
+            </div>
           </template>
         </DataTable>
       </div>
@@ -58,6 +65,7 @@
   </AppLayout>
 </template>
 
+
 <script setup>
 import DataTable from '@/Components/DataTable.vue'
 import Button from '@/Components/Button.vue'
@@ -65,8 +73,13 @@ import CreateUserModal from '@/Components/UsersModals/CreateUserModal.vue'
 import DeleteUserModal from '@/Components/UsersModals/DeleteUserModal.vue'
 import UpdateUserModal from '@/Components/UsersModals/UpdateUserModal.vue'
 import AppLayout from '@/Layouts/AppLayout.vue'
+import Breadcrumb from '@/Components/Breadcrumb.vue'
 import { router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
+const breadcrumbItems = [
+  { label: 'Início', href: '/' },
+  { label: 'Usuários' }
+]
 
 const props = defineProps({
   users: {

@@ -255,7 +255,7 @@
           <div class="tabulator-footer">
             <div class="tabulator-footer-contents">
             <span class="tabulator-page-counter">
-              <span>{{ startIndex }}-{{ endIndex }} de {{ filteredData.length }}</span>
+              <span>{{ startIndex }} - {{ endIndex }} de {{ filteredData.length }}</span>
             </span>
             
             <span class="tabulator-paginator">
